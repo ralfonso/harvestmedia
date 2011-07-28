@@ -24,9 +24,19 @@ class Client(object):
         self.albums = {}
         self.albums_by_id = {}
         
-        self.get_service_token()
+        self.request_service_token()
 
-    def get_service_token(self):
+    def get_remote_xml_root(self, method_url):
+        xml_doc = urlopen(method_url)
+        try:
+            tree = ET.parse(xml_doc)
+        except (ET.ParseError, e):
+            raise InvalidAPIResponse, "Unable to read the XML from the API server: " + e.message
+
+        root = tree.getroot()
+        return root
+
+    def request_service_token(self):
         method_url = self.webservice_url + '/getservicetoken/' + self.api_key
         tree = ET.parse(urlopen(method_url))
         root = tree.getroot()
@@ -43,7 +53,7 @@ class Client(object):
         root = tree.getroot()
         libraries = root.find('libraries').getchildren()
         for library_element in libraries:
-            library = Library(library_element)
+            library = Library(self, library_element)
             self.libraries[library.id] = library
 
         return self.libraries.values()
@@ -55,33 +65,3 @@ class Client(object):
         return self.libraries[id]
 
 
-    def get_albums_for_library(self, library_id):
-        # reset internal album list
-        self.albums[library_id] = {}
-
-        method_url = self.webservice_url + '/getalbums/' + self.service_token + '/' + library_id
-        tree = ET.parse(urlopen(method_url))
-        root = tree.getroot()
-        albums = root.find('albums').getchildren()
-
-        for album_element in albums:
-            album = Album(album_element)
-            self.albums[library_id][album.id] = album
-            self.albums_by_id[album.id] = album
-
-        return self.albums[library_id].values()
-
-    def get_tracks_for_album(self, album_id):
-        track_list = []
-        method_url = self.webservice_url + '/getalbumtracks/' + self.service_token + '/' + album_id
-
-        xml_file = urlopen(method_url)
-        tree = ET.parse(xml_file)
-        root = tree.getroot()
-        tracks = root.find('tracks').getchildren()
-
-        for track_element in tracks:
-            track = Track(track_element)
-            track_list.append(track)
-
-        return track_list
