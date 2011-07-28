@@ -1,12 +1,18 @@
 from util import DictObj
-from exceptions import *
+import exceptions
 from track import Track
+import config
+import client
 
 
 class Album(DictObj):
     
-    def __init__(self, client, xml_data=None):
-        self.client = client
+    def __init__(self, xml_data=None, connection=None):
+        self.config = config.Config()
+        self.client = connection
+
+        if self.client is None:
+            self.client = client.APIClient()
 
         if xml_data is not None:
             self._load(xml_data)
@@ -20,13 +26,13 @@ class Album(DictObj):
 
     def get_tracks(self):
         track_list = []
-        method_url = self.client.webservice_url + '/getalbumtracks/' + self.client.service_token + '/' + self.id
+        method_uri = '/getalbumtracks/%(service_token)s/' + self.id
 
-        xml_root = self.client.get_remote_xml_root(method_url)
+        xml_root = self.client.get_remote_xml_root(method_uri)
         tracks = xml_root.find('tracks').getchildren()
 
         for track_element in tracks:
-            track = Track(self.client, track_element)
+            track = Track(track_element)
             track_list.append(track)
 
         return track_list

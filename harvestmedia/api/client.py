@@ -1,16 +1,24 @@
 import xml.etree.cElementTree as ET
 from urllib2 import urlopen
 
-from library import Library
-from album import Album
-from track import Track
+import exceptions
+import config
 
 class Client(object):
     """
 
     """
 
-    def __init__(self, api_key, webservice_url):
+    
+    def _set(self, param, default=None, **kwargs):
+        if kwargs.get(param, None):
+            setattr(self, param, kwargs[param])
+        elif self.config.__dict__.has_key(param):
+            setattr(self, param, self.config.__dict__[param])
+        elif default:
+            setattr(self, param, default)
+
+    def __init__(self, **kwargs):
         """
         initialize the Client object
 
@@ -18,20 +26,21 @@ class Client(object):
         webservice_url: the base Harvest Media API URL
         """
 
-        self.api_key = api_key
-        self.webservice_url = webservice_url
+        self.config = config.Config()
+
+        self._set('api_key', **kwargs)
+        self._set('webservice_url', **kwargs)
         self.libraries = []
-        self.albums = {}
-        self.albums_by_id = {}
         
         self.request_service_token()
 
-    def get_remote_xml_root(self, method_url):
+    def get_remote_xml_root(self, method_uri):
+        method_url = self.webservice_url + method_uri % {'service_token': self.service_token}
         xml_doc = urlopen(method_url)
         try:
             tree = ET.parse(xml_doc)
         except (ET.ParseError, e):
-            raise InvalidAPIResponse, "Unable to read the XML from the API server: " + e.message
+            raise exceptions.InvalidAPIResponse, "Unable to read the XML from the API server: " + e.message
 
         root = tree.getroot()
         return root
@@ -43,25 +52,13 @@ class Client(object):
         token = root.find('token')
         self.service_token = token.get('value')
         self.service_token_expires = token.get('expires')
-    
-    def get_libraries(self):
-        # reset the stored library list
-        self.libraries = {}
-
-        method_url = self.webservice_url + '/getlibraries/' + self.service_token
-        tree = ET.parse(urlopen(method_url))
-        root = tree.getroot()
-        libraries = root.find('libraries').getchildren()
-        for library_element in libraries:
-            library = Library(self, library_element)
-            self.libraries[library.id] = library
-
-        return self.libraries.values()
-
-    def get_library_by_id(self, id, force_reload=False):
-        if self.libraries is None or force_reload:
-            self.get_libraries()
-
-        return self.libraries[id]
 
 
+class APIClient(Client):
+    def __init__(self, api_key=None, webservice_url=None):
+        super(APIClient, self).__init__(api_key=api_key, webservice_url=webservice_url)
+        if not hasattr(self, "api_key"):
+            raise exceptions.NotConfiguredError("Please specify an api_key")
+
+        if not hasattr(self, "webservice_url"):
+            raise exceptions.NotConfiguredError("Please specify the webservice_url")
