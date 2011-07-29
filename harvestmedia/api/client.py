@@ -30,28 +30,38 @@ class Client(object):
 
         self._set('api_key', **kwargs)
         self._set('webservice_url', **kwargs)
+        self._set('service_token', **kwargs)
         self.libraries = []
         
-        self.request_service_token()
+        if not self.config.service_token:
+            self.config.service_token = self.request_service_token()
 
     def get_remote_xml_root(self, method_uri):
-        method_url = self.webservice_url + method_uri % {'service_token': self.service_token}
+        if hasattr(self, 'service_token'):
+            params = {'service_token': self.service_token}
+        else:
+            params = {}
+
+        method_url = self.webservice_url + method_uri % params
         xml_doc = urlopen(method_url)
+        xml_doc_str = xml_doc.read()
+
         try:
-            tree = ET.parse(xml_doc)
-        except (ET.ParseError, e):
+            root = ET.fromstring(xml_doc_str)
+        except ET.ParseError, e:
             raise exceptions.InvalidAPIResponse, "Unable to read the XML from the API server: " + e.message
 
-        root = tree.getroot()
         return root
 
     def request_service_token(self):
-        method_url = self.webservice_url + '/getservicetoken/' + self.api_key
-        tree = ET.parse(urlopen(method_url))
-        root = tree.getroot()
+        method_uri = '/getservicetoken/' + self.api_key
+
+        root = self.get_remote_xml_root(method_uri)
         token = root.find('token')
         self.service_token = token.get('value')
-        self.service_token_expires = token.get('expires')
+        self.service_token_expires = token.get('expiry')
+
+        return self.service_token
 
 
 class APIClient(Client):
