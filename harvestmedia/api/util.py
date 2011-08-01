@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 class DictObj(object):
     """
     a dict-like object that provides dot-notation access to its values

@@ -1,5 +1,5 @@
+# -*- coding: utf-8 -*-
 from util import DictObj
-import config
 import client
 
 
@@ -25,4 +25,13 @@ class Track(DictObj):
             setattr(self, attribute, value)
 
     def as_dict(self):
-        return dict([(k,v) for k in self.__dict__.items()])
+        return dict([(k, v) for k,v in self.__dict__.items()])
+
+    def get_waveform_url(self, width=None, height=None):
+        asset_url = self.client.config.waveform_url
+        asset_url = asset_url.replace('{id}', self.id)
+        if width:
+            asset_url = asset_url.replace('{width}', str(width))
+        if height:
+            asset_url = asset_url.replace('{height}', str(height))
+        return asset_url

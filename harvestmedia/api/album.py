@@ -1,14 +1,13 @@
+# -*- coding: utf-8 -*-
 from util import DictObj
 import exceptions
 from track import Track
-import config
 import client
 
 
 class Album(DictObj):
     
     def __init__(self, xml_data=None, connection=None):
-        self.config = config.Config()
         self.client = connection
 
         if self.client is None:
@@ -36,3 +35,13 @@ class Album(DictObj):
             track_list.append(track)
 
         return track_list
+    
+    def get_cover_url(self, width=None, height=None):
+        asset_url = self.client.config.album_art_url
+        asset_url = asset_url.replace('{id}', self.id)
+        if width:
+            asset_url = asset_url.replace('{width}', str(width))
+        if height:
+            asset_url = asset_url.replace('{height}', str(height))
+        return asset_url
+

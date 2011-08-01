@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 class HarvestMediaError(Exception):
     def __init__(self, reason):
         super(HarvestMediaError, self).__init__(reason)

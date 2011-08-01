@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from util import DictObj
 import xml.etree.cElementTree as ET
 import exceptions
