@@ -50,8 +50,6 @@ class Client(object):
         method_url = self.webservice_url + method_uri % params
         xml_doc = urlopen(method_url)
         xml_doc_str = xml_doc.read()
-        print method_uri
-        print xml_doc_str
 
         try:
             root = ET.fromstring(xml_doc_str)
