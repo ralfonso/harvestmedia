@@ -10,3 +10,6 @@ class APITimeoutError(HarvestMediaError):
 
 class InvalidAPIResponse(HarvestMediaError):
     pass
+
+class MissingParameter(HarvestMediaError):
+    pass

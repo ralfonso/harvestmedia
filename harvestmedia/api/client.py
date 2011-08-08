@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import xml.etree.cElementTree as ET
-from urllib2 import urlopen
+import httplib
 
 import exceptions
 import config
@@ -14,8 +14,8 @@ class Client(object):
     def _set(self, param, default=None, **kwargs):
         if kwargs.get(param, None):
             setattr(self, param, kwargs[param])
-        elif self.config.__dict__.has_key(param):
-            setattr(self, param, self.config.__dict__[param])
+        elif hasattr(self.config, param):
+            setattr(self, param, getattr(self.config, param))
         elif default:
             setattr(self, param, default)
 
@@ -41,15 +41,23 @@ class Client(object):
         if not self.config.album_art_url:
             self.get_service_info()
 
-    def get_remote_xml_root(self, method_uri):
+    def __add_service_token(self, uri):
         if hasattr(self, 'service_token'):
             params = {'service_token': self.service_token}
         else:
             params = {}
 
-        method_url = self.webservice_url + method_uri % params
-        xml_doc = urlopen(method_url)
-        xml_doc_str = xml_doc.read()
+        return uri % params
+
+    def get_remote_xml_root(self, method_uri):
+        method_uri = self.config.webservice_prefix + self.__add_service_token(method_uri)
+        if self.config.webservice_url_parsed.scheme == 'http':
+            http = httplib.HTTPConnection(self.config.webservice_host)
+        elif self.config.webservice_url_parsed.scheme == 'https':
+            http = httplib.HTTPSConnection(self.config.webservice_host)
+        http.request('GET', method_uri)
+        response = http.getresponse()
+        xml_doc_str = response.read()
 
         try:
             root = ET.fromstring(xml_doc_str)
@@ -57,6 +65,22 @@ class Client(object):
             raise exceptions.InvalidAPIResponse, "Unable to read the XML from the API server: " + e.message
 
         return root
+
+    def post_xml(self, method_uri, xml_post_body):
+        method_url = self.config.webservice_url + self.__add_service_token(method_uri)
+
+        if self.config.webservice_url_parsed.scheme == 'http':
+            http = httplib.HTTPConnection(self.config.webservice_host)
+        elif self.config.webservice_url_parsed.scheme == 'https':
+            http = httplib.HTTPSConnection(self.config.webservice_host)
+
+        http.request('PUT', method_url, xml_post_body, {'Content-Type': 'application/xml'}) 
+        response = http.getresponse()
+        if response.status != 200:
+            raise exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response.status))
+        xml_doc_str = response.read()
+        return xml_doc_str
+            
 
     def request_service_token(self):
         method_uri = '/getservicetoken/' + self.api_key
@@ -79,8 +103,8 @@ class Client(object):
 class APIClient(Client):
     def __init__(self, api_key=None, webservice_url=None):
         super(APIClient, self).__init__(api_key=api_key, webservice_url=webservice_url)
-        if not hasattr(self, "api_key"):
+        if not self.api_key:
             raise exceptions.NotConfiguredError("Please specify an api_key")
 
-        if not hasattr(self, "webservice_url"):
+        if not self.webservice_url:
             raise exceptions.NotConfiguredError("Please specify the webservice_url")
