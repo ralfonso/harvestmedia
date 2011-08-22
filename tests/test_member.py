@@ -16,6 +16,15 @@ from harvestmedia.api.member import Member
 api_key = '12345'
 webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
 
+class HTTPResponseMock(object):
+
+    @property
+    def status(self):
+        return 200
+
+    def read(self):
+        return self.read_response
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_create_member_missing_username():
     member = Member()
@@ -32,10 +41,9 @@ def test_create_member(HTTPMock):
 
     http = HTTPMock()
 
-    xml_response = """
-     <?xml version="1.0" encoding="utf-8"?>
+    xml_response = """<?xml version="1.0" encoding="utf-8"?>
      <ResponseMember>
-        <memberaccount ID="%(test_member_id)s">
+        <memberaccount id="%(test_member_id)s">
             <username>%(username)s</username>
             <first_name>%(first_name)s</first_name>
             <last_name>%(last_name)s</last_name>
@@ -47,10 +55,18 @@ def test_create_member(HTTPMock):
                             'last_name': last_name,
                             'email': email}
 
-    http.getresponse.return_value = StringIO.StringIO(xml_response)
+    response = HTTPResponseMock()
+    response.read_response = xml_response
+    http.getresponse.return_value = response
+
+    config = harvestmedia.api.config.Config()
+    config.debug = True
     member = Member()
     member.username = username
     member.first_name = first_name
     member.last_name = last_name
     member.email = email
     member.create()
+
+    assert member.id == test_member_id
+    assert member.username == username

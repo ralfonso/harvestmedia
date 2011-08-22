@@ -12,6 +12,7 @@ class Config(object):
             cls._instance.waveform_url = None
             cls._instance._webservice_url = None
             cls._instance.webservice_url_parsed = None
+            cls._instance.debug = None
 
         return cls._instance
 

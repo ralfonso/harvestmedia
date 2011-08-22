@@ -4,6 +4,10 @@ import httplib
 
 import exceptions
 import config
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('harvestmedia')
 
 class Client(object):
     """
@@ -33,6 +37,8 @@ class Client(object):
         self._set('webservice_url', **kwargs)
         self._set('service_token', **kwargs)
         self._set('album_art_url', **kwargs)
+        self._set('debug', **kwargs)
+
         self.libraries = []
         
         if not self.config.service_token:
@@ -42,12 +48,10 @@ class Client(object):
             self.get_service_info()
 
     def __add_service_token(self, uri):
-        if hasattr(self, 'service_token'):
-            params = {'service_token': self.service_token}
-        else:
-            params = {}
+        if hasattr(self, 'service_token') and self.service_token:
+            uri = uri.replace('{{service_token}}', self.service_token)
 
-        return uri % params
+        return uri
 
     def get_remote_xml_root(self, method_uri):
         method_uri = self.config.webservice_prefix + self.__add_service_token(method_uri)
@@ -58,6 +62,9 @@ class Client(object):
         http.request('GET', method_uri)
         response = http.getresponse()
         xml_doc_str = response.read()
+
+        if self.debug:
+            logger.debug("server response: " + xml_doc_str)
 
         try:
             root = ET.fromstring(xml_doc_str)
@@ -74,10 +81,13 @@ class Client(object):
         elif self.config.webservice_url_parsed.scheme == 'https':
             http = httplib.HTTPSConnection(self.config.webservice_host)
 
-        http.request('PUT', method_url, xml_post_body, {'Content-Type': 'application/xml'}) 
+        if self.debug:
+            logger.debug("posting XML: " + xml_post_body)
+
+        http.request('POST', method_url, xml_post_body, {'Content-Type': 'application/xml'}) 
         response = http.getresponse()
         if response.status != 200:
-            raise exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response.status))
+            raise exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response.status) + ': ' + str(response.read()))
         xml_doc_str = response.read()
         return xml_doc_str
             
@@ -93,7 +103,7 @@ class Client(object):
         return self.service_token
 
     def get_service_info(self):
-        method_uri = '/getserviceinfo/%(service_token)s'
+        method_uri = '/getserviceinfo/{{service_token}}'
 
         root = self.get_remote_xml_root(method_uri)
         asset_url = root.find('asseturl')
