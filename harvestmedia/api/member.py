@@ -4,6 +4,7 @@ import logging
 
 from util import DictObj
 import client
+from playlist import Playlist
 from exceptions import MissingParameter
 
 logger = logging.getLogger('harvestmedia')
@@ -25,8 +26,8 @@ class Member(DictObj):
  
     def _load(self, xml_member):
         self.id = xml_member.get('id')
-        for attribute, value in xml_member.items():
-            setattr(self, attribute, value)
+        for child_element in xml_member.getchildren():
+            setattr(self, child_element.tag, child_element.text)
 
     def create(self):
         if not self.username:
@@ -34,6 +35,15 @@ class Member(DictObj):
 
         root = ET.Element('requestmember')
         member = ET.Element('memberaccount')
+
+        terms = ET.Element('termsaccept')
+        terms.text = 'true'
+        member.append(terms)
+
+        fileformat = ET.Element('fileformat')
+        fileformat.text = 'MP3'
+        member.append(fileformat)
+
         root.append(member)
 
         for attribute, value in self.__dict__.items():
@@ -61,6 +71,7 @@ class Member(DictObj):
         xml_username = xml_member.find('username')
 
         if xml_username is not None:
+            self._load(xml_member)
             return xml_member.get('id') 
         else:
             return False
@@ -68,3 +79,16 @@ class Member(DictObj):
     def send_password(self, username):
         method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': username}
         xml_root = self.client.get_remote_xml_root(method_uri)
+
+    def get_playlists(self):
+        method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
+        xml_root = self.client.get_remote_xml_root(method_uri)
+
+        playlists = []
+        playlist_elements = xml_root.find('playlists')
+        for playlist_element in playlist_elements.getchildren():
+            playlist = Playlist(playlist_element)
+            playlist.member_id = self.id
+            playlists.append(playlist)
+
+        return playlists

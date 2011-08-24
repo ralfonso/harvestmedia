@@ -7,6 +7,8 @@ import StringIO
 
 import mock
 import datetime, hashlib
+import xml.etree.cElementTree as ET
+
 
 import harvestmedia.api.exceptions
 import harvestmedia.api.config
@@ -70,3 +72,33 @@ def test_create_member(HTTPMock):
 
     assert member.id == test_member_id
     assert member.username == username
+
+
+def test_load():
+    now = datetime.datetime.today().isoformat()
+    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    username = 'testuser'
+    firstname = 'Test'
+    lastname = 'User'
+    email = 'email@email.com'
+
+    xml_str = """<?xml version="1.0" encoding="utf-8"?>
+     <ResponseMember>
+        <memberaccount id="%(test_member_id)s">
+            <username>%(username)s</username>
+            <firstname>%(firstname)s</firstname>
+            <lastname>%(lastname)s</lastname>
+            <email>%(email)s</email>
+        </memberaccount>
+    </ResponseMember>""" % {'test_member_id': test_member_id, 
+                            'username': username,
+                            'firstname': firstname,
+                            'lastname': lastname,
+                            'email': email}
+
+    xml_doc = ET.fromstring(xml_str)
+    xml_member = xml_doc.find('memberaccount')
+    member = Member(xml_member)
+
+    assert member.id == test_member_id
+    assert member.firstname == firstname

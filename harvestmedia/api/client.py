@@ -60,6 +60,10 @@ class Client(object):
         elif self.config.webservice_url_parsed.scheme == 'https':
             http = httplib.HTTPSConnection(self.config.webservice_host)
         http.request('GET', method_uri)
+
+        if self.debug:
+            logger.debug("url: %s://%s%s" % (self.config.webservice_url_parsed.scheme, self.config.webservice_host, method_uri))
+
         response = http.getresponse()
         xml_doc_str = response.read()
 
@@ -82,13 +86,24 @@ class Client(object):
             http = httplib.HTTPSConnection(self.config.webservice_host)
 
         if self.debug:
+            logger.debug("url: " + method_url)
             logger.debug("posting XML: " + xml_post_body)
 
         http.request('POST', method_url, xml_post_body, {'Content-Type': 'application/xml'}) 
         response = http.getresponse()
         if response.status != 200:
-            raise exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response.status) + ': ' + str(response.read()))
+            response_status = response.status
+            response_body = response.read()
+
+            if self.debug:
+                logger.debug('non 200 HTTP error returned from server: ' + str(response_status) + ': ' + str(response_body))
+
+            raise exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response_status) + ': ' + str(response_body))
+
         xml_doc_str = response.read()
+
+        if self.debug:
+            logger.debug("response XML: " + xml_doc_str)
         return xml_doc_str
             
 
