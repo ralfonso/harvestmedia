@@ -76,6 +76,15 @@ class Member(DictObj):
         else:
             return False
 
+
+    @classmethod
+    def get_by_id(cls, member_id):
+        connection = client.APIClient()
+        method_uri = '/getmember/{{service_token}}/%(member_id)s' % {'member_id': member_id}
+        xml_data = connection.get_remote_xml_root(method_uri)
+        xml_member = xml_data.find('memberaccount')
+        return cls(xml_member)
+
     def send_password(self, username):
         method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': username}
         xml_root = self.client.get_remote_xml_root(method_uri)

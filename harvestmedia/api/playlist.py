@@ -7,6 +7,8 @@ from util import DictObj
 import client
 from exceptions import MissingParameter
 
+from track import Track
+
 logger = logging.getLogger('harvestmedia')
 
 class Playlist(DictObj):
@@ -17,17 +19,25 @@ class Playlist(DictObj):
 
         """
 
+        self.tracks = []
+
         self.client = connection
         if self.client is None:
             self.client = client.APIClient()
 
         if xml_data is not None:
             self._load(xml_data)
+
  
     def _load(self, xml_playlist):
         self.id = xml_playlist.get('id')
         for attribute, value in xml_playlist.items():
             setattr(self, attribute, value)
+
+        tracks = xml_playlist.find('tracks')
+        if tracks:
+            for track in tracks.getchildren():
+                self.tracks.append(Track(track))
 
     def create(self):
         if not self.member_id:
@@ -45,6 +55,30 @@ class Playlist(DictObj):
                 name = playlist.get('name')
                 if name == self.name:
                     self._load(playlist)
+
+    def add_track(self, track_id):
+        method_uri = '/addtoplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % {'member_id': self.member_id, 'playlist_id': self.id, 'track_id': track_id}
+        xml_root = self.client.get_remote_xml_root(method_uri)
+
+        response_code = xml_root.find('code')
+        status = response_code is not None and response_code.text.lower() == 'ok'
+
+        if status:
+            self.tracks.append(Track.get_by_id(track_id))
+    
+    def remove_track(self, track_id):
+        method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % {'member_id': self.member_id, 'playlist_id': self.id, 'track_id': track_id}
+        xml_root = self.client.get_remote_xml_root(method_uri)
+
+        response_code = xml_root.find('code')
+        status = response_code is not None and response_code.text.lower() == 'ok'
+
+        if status:
+            for track in self.tracks:
+                if track.id == track_id:
+                    self.tracks.remove(track)
+
+        return status
 
     def remove(self):
         if not self.member_id:

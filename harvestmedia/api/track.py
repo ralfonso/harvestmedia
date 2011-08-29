@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
+import xml.etree.cElementTree as ET
+import logging
+
 from util import DictObj
 import client
 
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('harvestmedia')
 
 class Track(DictObj):
     """ Represents a Harvest Media track asset """
@@ -26,6 +32,25 @@ class Track(DictObj):
 
     def as_dict(self):
         return dict([(k, v) for k,v in self.__dict__.items()])
+
+
+    @classmethod 
+    def get_by_id(cls, track_id):
+        connection = client.APIClient()
+        method_uri = '/gettracks/{{service_token}}'
+        xml_data = ET.Element('tracks')
+        xml_track = ET.Element('track')
+        xml_track.text = track_id
+        xml_data.append(xml_track)
+        xml_post_body = ET.tostring(xml_data)
+
+        server_xml = connection.post_xml(method_uri, xml_post_body)
+        xml_data = ET.fromstring(server_xml)
+        xml_tracks = xml_data.find('tracks')
+        if xml_tracks is not None:
+            xml_track = xml_tracks.find('track')
+            if xml_track is not None:
+                return cls(xml_track)
 
     def get_waveform_url(self, width=None, height=None):
         asset_url = self.client.config.waveform_url
