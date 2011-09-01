@@ -5,6 +5,8 @@ import logging
 from util import DictObj
 import client
 from playlist import Playlist
+from favourite import Favourite
+from track import Track
 from exceptions import MissingParameter
 
 logger = logging.getLogger('harvestmedia')
@@ -101,3 +103,17 @@ class Member(DictObj):
             playlists.append(playlist)
 
         return playlists
+
+    def get_favourites(self):
+        method_uri = '/getfavourites/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
+
+        xml_root = self.client.get_remote_xml_root(method_uri)
+
+        favourites = []
+        favourites_element = xml_root.find('favourites')
+        track_elements = favourites_element.find('tracks')
+        for track_element in track_elements.getchildren():
+            favourite = Track(track_element)
+            favourites.append(favourite)
+
+        return favourites
