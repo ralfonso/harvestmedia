@@ -13,7 +13,7 @@ logger = logging.getLogger('harvestmedia')
 
 class Playlist(DictObj):
     def __init__(self, xml_data=None, connection=None):
-        """ Create a new Member object from an ElementTree.Element object
+        """ Create a new Favourite object from an ElementTree.Element object
 
         xml_data: the ElementTree.Element object to parse
 
@@ -88,6 +88,22 @@ class Playlist(DictObj):
             raise MissingParameter('You have to specify an id to remove a playlist')
 
         method_uri = '/removeplaylist/{{service_token}}/%(member_id)s/%(id)s' % {'member_id': self.member_id, 'id': self.id}
+        xml_root = self.client.get_remote_xml_root(method_uri)
+
+        response_code = xml_root.find('code')
+        return response_code is not None and response_code.text.lower() == 'ok'
+
+    def update(self):
+        if not self.member_id:
+            raise MissingParameter('You have to specify a member_id to update a playlist')
+
+        if not self.id:
+            raise MissingParameter('You have to specify an id to update a playlist')
+
+        method_uri = '/upateplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/%(playlist_name)s' % { 'member_id': self.member_id,
+                                                                                                            'playlist_id': self.id,
+                                                                                                            'playlist_name': url_quote(self.name.encode('utf-8'))}
+
         xml_root = self.client.get_remote_xml_root(method_uri)
 
         response_code = xml_root.find('code')
