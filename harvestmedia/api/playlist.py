@@ -65,6 +65,8 @@ class Playlist(DictObj):
 
         if status:
             self.tracks.append(Track.get_by_id(track_id))
+
+        return status
     
     def remove_track(self, track_id):
         method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % {'member_id': self.member_id, 'playlist_id': self.id, 'track_id': track_id}
