@@ -124,6 +124,17 @@ class Client(object):
         asset_url = root.find('asseturl')
         self.config.album_art_url = asset_url.get('albumart')
         self.config.waveform_url = asset_url.get('waveform')
+        self.config.download_url = asset_url.get('trackdownload')
+        self.config.stream_url = asset_url.get('trackstream')
+
+        self.config.trackformats = []
+        
+        trackformats_xml = root.find('trackformats')
+
+        if trackformats_xml:
+            for trackformat_xml in trackformats_xml.getchildren():
+                self.config.trackformats.append(dict(trackformat_xml.items()))     
+
 
 class APIClient(Client):
     def __init__(self, api_key=None, webservice_url=None):
