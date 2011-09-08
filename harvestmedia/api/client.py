@@ -5,6 +5,7 @@ import httplib
 import exceptions
 import config
 import logging
+import iso8601
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('harvestmedia')
@@ -42,14 +43,14 @@ class Client(object):
         self.libraries = []
         
         if not self.config.service_token:
-            self.config.service_token = self.request_service_token()
+            self.request_service_token(self.config)
 
         if not self.config.album_art_url:
             self.get_service_info()
 
     def __add_service_token(self, uri):
-        if hasattr(self, 'service_token') and self.service_token:
-            uri = uri.replace('{{service_token}}', self.service_token)
+        if hasattr(self, 'service_token') and self.config.service_token:
+            uri = uri.replace('{{service_token}}', self.config.service_token)
 
         return uri
 
@@ -107,15 +108,14 @@ class Client(object):
         return xml_doc_str
             
 
-    def request_service_token(self):
+    def request_service_token(self, config):
         method_uri = '/getservicetoken/' + self.api_key
 
         root = self.get_remote_xml_root(method_uri)
         token = root.find('token')
-        self.service_token = token.get('value')
-        self.service_token_expires = token.get('expiry')
-
-        return self.service_token
+        config.service_token = token.get('value')
+        service_token_expires = token.get('expiry')
+        config.service_token_expires = iso8601.parse_date(service_token_expires)
 
     def get_service_info(self):
         method_uri = '/getserviceinfo/{{service_token}}'

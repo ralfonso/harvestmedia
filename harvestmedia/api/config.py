@@ -8,6 +8,7 @@ class Config(object):
         if not cls._instance:
             cls._instance = super(Config, cls).__new__(cls, *args, **kwargs)
             cls._instance.service_token = None
+            cls._instance.service_token_expires = None
             cls._instance.album_art_url = None
             cls._instance.waveform_url = None
             cls._instance._webservice_url = None
