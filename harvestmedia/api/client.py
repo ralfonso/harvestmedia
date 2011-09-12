@@ -97,7 +97,7 @@ class Client(object):
             response_body = response.read()
 
             if self.debug:
-                logger.debug('non 200 HTTP error returned from server: ' + str(response_status) + ': ' + str(response_body))
+                logger.debug('HTTP: non 200 status received from server: ' + str(response_status))
 
             raise exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response_status) + ': ' + str(response_body))
 
