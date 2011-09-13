@@ -39,6 +39,7 @@ class Track(DictObj):
         connection = client.APIClient()
         method_uri = '/gettracks/{{service_token}}'
         xml_data = ET.Element('tracks')
+        xml_data.set('fulldetail', 'true')
         xml_track = ET.Element('track')
         xml_track.text = track_id
         xml_data.append(xml_track)
@@ -51,6 +52,32 @@ class Track(DictObj):
             xml_track = xml_tracks.find('track')
             if xml_track is not None:
                 return cls(xml_track)
+
+    @classmethod
+    def get_multiple(cls, track_ids):
+        connection = client.APIClient()
+        method_uri = '/gettracks/{{service_token}}'
+        xml_data = ET.Element('tracks')
+        xml_data.set('fulldetail', 'true')
+
+        for track_id in track_ids:
+            xml_track = ET.Element('track')
+            xml_track.text = track_id
+            xml_data.append(xml_track)
+
+        xml_post_body = ET.tostring(xml_data)
+
+        server_xml = connection.post_xml(method_uri, xml_post_body)
+        xml_data = ET.fromstring(server_xml)
+        xml_tracks = xml_data.find('tracks')
+
+        tracks = []
+
+        if xml_tracks is not None:
+            for xml_track in xml_tracks.getchildren():
+                tracks.append(cls(xml_track))
+
+        return tracks
 
     def get_waveform_url(self, width=None, height=None):
         asset_url = self.client.config.waveform_url

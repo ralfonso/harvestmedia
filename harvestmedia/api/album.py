@@ -34,7 +34,10 @@ class Album(DictObj):
             track = Track(track_element)
             track_list.append(track)
 
-        return track_list
+        # now we need to get the fulldetail
+        
+        track_ids = [t.id for t in track_list]
+        return Track.get_multiple(track_ids)
     
     def get_cover_url(self, width=None, height=None):
         asset_url = self.client.config.album_art_url
