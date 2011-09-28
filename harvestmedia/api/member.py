@@ -7,9 +7,12 @@ import client
 from playlist import Playlist
 from favourite import Favourite
 from track import Track
-from exceptions import MissingParameter
+from exceptions import HarvestMediaError, MissingParameter
 
 logger = logging.getLogger('harvestmedia')
+
+class MemberCreateError(HarvestMediaError):
+    pass
 
 class Member(DictObj):
     def __init__(self, xml_data=None, connection=None):
@@ -61,7 +64,18 @@ class Member(DictObj):
 
         server_xml = self.client.post_xml(method_uri, xml_post_body)
         xml_data = ET.fromstring(server_xml)
-        xml_member = xml_data.find('memberaccount')
+
+        xml_error = xml_data.find('error')
+
+        if xml_error:
+            xml_description = xml_error.find('description')
+            description = xml_description.text
+            raise MemberCreateError(description)
+        else:
+            xml_member = xml_data.find('memberaccount')
+            if not xml_member:
+                raise MemberCreateError('Member registration info not returned')
+                
         self._load(xml_member)
 
 

@@ -124,6 +124,7 @@ class Client(object):
         self.config.album_art_url = asset_url.get('albumart')
         self.config.waveform_url = asset_url.get('waveform')
         self.config.download_url = asset_url.get('trackdownload')
+        self.config.playlistdownload_url = asset_url.get('playlistdownload')
         self.config.stream_url = asset_url.get('trackstream')
 
         self.config.trackformats = []
