@@ -7,7 +7,6 @@ import config
 import logging
 import iso8601
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('harvestmedia')
 
 class Client(object):
@@ -69,7 +68,7 @@ class Client(object):
         xml_doc_str = response.read()
 
         if self.debug:
-            logger.debug("server response: " + xml_doc_str.decode('utf_16_le'))
+            logger.debug("server response: " + xml_doc_str)
 
         try:
             root = ET.fromstring(xml_doc_str)

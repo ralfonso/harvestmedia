@@ -6,7 +6,6 @@ from util import DictObj
 import client
 
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('harvestmedia')
 
 class Track(DictObj):
