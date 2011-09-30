@@ -68,7 +68,7 @@ class Client(object):
         xml_doc_str = response.read()
 
         if self.debug:
-            logger.debug("server response: " + xml_doc_str)
+            logger.debug("server response: " + xml_doc_str.decode('utf_16_le'))
 
         try:
             root = ET.fromstring(xml_doc_str)
@@ -103,7 +103,7 @@ class Client(object):
         xml_doc_str = response.read()
 
         if self.debug:
-            logger.debug("response XML: " + xml_doc_str)
+            logger.debug("response XML: " + xml_doc_str.decode('utf_16_le'))
         return xml_doc_str
             
 
