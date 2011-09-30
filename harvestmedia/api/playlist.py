@@ -5,11 +5,14 @@ from urllib import quote as url_quote
 
 from util import DictObj
 import client
-from exceptions import MissingParameter
+from exceptions import HarvestMediaError, MissingParameter
 
 from track import Track
 
 logger = logging.getLogger('harvestmedia')
+
+class PlaylistUpdateError(HarvestMediaError):
+    pass
 
 class Playlist(DictObj):
     def __init__(self, xml_data=None, connection=None):
@@ -102,11 +105,25 @@ class Playlist(DictObj):
         if not self.id:
             raise MissingParameter('You have to specify an id to update a playlist')
 
-        method_uri = '/upateplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/%(playlist_name)s' % { 'member_id': self.member_id,
+        method_uri = '/updateplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/%(playlist_name)s' % { 'member_id': self.member_id,
                                                                                                             'playlist_id': self.id,
                                                                                                             'playlist_name': url_quote(self.name.encode('utf-8'))}
 
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_data = self.client.get_remote_xml_root(method_uri)
 
-        response_code = xml_root.find('code')
-        return response_code is not None and response_code.text.lower() == 'ok'
+        xml_error = xml_data.find('error')
+
+        if xml_error:
+            xml_description = xml_error.find('description')
+            description = xml_description.text
+            raise PlaylistUpdateError(description)
+        else:
+            xml_playlists = xml_data.find('playlists')
+            if xml_playlists is None:
+                raise PlaylistUpdateError('Playlist not returned')
+
+            xml_playlist = xml_playlists.find('playlist')
+            if xml_playlist is None:
+                raise PlaylistUpdateError('Playlist not returned')
+
+            self._load(xml_playlist)
