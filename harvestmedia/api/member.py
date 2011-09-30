@@ -14,6 +14,9 @@ logger = logging.getLogger('harvestmedia')
 class MemberCreateError(HarvestMediaError):
     pass
 
+class MemberUpdateError(HarvestMediaError):
+    pass
+
 class Member(DictObj):
     def __init__(self, xml_data=None, connection=None):
         """ Create a new Member object from an ElementTree.Element object
@@ -22,9 +25,9 @@ class Member(DictObj):
 
         """
 
-        self.client = connection
-        if self.client is None:
-            self.client = client.APIClient()
+        self._client = connection
+        if self._client is None:
+            self._client = client.APIClient()
 
         if xml_data is not None:
             self._load(xml_data)
@@ -41,6 +44,12 @@ class Member(DictObj):
         root = ET.Element('requestmember')
         member = ET.Element('memberaccount')
 
+        for prop, value in vars(self).items():
+            if not prop.startswith('_'):
+                el = ET.Element(prop)
+                el.text = value
+                member.append(el)
+
         terms = ET.Element('termsaccept')
         terms.text = 'true'
         member.append(terms)
@@ -51,18 +60,10 @@ class Member(DictObj):
 
         root.append(member)
 
-        for attribute, value in self.__dict__.items():
-            if attribute == 'client':
-                continue
-
-            attribute_element = ET.Element(attribute)
-            attribute_element.text = value
-            member.append(attribute_element)
-
         method_uri = '/registermember/{{service_token}}'
         xml_post_body = ET.tostring(root)
 
-        server_xml = self.client.post_xml(method_uri, xml_post_body)
+        server_xml = self._client.post_xml(method_uri, xml_post_body)
         xml_data = ET.fromstring(server_xml)
 
         xml_error = xml_data.find('error')
@@ -73,15 +74,47 @@ class Member(DictObj):
             raise MemberCreateError(description)
         else:
             xml_member = xml_data.find('memberaccount')
-            if not xml_member:
+            if xml_member is None:
                 raise MemberCreateError('Member registration info not returned')
                 
         self._load(xml_member)
 
+    def update(self):
+        root = ET.Element('requestmember')
+        member = ET.Element('memberaccount')
+
+        for prop, value in vars(self).items():
+            if not prop.startswith('_'):
+                el = ET.Element(prop)
+                el.text = value
+                member.append(el)
+
+        root.append(member)
+
+        method_uri = '/updatemember/{{service_token}}'
+        xml_post_body = ET.tostring(root)
+
+        server_xml = self._client.post_xml(method_uri, xml_post_body)
+        xml_data = ET.fromstring(server_xml)
+
+        xml_error = xml_data.find('error')
+
+        if xml_error:
+            xml_description = xml_error.find('description')
+            description = xml_description.text
+            raise MemberCreateError(description)
+        else:
+            xml_member = xml_data.find('memberaccount')
+            if xml_member is None:
+                raise MemberUpdateError('Member update info not returned')
+                
+        self._load(xml_member)
+        
+
 
     def authenticate(self, username, password):
         method_uri = '/authenticatemember/{{service_token}}/%(username)s/%(password)s' % {'username': username, 'password': password}
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_remote_xml_root(method_uri)
 
         xml_member = xml_root.find('memberaccount')
         xml_username = xml_member.find('username')
@@ -103,11 +136,11 @@ class Member(DictObj):
 
     def send_password(self, username):
         method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': username}
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_remote_xml_root(method_uri)
 
     def get_playlists(self):
         method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_remote_xml_root(method_uri)
 
         playlists = []
         playlist_elements = xml_root.find('playlists')
@@ -121,7 +154,7 @@ class Member(DictObj):
     def get_favourites(self):
         method_uri = '/getfavourites/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
 
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_remote_xml_root(method_uri)
 
         favourites = []
         favourites_element = xml_root.find('favourites')
