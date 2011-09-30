@@ -10,10 +10,10 @@ import config
 class Attribute(DictObj):
     
     def __init__(self, xml_data=None, connection=None):
-        self.config = config.Config()
-        self.client = connection
-        if self.client is None:
-            self.client = client.APIClient()
+        self._config = config.Config()
+        self._client = connection
+        if self._client is None:
+            self._client = client.APIClient()
             
         if xml_data is not None:
             self._load(xml_data)
@@ -42,10 +42,10 @@ class Attribute(DictObj):
 class Category(DictObj):
     
     def __init__(self, xml_data=None, connection=None):
-        self.config = config.Config()
-        self.client = connection
-        if self.client is None:
-            self.client = client.APIClient()
+        self._config = config.Config()
+        self._client = connection
+        if self._client is None:
+            self._client = client.APIClient()
             
         if xml_data is not None:
             self._load(xml_data)

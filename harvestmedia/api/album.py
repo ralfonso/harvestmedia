@@ -8,10 +8,10 @@ import client
 class Album(DictObj):
     
     def __init__(self, xml_data=None, connection=None):
-        self.client = connection
+        self._client = connection
 
-        if self.client is None:
-            self.client = client.APIClient()
+        if self._client is None:
+            self._client = client.APIClient()
 
         if xml_data is not None:
             self._load(xml_data)
@@ -27,7 +27,7 @@ class Album(DictObj):
         track_list = []
         method_uri = '/getalbumtracks/{{service_token}}/' + self.id
 
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_remote_xml_root(method_uri)
         tracks = xml_root.find('tracks').getchildren()
 
         for track_element in tracks:
@@ -40,7 +40,7 @@ class Album(DictObj):
         return Track.get_multiple(track_ids)
     
     def get_cover_url(self, width=None, height=None):
-        asset_url = self.client.config.album_art_url
+        asset_url = self._client.config.album_art_url
         asset_url = asset_url.replace('{id}', self.id)
         if width:
             asset_url = asset_url.replace('{width}', str(width))

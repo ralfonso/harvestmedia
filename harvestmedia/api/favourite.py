@@ -19,9 +19,9 @@ class Favourite(DictObj):
 
         """
 
-        self.client = connection
-        if self.client is None:
-            self.client = client.APIClient()
+        self._client = connection
+        if self._client is None:
+            self._client = client.APIClient()
 
         if xml_data is not None:
             self._load(xml_data)
@@ -45,7 +45,7 @@ class Favourite(DictObj):
             raise MissingParameter('You have to specify a track_id to add to favourites')
 
         method_uri = '/addtofavourites/{{service_token}}/%(member_id)s/track/%(track_id)s' % {'member_id': self.member_id, 'track_id': track_id}
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_remote_xml_root(method_uri)
 
         response_code = xml_root.find('code')
         status = response_code is not None and response_code.text.lower() == 'ok'
@@ -60,7 +60,7 @@ class Favourite(DictObj):
             raise MissingParameter('You have to specify a track_id to add to favourites')
 
         method_uri = '/removefavouritestrack/{{service_token}}/%(member_id)s/%(track_id)s' % {'member_id': self.member_id, 'track_id': track_id}
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_remote_xml_root(method_uri)
 
         response_code = xml_root.find('code')
         status = response_code is not None and response_code.text.lower() == 'ok'

@@ -18,9 +18,9 @@ class Track(DictObj):
 
         """
 
-        self.client = connection
-        if self.client is None:
-            self.client = client.APIClient()
+        self._client = connection
+        if self._client is None:
+            self._client = client.APIClient()
 
         if xml_data is not None:
             self._load(xml_data)
@@ -79,7 +79,7 @@ class Track(DictObj):
         return tracks
 
     def get_waveform_url(self, width=None, height=None):
-        asset_url = self.client.config.waveform_url
+        asset_url = self._client.config.waveform_url
         asset_url = asset_url.replace('{id}', self.id)
         if width:
             asset_url = asset_url.replace('{width}', str(width))

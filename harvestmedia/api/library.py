@@ -10,10 +10,10 @@ from album import Album
 class Library(DictObj):
     
     def __init__(self, xml_data=None, connection=None):
-        self.config = config.Config()
-        self.client = connection
-        if self.client is None:
-            self.client = client.APIClient()
+        self._config = config.Config()
+        self._client = connection
+        if self._client is None:
+            self._client = client.APIClient()
             
         if xml_data is not None:
             self._load(xml_data)
@@ -32,7 +32,7 @@ class Library(DictObj):
         self.albums = {}
 
         method_uri = '/getalbums/{{service_token}}/' + self.id
-        xml_root = self.client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_remote_xml_root(method_uri)
         albums = xml_root.find('albums').getchildren()
 
         for album_element in albums:
