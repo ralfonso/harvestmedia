@@ -67,6 +67,17 @@ class Client(object):
         response = http.getresponse()
         xml_doc_str = response.read()
 
+        if response.status != 200:
+            response_status = response.status
+            response_body = response.read()
+
+            if self.debug:
+                logger.debug('HTTP: non 200 status received from server: ' + str(response_status))
+
+            exc = exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response_status) + ': ' + str(response_body))
+            exc.code = response.status
+            raise exc
+
         if self.debug:
             logger.debug("server response: " + xml_doc_str.decode('utf_16_le'))
 

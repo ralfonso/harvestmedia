@@ -9,7 +9,9 @@ class APITimeoutError(HarvestMediaError):
     pass
 
 class InvalidAPIResponse(HarvestMediaError):
-    pass
+    def __init__(self, reason):
+        super(HarvestMediaError, self).__init__(reason)
+        self.code = None
 
 class MissingParameter(HarvestMediaError):
     pass
