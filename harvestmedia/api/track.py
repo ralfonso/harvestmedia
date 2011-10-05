@@ -5,6 +5,7 @@ import logging
 from util import DictObj
 import client
 
+from harvestmedia.api.category import Category
 
 logger = logging.getLogger('harvestmedia')
 
@@ -19,6 +20,7 @@ class Track(DictObj):
         """
 
         self._client = connection
+        self.categories = []
         if self._client is None:
             self._client = client.APIClient()
 
@@ -28,6 +30,11 @@ class Track(DictObj):
     def _load(self, xml_data):
         for attribute, value in xml_data.items():
             setattr(self, attribute, value)
+
+        categories = xml_data.find('categories')
+        if categories is not None:
+            for category in categories.getchildren():
+                self.categories.append(Category(category))
 
     def as_dict(self):
         return dict([(k, v) for k,v in self.__dict__.items()])

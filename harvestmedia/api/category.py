@@ -25,7 +25,7 @@ class Attribute(DictObj):
         self.id = xmldata.get('id')
         name_value = xmldata.get('name')
         if ' - ' in name_value:
-            self.name, self.value = name_value.split(' - ')
+            self.value, self.name = name_value.split(' - ')
         else:
             self.name = name_value
             self.value = None
