@@ -116,7 +116,7 @@ class Member(DictObj):
 
     def authenticate(self, username, password):
         method_uri = '/authenticatemember/{{service_token}}/%(username)s/%(password)s' % {'username': username, 'password': password}
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
 
         xml_member = xml_root.find('memberaccount')
         xml_username = xml_member.find('username')
@@ -132,17 +132,17 @@ class Member(DictObj):
     def get_by_id(cls, member_id):
         connection = client.APIClient()
         method_uri = '/getmember/{{service_token}}/%(member_id)s' % {'member_id': member_id}
-        xml_data = connection.get_remote_xml_root(method_uri)
+        xml_data = connection.get_xml(method_uri)
         xml_member = xml_data.find('memberaccount')
         return cls(xml_member)
 
     def send_password(self, username):
         method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': username}
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
 
     def get_playlists(self):
         method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
 
         playlists = []
         playlist_elements = xml_root.find('playlists')
@@ -156,7 +156,7 @@ class Member(DictObj):
     def get_favourites(self):
         method_uri = '/getfavourites/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
 
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
 
         favourites = []
         favourites_element = xml_root.find('favourites')

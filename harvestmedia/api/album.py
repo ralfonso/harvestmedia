@@ -27,7 +27,7 @@ class Album(DictObj):
         track_list = []
         method_uri = '/getalbumtracks/{{service_token}}/' + self.id
 
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
         tracks = xml_root.find('tracks').getchildren()
 
         for track_element in tracks:

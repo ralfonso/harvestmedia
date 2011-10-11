@@ -50,7 +50,7 @@ class Playlist(DictObj):
             raise MissingParameter('You have to specify a playlist name to create a playlist')
 
         method_uri = '/addplaylist/{{service_token}}/%(member_id)s/%(playlist_name)s/' % {'member_id': self.member_id, 'playlist_name': url_quote(self.name.encode('utf-8')) }
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
         playlists = xml_root.find('playlists')
 
         if playlists is not None:
@@ -61,7 +61,7 @@ class Playlist(DictObj):
 
     def add_track(self, track_id):
         method_uri = '/addtoplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % {'member_id': self.member_id, 'playlist_id': self.id, 'track_id': track_id}
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
 
         response_code = xml_root.find('code')
         status = response_code is not None and response_code.text.lower() == 'ok'
@@ -73,7 +73,7 @@ class Playlist(DictObj):
     
     def remove_track(self, track_id):
         method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % {'member_id': self.member_id, 'playlist_id': self.id, 'track_id': track_id}
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
 
         response_code = xml_root.find('code')
         status = response_code is not None and response_code.text.lower() == 'ok'
@@ -93,7 +93,7 @@ class Playlist(DictObj):
             raise MissingParameter('You have to specify an id to remove a playlist')
 
         method_uri = '/removeplaylist/{{service_token}}/%(member_id)s/%(id)s' % {'member_id': self.member_id, 'id': self.id}
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
 
         response_code = xml_root.find('code')
         return response_code is not None and response_code.text.lower() == 'ok'
@@ -109,7 +109,7 @@ class Playlist(DictObj):
                                                                                                             'playlist_id': self.id,
                                                                                                             'playlist_name': url_quote(self.name.encode('utf-8'))}
 
-        xml_data = self._client.get_remote_xml_root(method_uri)
+        xml_data = self._client.get_xml(method_uri)
 
         xml_error = xml_data.find('error')
 

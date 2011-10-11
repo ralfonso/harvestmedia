@@ -5,6 +5,7 @@ from urllib2 import urlopen
 import StringIO
 
 import mock
+import iso8601
 import datetime, hashlib
 
 import harvestmedia.api.exceptions
@@ -19,7 +20,9 @@ webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
 @raises(harvestmedia.api.exceptions.InvalidAPIResponse)
 def test_xml_failure(HTTPMock):
     http = HTTPMock()
-    http.getresponse.return_value = StringIO.StringIO('<xml><this xml is malformed</xml>')
+    mock_response = StringIO.StringIO('<xml><this xml is malformed</xml>')
+    mock_response.status = 200
+    http.getresponse.return_value = mock_response
 
     hmconfig = harvestmedia.api.config.Config()
     hmconfig.api_key = api_key
@@ -49,7 +52,9 @@ def test_get_service_token(HTTPMock):
                     ]
                         
     def side_effect(*args):
-        return StringIO.StringIO(return_values.pop(0))
+        mock_response = StringIO.StringIO(return_values.pop(0))
+        mock_response.status = 200
+        return mock_response
                         
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
@@ -59,8 +64,8 @@ def test_get_service_token(HTTPMock):
     hmconfig.webservice_url = webservice_url
     client = harvestmedia.api.client.Client()
     
-    assert client.service_token == test_token
-    assert client.service_token_expires == expiry
+    assert client.config.service_token == test_token
+    assert client.config.service_token_expires == iso8601.parse_date(expiry)
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_libraries(HTTPMock):
@@ -73,13 +78,15 @@ def test_get_libraries(HTTPMock):
     hmconfig.api_key = api_key
     hmconfig.webservice_url = webservice_url
     client = harvestmedia.api.client.Client()
-    http.getresponse.return_value = StringIO.StringIO("""
+    mock_response = StringIO.StringIO("""
         <ResponseLibraries>
             <libraries> 
                 <library id="abc123" name="VIDEOHELPER" detail="Library description" />
                 <library id="abc125" name="MODULES" detail="Library description" />
             </libraries>
         </ResponseLibraries>""")
+    mock_response.status = 200
+    http.getresponse.return_value = mock_response
 
     libraries = Library.get_libraries()
     assert isinstance(libraries, list)
@@ -87,3 +94,16 @@ def test_get_libraries(HTTPMock):
     library = libraries[0]
     assert library.id == 'abc123'
     assert library.name == 'VIDEOHELPER'
+
+@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@raises(harvestmedia.api.exceptions.InvalidToken)
+def test_invalid_token(HTTPMock):
+    http = HTTPMock()
+    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><memberaccount><error><code>5</code><description>Invalid Token</description></error></memberaccount>')
+    mock_response.status = 200
+    http.getresponse.return_value = mock_response
+    hmconfig = harvestmedia.api.config.Config()
+    hmconfig.api_key = api_key
+    hmconfig.webservice_url = webservice_url
+    client = harvestmedia.api.client.Client()
+    libraries = Library.get_libraries()

@@ -71,7 +71,7 @@ class Category(DictObj):
             api_client = client.APIClient()
 
         method_uri = '/getcategories/{{service_token}}'
-        xml_root = api_client.get_remote_xml_root(method_uri)
+        xml_root = api_client.get_xml(method_uri)
 
         xml_categories = xml_root.find('categories').getchildren()
         for xml_category in xml_categories:

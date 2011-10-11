@@ -32,7 +32,7 @@ class Library(DictObj):
         self.albums = {}
 
         method_uri = '/getalbums/{{service_token}}/' + self.id
-        xml_root = self._client.get_remote_xml_root(method_uri)
+        xml_root = self._client.get_xml(method_uri)
         albums = xml_root.find('albums').getchildren()
 
         for album_element in albums:
@@ -48,7 +48,7 @@ class Library(DictObj):
             api_client = client.APIClient()
 
         method_uri = '/getlibraries/{{service_token}}'
-        xml_root = api_client.get_remote_xml_root(method_uri)
+        xml_root = api_client.get_xml(method_uri)
         xml_libraries = xml_root.find('libraries').getchildren()
         for library_element in xml_libraries:
             library = Library(library_element)

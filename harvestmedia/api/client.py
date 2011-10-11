@@ -42,6 +42,8 @@ class Client(object):
         self.libraries = []
         
         if not self.config.service_token:
+            if self.debug:
+                logger.debug('requesting service token')
             self.request_service_token(self.config)
 
         if not self.config.album_art_url:
@@ -53,7 +55,7 @@ class Client(object):
 
         return uri
 
-    def get_remote_xml_root(self, method_uri):
+    def get_xml(self, method_uri):
         method_uri = self.config.webservice_prefix + self.__add_service_token(method_uri)
         if self.config.webservice_url_parsed.scheme == 'http':
             http = httplib.HTTPConnection(self.config.webservice_host)
@@ -85,6 +87,14 @@ class Client(object):
             root = ET.fromstring(xml_doc_str)
         except ET.ParseError, e:
             raise exceptions.InvalidAPIResponse, "Unable to read the XML from the API server: " + e.message
+
+
+        error = root.find('error')
+        if error is not None:
+            code = error.find('code')
+            if code is not None:
+                if code.text == '5':
+                    raise exceptions.InvalidToken()
 
         return root
 
@@ -121,8 +131,10 @@ class Client(object):
     def request_service_token(self, config):
         method_uri = '/getservicetoken/' + self.api_key
 
-        root = self.get_remote_xml_root(method_uri)
+        root = self.get_xml(method_uri)
         token = root.find('token')
+        if self.debug:
+            logger.debug('got token: %s' % token.get('value'))
         config.service_token = token.get('value')
         service_token_expires = token.get('expiry')
         config.service_token_expires = iso8601.parse_date(service_token_expires)
@@ -130,7 +142,7 @@ class Client(object):
     def get_service_info(self):
         method_uri = '/getserviceinfo/{{service_token}}'
 
-        root = self.get_remote_xml_root(method_uri)
+        root = self.get_xml(method_uri)
         asset_url = root.find('asseturl')
         self.config.album_art_url = asset_url.get('albumart')
         self.config.waveform_url = asset_url.get('waveform')
