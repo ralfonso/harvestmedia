@@ -15,3 +15,7 @@ class InvalidAPIResponse(HarvestMediaError):
 
 class MissingParameter(HarvestMediaError):
     pass
+
+class InvalidToken(HarvestMediaError):
+    def __init__(self):
+        super(HarvestMediaError, self).__init__('Invalid Token')
