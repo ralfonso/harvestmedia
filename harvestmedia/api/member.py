@@ -106,7 +106,7 @@ class Member(DictObj):
 
         if xml_username is not None:
             self._load(xml_member)
-            return xml_member.get('id') 
+            return True
         else:
             return False
 
