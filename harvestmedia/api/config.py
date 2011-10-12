@@ -14,6 +14,7 @@ class Config(object):
             cls._instance._webservice_url = None
             cls._instance.webservice_url_parsed = None
             cls._instance.debug = None
+            cls._instance.timezone = 'Australia/Sydney'
 
         return cls._instance
 

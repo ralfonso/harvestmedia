@@ -6,6 +6,7 @@ import exceptions
 import config
 import logging
 import iso8601
+import pytz
 
 logger = logging.getLogger('harvestmedia')
 
@@ -55,18 +56,7 @@ class Client(object):
 
         return uri
 
-    def get_xml(self, method_uri):
-        method_uri = self.config.webservice_prefix + self.__add_service_token(method_uri)
-        if self.config.webservice_url_parsed.scheme == 'http':
-            http = httplib.HTTPConnection(self.config.webservice_host)
-        elif self.config.webservice_url_parsed.scheme == 'https':
-            http = httplib.HTTPSConnection(self.config.webservice_host)
-        http.request('GET', method_uri)
-
-        if self.debug:
-            logger.debug("url: %s://%s%s" % (self.config.webservice_url_parsed.scheme, self.config.webservice_host, method_uri))
-
-        response = http.getresponse()
+    def _handle_response(self, response):
         xml_doc_str = response.read()
 
         if response.status != 200:
@@ -93,10 +83,35 @@ class Client(object):
         if error is not None:
             code = error.find('code')
             if code is not None:
-                if code.text == '5':
+                if code.text == '1':
+                    raise exceptions.CorruptInputData()
+                elif code.text == '2':
+                    description = error.find('description')
+                    reason = description.text if description is not None else 'Incorrect Input Data'
+                    raise exceptions.IncorrectInputData(reason)
+                elif code.text == '5':
                     raise exceptions.InvalidToken()
+                elif code.text == '7':
+                    raise exceptions.MemberDoesNotExist()
 
         return root
+
+
+
+    def get_xml(self, method_uri):
+        method_uri = self.config.webservice_prefix + self.__add_service_token(method_uri)
+        if self.config.webservice_url_parsed.scheme == 'http':
+            http = httplib.HTTPConnection(self.config.webservice_host)
+        elif self.config.webservice_url_parsed.scheme == 'https':
+            http = httplib.HTTPSConnection(self.config.webservice_host)
+        http.request('GET', method_uri)
+
+        if self.debug:
+            logger.debug("url: %s://%s%s" % (self.config.webservice_url_parsed.scheme, self.config.webservice_host, method_uri))
+
+        response = http.getresponse()
+
+        return self._handle_response(response)
 
     def post_xml(self, method_uri, xml_post_body):
         method_url = self.config.webservice_url + self.__add_service_token(method_uri)
@@ -111,22 +126,9 @@ class Client(object):
             logger.debug("posting XML: " + xml_post_body)
 
         http.request('POST', method_url, xml_post_body, {'Content-Type': 'application/xml'}) 
+
         response = http.getresponse()
-        if response.status != 200:
-            response_status = response.status
-            response_body = response.read()
-
-            if self.debug:
-                logger.debug('HTTP: non 200 status received from server: ' + str(response_status))
-
-            raise exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response_status) + ': ' + str(response_body))
-
-        xml_doc_str = response.read()
-
-        if self.debug:
-            logger.debug("response XML: " + xml_doc_str.decode('utf-8'))
-        return xml_doc_str
-            
+        return self._handle_response(response)
 
     def request_service_token(self, config):
         method_uri = '/getservicetoken/' + self.api_key
@@ -137,7 +139,13 @@ class Client(object):
             logger.debug('got token: %s' % token.get('value'))
         config.service_token = token.get('value')
         service_token_expires = token.get('expiry')
-        config.service_token_expires = iso8601.parse_date(service_token_expires)
+
+        # convert from the harvestmedia timezone to UTC
+        service_token_expires_date = iso8601.parse_date(service_token_expires)
+        hm_tz = pytz.timezone(self.config.timezone)
+        service_token_expires_date = service_token_expires_date.replace(tzinfo=hm_tz)
+        utc_tz =  pytz.timezone('UTC')
+        config.service_token_expires = service_token_expires_date.astimezone(utc_tz)
 
     def get_service_info(self):
         method_uri = '/getserviceinfo/{{service_token}}'
