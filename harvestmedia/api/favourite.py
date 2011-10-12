@@ -45,12 +45,8 @@ class Favourite(DictObj):
             raise MissingParameter('You have to specify a track_id to add to favourites')
 
         method_uri = '/addtofavourites/{{service_token}}/%(member_id)s/track/%(track_id)s' % {'member_id': self.member_id, 'track_id': track_id}
-        xml_root = self._client.get_xml(method_uri)
-
-        response_code = xml_root.find('code')
-        status = response_code is not None and response_code.text.lower() == 'ok'
-        return status
-
+        self._client.get_xml(method_uri)
+        return True
     
     def remove_track(self, track_id):
         if not self.member_id:
@@ -60,9 +56,5 @@ class Favourite(DictObj):
             raise MissingParameter('You have to specify a track_id to add to favourites')
 
         method_uri = '/removefavouritestrack/{{service_token}}/%(member_id)s/%(track_id)s' % {'member_id': self.member_id, 'track_id': track_id}
-        xml_root = self._client.get_xml(method_uri)
-
-        response_code = xml_root.find('code')
-        status = response_code is not None and response_code.text.lower() == 'ok'
-
-        return status
+        self._client.get_xml(method_uri)
+        return True

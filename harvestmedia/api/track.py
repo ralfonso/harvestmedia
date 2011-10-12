@@ -51,8 +51,7 @@ class Track(DictObj):
         xml_data.append(xml_track)
         xml_post_body = ET.tostring(xml_data)
 
-        server_xml = connection.post_xml(method_uri, xml_post_body)
-        xml_data = ET.fromstring(server_xml)
+        xml_data = connection.post_xml(method_uri, xml_post_body)
         xml_tracks = xml_data.find('tracks')
         if xml_tracks is not None:
             xml_track = xml_tracks.find('track')
@@ -73,8 +72,7 @@ class Track(DictObj):
 
         xml_post_body = ET.tostring(xml_data)
 
-        server_xml = connection.post_xml(method_uri, xml_post_body)
-        xml_data = ET.fromstring(server_xml)
+        xml_data = connection.post_xml(method_uri, xml_post_body)
         xml_tracks = xml_data.find('tracks')
 
         tracks = []

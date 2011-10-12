@@ -63,19 +63,10 @@ class Member(DictObj):
         method_uri = '/registermember/{{service_token}}'
         xml_post_body = ET.tostring(root)
 
-        server_xml = self._client.post_xml(method_uri, xml_post_body)
-        xml_data = ET.fromstring(server_xml)
-
-        xml_error = xml_data.find('error')
-
-        if xml_error:
-            xml_description = xml_error.find('description')
-            description = xml_description.text
-            raise MemberCreateError(description)
-        else:
-            xml_member = xml_data.find('memberaccount')
-            if xml_member is None:
-                raise MemberCreateError('Member registration info not returned')
+        xml_data = self._client.post_xml(method_uri, xml_post_body)
+        xml_member = xml_data.find('memberaccount')
+        if xml_member is None:
+            raise MemberCreateError('Member registration info not returned')
                 
         self._load(xml_member)
 
@@ -96,19 +87,11 @@ class Member(DictObj):
         method_uri = '/updatemember/{{service_token}}'
         xml_post_body = ET.tostring(root)
 
-        server_xml = self._client.post_xml(method_uri, xml_post_body)
-        xml_data = ET.fromstring(server_xml)
+        xml_data = self._client.post_xml(method_uri, xml_post_body)
 
-        xml_error = xml_data.find('error')
-
-        if xml_error:
-            xml_description = xml_error.find('description')
-            description = xml_description.text
-            raise MemberCreateError(description)
-        else:
-            xml_member = xml_data.find('memberaccount')
-            if xml_member is None:
-                raise MemberUpdateError('Member update info not returned')
+        xml_member = xml_data.find('memberaccount')
+        if xml_member is None:
+            raise MemberUpdateError('Member update info not returned')
                 
         self._load(xml_member)
         
@@ -138,7 +121,8 @@ class Member(DictObj):
 
     def send_password(self, username):
         method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': username}
-        xml_root = self._client.get_xml(method_uri)
+        self._client.get_xml(method_uri)
+        return True
 
     def get_playlists(self):
         method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % { 'member_id': self.id }

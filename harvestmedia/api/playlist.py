@@ -11,9 +11,6 @@ from track import Track
 
 logger = logging.getLogger('harvestmedia')
 
-class PlaylistUpdateError(HarvestMediaError):
-    pass
-
 class Playlist(DictObj):
     def __init__(self, xml_data=None, connection=None):
         """ Create a new Favourite object from an ElementTree.Element object
@@ -61,29 +58,19 @@ class Playlist(DictObj):
 
     def add_track(self, track_id):
         method_uri = '/addtoplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % {'member_id': self.member_id, 'playlist_id': self.id, 'track_id': track_id}
-        xml_root = self._client.get_xml(method_uri)
-
-        response_code = xml_root.find('code')
-        status = response_code is not None and response_code.text.lower() == 'ok'
-
-        if status:
-            self.tracks.append(Track.get_by_id(track_id))
-
-        return status
+        self._client.get_xml(method_uri)
+        self.tracks.append(Track.get_by_id(track_id))
+        return True
     
     def remove_track(self, track_id):
         method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % {'member_id': self.member_id, 'playlist_id': self.id, 'track_id': track_id}
-        xml_root = self._client.get_xml(method_uri)
+        self._client.get_xml(method_uri)
 
-        response_code = xml_root.find('code')
-        status = response_code is not None and response_code.text.lower() == 'ok'
+        for track in self.tracks:
+            if track.id == track_id:
+                self.tracks.remove(track)
 
-        if status:
-            for track in self.tracks:
-                if track.id == track_id:
-                    self.tracks.remove(track)
-
-        return status
+        return True
 
     def remove(self):
         if not self.member_id:
@@ -93,10 +80,8 @@ class Playlist(DictObj):
             raise MissingParameter('You have to specify an id to remove a playlist')
 
         method_uri = '/removeplaylist/{{service_token}}/%(member_id)s/%(id)s' % {'member_id': self.member_id, 'id': self.id}
-        xml_root = self._client.get_xml(method_uri)
-
-        response_code = xml_root.find('code')
-        return response_code is not None and response_code.text.lower() == 'ok'
+        self._client.get_xml(method_uri)
+        return True
 
     def update(self):
         if not self.member_id:
@@ -109,21 +94,5 @@ class Playlist(DictObj):
                                                                                                             'playlist_id': self.id,
                                                                                                             'playlist_name': url_quote(self.name.encode('utf-8'))}
 
-        xml_data = self._client.get_xml(method_uri)
-
-        xml_error = xml_data.find('error')
-
-        if xml_error:
-            xml_description = xml_error.find('description')
-            description = xml_description.text
-            raise PlaylistUpdateError(description)
-        else:
-            xml_playlists = xml_data.find('playlists')
-            if xml_playlists is None:
-                raise PlaylistUpdateError('Playlist not returned')
-
-            xml_playlist = xml_playlists.find('playlist')
-            if xml_playlist is None:
-                raise PlaylistUpdateError('Playlist not returned')
-
-            self._load(xml_playlist)
+        self._client.get_xml(method_uri)
+        return True
