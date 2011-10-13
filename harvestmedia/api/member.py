@@ -74,7 +74,7 @@ class Member(DictObj):
         root = ET.Element('requestmember')
         member = ET.Element('memberaccount')
 
-        member.set('ID', str(self.id))
+        member.set('id', str(self.id))
 
         for prop, value in vars(self).items():
             if not prop.startswith('_'):
