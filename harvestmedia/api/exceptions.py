@@ -34,3 +34,5 @@ class CorruptInputData(HarvestMediaError):
         super(HarvestMediaError, self).__init__('Corrupt Input Data')
     
     
+class TokenExpired(Exception):
+    pass

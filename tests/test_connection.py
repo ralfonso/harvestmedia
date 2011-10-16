@@ -5,8 +5,10 @@ from urllib2 import urlopen
 import StringIO
 
 import mock
+import pytz
 import iso8601
 import datetime, hashlib
+from datetime import timedelta
 
 import harvestmedia.api.exceptions
 import harvestmedia.api.config
@@ -26,16 +28,18 @@ def test_xml_failure(HTTPMock):
 
     hmconfig = harvestmedia.api.config.Config()
     hmconfig.api_key = api_key
+    hmconfig.debug = True
     hmconfig.webservice_url = webservice_url
     client = harvestmedia.api.client.Client()
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_service_token(HTTPMock):
-    expiry = datetime.datetime.today().isoformat()
-    test_token = hashlib.md5(expiry).hexdigest() # generate an md5 from the date for testing
+    expiry = datetime.datetime.now()
+    expiry += timedelta(hours=17)
+    test_token = hashlib.md5(str(expiry)).hexdigest() # generate an md5 from the date for testing
 
     return_values = [
-                     '<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry),
+                     '<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry.strftime("%Y-%m-%dT%H:%M:%S")),
                      """<?xml version="1.0" encoding="utf-8"?>
                         <responseserviceinfo>
                             <asseturl
@@ -64,8 +68,8 @@ def test_get_service_token(HTTPMock):
     hmconfig.webservice_url = webservice_url
     client = harvestmedia.api.client.Client()
     
-    assert client.config.service_token == test_token
-    assert client.config.service_token_expires == iso8601.parse_date(expiry)
+    assert client.config.service_token.token == test_token
+    assert client.config.service_token.expiry == expiry.strftime("%Y-%m-%dT%H:%M:%S")
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_libraries(HTTPMock):
@@ -104,6 +108,7 @@ def test_invalid_token(HTTPMock):
     http.getresponse.return_value = mock_response
     hmconfig = harvestmedia.api.config.Config()
     hmconfig.api_key = api_key
+    hmconfig.debug = True
     hmconfig.webservice_url = webservice_url
     client = harvestmedia.api.client.Client()
     libraries = Library.get_libraries()

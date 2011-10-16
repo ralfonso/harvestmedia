@@ -45,14 +45,22 @@ class Client(object):
         if not self.config.service_token:
             if self.debug:
                 logger.debug('requesting service token')
-            self.request_service_token(self.config)
+            self.request_service_token()
 
         if not self.config.album_art_url:
             self.get_service_info()
 
     def __add_service_token(self, uri):
-        if hasattr(self, 'service_token') and self.config.service_token:
-            uri = uri.replace('{{service_token}}', self.config.service_token)
+        if '{{service_token}}' not in uri:
+            return uri
+
+        try:
+            service_token = self.config.service_token.token
+        except exceptions.TokenExpired:
+            self.request_service_token()
+            service_token = self.config.service_token.token
+
+        uri = uri.replace('{{service_token}}', service_token)
 
         return uri
 
@@ -130,22 +138,18 @@ class Client(object):
         response = http.getresponse()
         return self._handle_response(response)
 
-    def request_service_token(self, config):
+    def request_service_token(self):
         method_uri = '/getservicetoken/' + self.api_key
 
         root = self.get_xml(method_uri)
-        token = root.find('token')
+        xml_token = root.find('token')
         if self.debug:
-            logger.debug('got token: %s' % token.get('value'))
-        config.service_token = token.get('value')
-        service_token_expires = token.get('expiry')
+            logger.debug('got token: %s' % xml_token.get('value'))
+        token = xml_token.get('value')
+        expiry = xml_token.get('expiry')
 
-        # convert from the harvestmedia timezone to UTC
-        service_token_expires_date = iso8601.parse_date(service_token_expires)
-        hm_tz = pytz.timezone(self.config.timezone)
-        service_token_expires_date = service_token_expires_date.replace(tzinfo=hm_tz)
-        utc_tz =  pytz.timezone('UTC')
-        config.service_token_expires = service_token_expires_date.astimezone(utc_tz)
+        self.config.service_token = config.ServiceToken(self.config, token, expiry)
+
 
     def get_service_info(self):
         method_uri = '/getserviceinfo/{{service_token}}'
