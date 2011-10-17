@@ -7,6 +7,8 @@ import config
 import logging
 import iso8601
 import pytz
+from signals import signals
+import datetime
 
 logger = logging.getLogger('harvestmedia')
 
@@ -40,8 +42,12 @@ class Client(object):
         self._set('album_art_url', **kwargs)
         self._set('debug', **kwargs)
 
-        self.libraries = []
-        
+        def handle_expired_token():
+            self.request_service_token()
+
+        signals.add_signal('expired-token')
+        signals.connect('expired-token', handle_expired_token)
+
         if not self.config.service_token:
             if self.debug:
                 logger.debug('requesting service token')
@@ -98,6 +104,7 @@ class Client(object):
                     reason = description.text if description is not None else 'Incorrect Input Data'
                     raise exceptions.IncorrectInputData(reason)
                 elif code.text == '5':
+                    signals.send('expired-token')
                     raise exceptions.InvalidToken()
                 elif code.text == '7':
                     raise exceptions.MemberDoesNotExist()
