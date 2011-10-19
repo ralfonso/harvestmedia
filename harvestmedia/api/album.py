@@ -23,7 +23,7 @@ class Album(DictObj):
     def as_dict(self):
         return dict([(k,v) for k,v in self.__dict__.items()])
 
-    def get_tracks(self):
+    def get_tracks(self, get_full_detail=True):
         track_list = []
         method_uri = '/getalbumtracks/{{service_token}}/' + self.id
 
@@ -34,10 +34,12 @@ class Album(DictObj):
             track = Track(track_element)
             track_list.append(track)
 
-        # now we need to get the fulldetail
-        
-        track_ids = [t.id for t in track_list]
-        return Track.get_multiple(track_ids)
+        if get_full_detail:
+            # now we need to get the fulldetail
+            track_ids = [t.id for t in track_list]
+            return Track.get_multiple(track_ids)
+        else:
+            return track_list
     
     def get_cover_url(self, width=None, height=None):
         asset_url = self._client.config.album_art_url
@@ -47,4 +49,3 @@ class Album(DictObj):
         if height:
             asset_url = asset_url.replace('{height}', str(height))
         return asset_url
-

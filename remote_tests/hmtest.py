@@ -13,6 +13,7 @@ webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
 hmconfig = Config()
 hmconfig.api_key = api_key
 hmconfig.webservice_url = webservice_url
+hmconfig.debug = True
 libraries = Library.get_libraries()
 
 for library in libraries:

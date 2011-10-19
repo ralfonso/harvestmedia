@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from nose.tools import raises
+from nose.tools import raises, with_setup
 from unittest.case import SkipTest
 from urllib2 import urlopen
 import StringIO
@@ -10,6 +10,8 @@ import iso8601
 import datetime, hashlib
 from datetime import timedelta
 
+from setup import init_client, clear_client
+
 import harvestmedia.api.exceptions
 import harvestmedia.api.config
 import harvestmedia.api.client
@@ -18,6 +20,7 @@ from harvestmedia.api.library import Library
 api_key = '12345'
 webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
 
+@with_setup(init_client)
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 @raises(harvestmedia.api.exceptions.InvalidAPIResponse)
 def test_xml_failure(HTTPMock):
@@ -31,11 +34,13 @@ def test_xml_failure(HTTPMock):
     hmconfig.debug = True
     hmconfig.webservice_url = webservice_url
     client = harvestmedia.api.client.Client()
+    client.get_service_info()
 
+@with_setup(clear_client)
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_service_token(HTTPMock):
     expiry = datetime.datetime.now()
-    expiry += timedelta(hours=17)
+    expiry += timedelta(hours=22) # offset for HM timezone
     test_token = hashlib.md5(str(expiry)).hexdigest() # generate an md5 from the date for testing
 
     return_values = [
@@ -117,10 +122,11 @@ def test_invalid_token(HTTPMock):
 def test_expired_token(HTTPMock):
     http = HTTPMock()
     expiry = datetime.datetime.now()
-    expiry += timedelta(hours=17)
+    expiry2 = expiry + timedelta(hours=22)
     test_token = hashlib.md5(str(expiry)).hexdigest() # generate an md5 from the date for testing
     return_values = [
                      '<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry.strftime("%Y-%m-%dT%H:%M:%S")),
+                     '<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry2.strftime("%Y-%m-%dT%H:%M:%S")),
                      """<?xml version="1.0" encoding="utf-8"?>
                         <responseserviceinfo>
                             <asseturl
@@ -134,7 +140,6 @@ def test_expired_token(HTTPMock):
                               <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" /> 
                             </trackformats>
                         </responseserviceinfo>""",
-                     '<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry.strftime("%Y-%m-%dT%H:%M:%S")),
                     ]
                         
     def side_effect(*args):
@@ -150,5 +155,10 @@ def test_expired_token(HTTPMock):
     hmconfig.webservice_url = webservice_url
     client = harvestmedia.api.client.Client()
     client.config.service_token.expiry = (datetime.datetime.now() - datetime.timedelta(hours=12)).isoformat()
+    try:
+        client.get_service_info()
+    except Exception, e:
+        assert isinstance(e, harvestmedia.api.exceptions.TokenExpired)
+
     client.get_service_info()
-    assert client.config.service_token.expiry == expiry.strftime("%Y-%m-%dT%H:%M:%S")
+    assert client.config.service_token.expiry == expiry2.strftime("%Y-%m-%dT%H:%M:%S")

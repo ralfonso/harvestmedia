@@ -14,7 +14,7 @@ class Signals:
         self._signals[name].connect(func)
 
     def send(self, name, *args, **kwargs):
-        logger.debug('sending signal %s' % signal)
+        logger.debug('sending signal %s' % name)
         self._signals[name].send(*args, **kwargs)
 
 signals = Signals()

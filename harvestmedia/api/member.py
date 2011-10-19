@@ -65,9 +65,6 @@ class Member(DictObj):
 
         xml_data = self._client.post_xml(method_uri, xml_post_body)
         xml_member = xml_data.find('memberaccount')
-        if xml_member is None:
-            raise MemberCreateError('Member registration info not returned')
-                
         self._load(xml_member)
 
     def update(self):
@@ -90,9 +87,6 @@ class Member(DictObj):
         xml_data = self._client.post_xml(method_uri, xml_post_body)
 
         xml_member = xml_data.find('memberaccount')
-        if xml_member is None:
-            raise MemberUpdateError('Member update info not returned')
-                
         self._load(xml_member)
         
 
@@ -102,14 +96,7 @@ class Member(DictObj):
         xml_root = self._client.get_xml(method_uri)
 
         xml_member = xml_root.find('memberaccount')
-        xml_username = xml_member.find('username')
-
-        if xml_username is not None:
-            self._load(xml_member)
-            return True
-        else:
-            return False
-
+        self._load(xml_member)
 
     @classmethod
     def get_by_id(cls, member_id):

@@ -42,13 +42,13 @@ class Client(object):
         self._set('album_art_url', **kwargs)
         self._set('debug', **kwargs)
 
-        def handle_expired_token():
+        def handle_expired_token(*args, **kwargs):
             self.request_service_token()
 
         signals.add_signal('expired-token')
         signals.connect('expired-token', handle_expired_token)
 
-        if not self.config.service_token:
+        if self.config.service_token is None:
             if self.debug:
                 logger.debug('requesting service token')
             self.request_service_token()
@@ -106,6 +106,8 @@ class Client(object):
                 elif code.text == '5':
                     signals.send('expired-token')
                     raise exceptions.InvalidToken()
+                elif code.text == '6':
+                    raise exceptions.InvalidLoginDetails()
                 elif code.text == '7':
                     raise exceptions.MemberDoesNotExist()
 
@@ -150,6 +152,10 @@ class Client(object):
 
         root = self.get_xml(method_uri)
         xml_token = root.find('token')
+
+        if xml_token is None:
+            raise exceptions.InvalidAPIResponse('server did not return token')
+
         if self.debug:
             logger.debug('got token: %s' % xml_token.get('value'))
         token = xml_token.get('value')

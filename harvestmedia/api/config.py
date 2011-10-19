@@ -32,12 +32,12 @@ class ServiceToken(object):
         utc_tz =  pytz.timezone('UTC')
         self._expiry_dt = service_token_expires_date.astimezone(utc_tz)
         self._expiry = value
-        print self._expiry
 
     @property
     def token(self):
         utc_now = datetime.datetime.now(pytz.utc)
         if self._expiry_dt <= utc_now:
+            logger.debug('%s <=> %s' % (self._expiry_dt, utc_now))
             signals.send('expired-token')
             raise TokenExpired
 
@@ -52,6 +52,7 @@ class Config(object):
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
+            # set up some defaults
             cls._instance = super(Config, cls).__new__(cls, *args, **kwargs)
             cls._instance.service_token = None
             cls._instance.service_token_expires = None
