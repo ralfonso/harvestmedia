@@ -38,7 +38,6 @@ class ServiceToken(object):
         utc_now = datetime.datetime.now(pytz.utc)
         if self._expiry_dt <= utc_now:
             logger.debug('%s <=> %s' % (self._expiry_dt, utc_now))
-            signals.send('expired-token')
             raise TokenExpired
 
         return self._token
