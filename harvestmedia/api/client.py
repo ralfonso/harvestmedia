@@ -151,7 +151,7 @@ class Client(object):
             raise exceptions.InvalidAPIResponse('server did not return token')
 
         if self.debug:
-            logger.debug('got token: %s' % xml_token.get('value'))
+            logger.debug('got token: %s (expires: %s)' % (xml_token.get('value'), xml_token.get('expiry')))
         token = xml_token.get('value')
         expiry = xml_token.get('expiry')
 
