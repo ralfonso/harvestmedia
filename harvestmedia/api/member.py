@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import xml.etree.cElementTree as ET
 import logging
+import urllib
 
 from util import DictObj
 import client
@@ -92,7 +93,7 @@ class Member(DictObj):
 
 
     def authenticate(self, username, password):
-        method_uri = '/authenticatemember/{{service_token}}/%(username)s/%(password)s' % {'username': username, 'password': password}
+        method_uri = '/authenticatemember/{{service_token}}/%(username)s/%(password)s' % {'username': urllib.quote(username), 'password': urllib.quote(password)}
         xml_root = self._client.get_xml(method_uri)
 
         xml_member = xml_root.find('memberaccount')
@@ -107,7 +108,7 @@ class Member(DictObj):
         return cls(xml_member)
 
     def send_password(self, username):
-        method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': username}
+        method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': urllib.quote(username)}
         self._client.get_xml(method_uri)
         return True
 
