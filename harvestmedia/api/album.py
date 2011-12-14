@@ -34,6 +34,9 @@ class Album(DictObj):
             track = Track(track_element)
             track_list.append(track)
 
+        if len(track_list) == 0:
+            return track_list
+
         if get_full_detail:
             # now we need to get the fulldetail
             track_ids = [t.id for t in track_list]
