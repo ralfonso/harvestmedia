@@ -42,7 +42,17 @@ class Client(object):
         self._set('album_art_url', **kwargs)
         self._set('debug', **kwargs)
 
-        if self.config.service_token is None:
+        need_token = False
+
+        if self.config.service_token:
+            try:    
+                token = self.config.service_token.token
+            except exceptions.TokenExpired:
+                need_token = True
+        else:
+            need_token = True
+            
+        if need_token:
             if self.debug:
                 logger.debug('requesting service token')
             self.request_service_token()
