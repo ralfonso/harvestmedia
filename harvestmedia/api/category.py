@@ -9,14 +9,8 @@ import config
 
 class Attribute(DictObj):
     
-    def __init__(self, xml_data=None, connection=None):
-        self._config = config.Config()
-        self._client = connection
-        if self._client is None:
-            self._client = client.APIClient()
-            
-        if xml_data is not None:
-            self._load(xml_data)
+    def __init__(self, xml_data=None):
+        self._load(xml_data)
 
     def _load(self, xmldata):
         """
@@ -41,14 +35,8 @@ class Attribute(DictObj):
 
 class Category(DictObj):
     
-    def __init__(self, xml_data=None, connection=None):
-        self._config = config.Config()
-        self._client = connection
-        if self._client is None:
-            self._client = client.APIClient()
-            
-        if xml_data is not None:
-            self._load(xml_data)
+    def __init__(self, xml_data=None):
+        self._load(xml_data)
 
     def _load(self, xmldata):
         """
@@ -65,13 +53,11 @@ class Category(DictObj):
                 self.attributes.append(Attribute(attribute_xml))
 
     @staticmethod
-    def get_categories(api_client=None):
+    def get_categories(client):
         categories = []
-        if api_client is None:
-            api_client = client.APIClient()
 
         method_uri = '/getcategories/{{service_token}}'
-        xml_root = api_client.get_xml(method_uri)
+        xml_root = client.get_xml(method_uri)
 
         xml_categories = xml_root.find('categories').getchildren()
         for xml_category in xml_categories:

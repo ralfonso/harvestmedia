@@ -47,22 +47,18 @@ class ServiceToken(object):
         self._token = value 
 
 class Config(object):
-    _instance = None
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            # set up some defaults
-            cls._instance = super(Config, cls).__new__(cls, *args, **kwargs)
-            cls._instance.service_token = None
-            cls._instance.service_token_expires = None
-            cls._instance.album_art_url = None
-            cls._instance.waveform_url = None
-            cls._instance._webservice_url = None
-            cls._instance.webservice_url_parsed = None
-            cls._instance.debug = None
-            cls._instance.timezone = 'Australia/Sydney'
+    def _set(self, param, default=None, **kwargs):
+        if kwargs.get(param, None):
+            setattr(self, param, kwargs[param])
+        else:
+            setattr(self, param, default)
 
-        return cls._instance
+    def __init__(self, *args, **kwargs):
+        self._set('waveform_url', **kwargs)
+        self._set('webservice_url', **kwargs)
+        self._set('debug', **kwargs)
+        self._set('timezone', 'Australia/Sydney', **kwargs)
 
     @property
     def webservice_url(self):
@@ -70,7 +66,10 @@ class Config(object):
 
     @webservice_url.setter
     def webservice_url(self, value):
-        self.webservice_url_parsed = urlparse(value)
-        self._webservice_url = value
-        self.webservice_prefix = self.webservice_url_parsed.path
-        self.webservice_host = self.webservice_url_parsed.netloc
+        self.webservice_url_parsed = None
+
+        if value is not None:
+            self.webservice_url_parsed = urlparse(value)
+            self._webservice_url = value
+            self.webservice_prefix = self.webservice_url_parsed.path
+            self.webservice_host = self.webservice_url_parsed.netloc

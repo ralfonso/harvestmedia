@@ -7,14 +7,9 @@ import client
 
 class Album(DictObj):
     
-    def __init__(self, xml_data=None, connection=None):
-        self._client = connection
-
-        if self._client is None:
-            self._client = client.APIClient()
-
-        if xml_data is not None:
-            self._load(xml_data)
+    def __init__(self, xml_data, _client):
+        self._client = _client
+        self._load(xml_data)
 
     def _load(self, xml_data):
         for attribute, value in xml_data.items():
@@ -31,7 +26,7 @@ class Album(DictObj):
         tracks = xml_root.find('tracks').getchildren()
 
         for track_element in tracks:
-            track = Track(track_element)
+            track = Track(track_element, self._client)
             track_list.append(track)
 
         if len(track_list) == 0:
@@ -40,7 +35,7 @@ class Album(DictObj):
         if get_full_detail:
             # now we need to get the fulldetail
             track_ids = [t.id for t in track_list]
-            return Track.get_multiple(track_ids)
+            return Track.get_multiple(track_ids, self._client)
         else:
             return track_list
     

@@ -9,14 +9,10 @@ from album import Album
 
 class Library(DictObj):
     
-    def __init__(self, xml_data=None, connection=None):
+    def __init__(self, xml_data, _client):
         self._config = config.Config()
-        self._client = connection
-        if self._client is None:
-            self._client = client.APIClient()
-            
-        if xml_data is not None:
-            self._load(xml_data)
+        self._client = _client
+        self._load(xml_data)
 
     def _load(self, xmldata):
         """
@@ -42,16 +38,14 @@ class Library(DictObj):
         return self.albums.values()
 
     @staticmethod
-    def get_libraries(api_client=None):
+    def get_libraries(_client=None):
         libraries = []
-        if api_client is None:
-            api_client = client.APIClient()
 
         method_uri = '/getlibraries/{{service_token}}'
-        xml_root = api_client.get_xml(method_uri)
+        xml_root = _client.get_xml(method_uri)
         xml_libraries = xml_root.find('libraries').getchildren()
         for library_element in xml_libraries:
-            library = Library(library_element)
+            library = Library(library_element, _client=_client)
             libraries.append(library)
 
         return libraries

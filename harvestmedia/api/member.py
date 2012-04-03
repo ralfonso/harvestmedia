@@ -19,18 +19,17 @@ class MemberUpdateError(HarvestMediaError):
     pass
 
 class Member(DictObj):
-    def __init__(self, xml_data=None, connection=None):
+    def __init__(self, xml_data=None, _client=None):
         """ Create a new Member object from an ElementTree.Element object
 
         xml_data: the ElementTree.Element object to parse
 
         """
 
-        self._client = connection
-        if self._client is None:
-            self._client = client.APIClient()
+        if _client:
+            self._client = _client
 
-        if xml_data is not None:
+        if xml_data:
             self._load(xml_data)
  
     def _load(self, xml_member):
@@ -38,7 +37,7 @@ class Member(DictObj):
         for child_element in xml_member.getchildren():
             setattr(self, child_element.tag, child_element.text)
 
-    def create(self):
+    def create(self, ):
         if not self.username:
             raise MissingParameter('You have to specify a username to register a member')
 
@@ -91,21 +90,20 @@ class Member(DictObj):
         self._load(xml_member)
         
 
-
-    def authenticate(self, username, password):
+    @classmethod
+    def authenticate(cls, username, password, _client):
         method_uri = '/authenticatemember/{{service_token}}/%(username)s/%(password)s' % {'username': urllib.quote(username), 'password': urllib.quote(password)}
-        xml_root = self._client.get_xml(method_uri)
+        xml_root = _client.get_xml(method_uri)
 
         xml_member = xml_root.find('memberaccount')
-        self._load(xml_member)
+        return cls(xml_member, _client)
 
     @classmethod
-    def get_by_id(cls, member_id):
-        connection = client.APIClient()
+    def get_by_id(cls, member_id, _client):
         method_uri = '/getmember/{{service_token}}/%(member_id)s' % {'member_id': member_id}
-        xml_data = connection.get_xml(method_uri)
+        xml_data = _client.get_xml(method_uri)
         xml_member = xml_data.find('memberaccount')
-        return cls(xml_member)
+        return cls(xml_member, _client)
 
     def send_password(self, username):
         method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': urllib.quote(username)}
@@ -134,7 +132,7 @@ class Member(DictObj):
         favourites_element = xml_root.find('favourites')
         track_elements = favourites_element.find('tracks')
         for track_element in track_elements.getchildren():
-            favourite = Track(track_element)
+            favourite = Track(track_element, self._client)
             favourites.append(favourite)
 
         return favourites

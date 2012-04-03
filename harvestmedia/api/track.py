@@ -12,20 +12,16 @@ logger = logging.getLogger('harvestmedia')
 class Track(DictObj):
     """ Represents a Harvest Media track asset """
 
-    def __init__(self, xml_data=None, connection=None):
+    def __init__(self, xml_data, _client):
         """ Create a new Track object from an ElementTree.Element object
 
         track_element: the ElementTree.Element object to parse
 
         """
 
-        self._client = connection
         self.categories = []
-        if self._client is None:
-            self._client = client.APIClient()
-
-        if xml_data is not None:
-            self._load(xml_data)
+        self._load(xml_data)
+        self._client = _client
  
     def _load(self, xml_data):
         for attribute, value in xml_data.items():
@@ -41,8 +37,7 @@ class Track(DictObj):
 
 
     @classmethod 
-    def get_by_id(cls, track_id):
-        connection = client.APIClient()
+    def get_by_id(cls, track_id, _client):
         method_uri = '/gettracks/{{service_token}}'
         xml_data = ET.Element('tracks')
         xml_data.set('fulldetail', 'true')
@@ -51,16 +46,15 @@ class Track(DictObj):
         xml_data.append(xml_track)
         xml_post_body = ET.tostring(xml_data)
 
-        xml_data = connection.post_xml(method_uri, xml_post_body)
+        xml_data = _client.post_xml(method_uri, xml_post_body)
         xml_tracks = xml_data.find('tracks')
         if xml_tracks is not None:
             xml_track = xml_tracks.find('track')
             if xml_track is not None:
-                return cls(xml_track)
+                return cls(xml_track, _client)
 
     @classmethod
-    def get_multiple(cls, track_ids):
-        connection = client.APIClient()
+    def get_multiple(cls, track_ids, _client):
         method_uri = '/gettracks/{{service_token}}'
         xml_data = ET.Element('tracks')
         xml_data.set('fulldetail', 'true')
@@ -72,14 +66,14 @@ class Track(DictObj):
 
         xml_post_body = ET.tostring(xml_data)
 
-        xml_data = connection.post_xml(method_uri, xml_post_body)
+        xml_data = _client.post_xml(method_uri, xml_post_body)
         xml_tracks = xml_data.find('tracks')
 
         tracks = []
 
         if xml_tracks is not None:
             for xml_track in xml_tracks.getchildren():
-                tracks.append(cls(xml_track))
+                tracks.append(cls(xml_track, _client))
 
         return tracks
 
