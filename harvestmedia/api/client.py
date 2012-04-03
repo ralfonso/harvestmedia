@@ -10,7 +10,9 @@ import exceptions
 from config import Config, ServiceToken
 from signals import signals
 
+
 logger = logging.getLogger('harvestmedia')
+
 
 class Client(object):
 
@@ -100,8 +102,6 @@ class Client(object):
                     raise exceptions.MemberDoesNotExist()
 
         return root
-
-
 
     def get_xml(self, method_uri):
         method_uri = self.config.webservice_prefix + self.__add_service_token(method_uri)

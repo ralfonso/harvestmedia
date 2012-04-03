@@ -55,6 +55,11 @@ class Playlist(DictObj):
                     self._load(playlist)
 
     def add_track(self, track_id):
+        if not self.member_id:
+            raise MissingParameter('You have to specify a member_id to add a track to a playlist')
+        if not self.id:
+            raise MissingParameter('You have to specify a playlist id to add a track to a playlist')
+
         method_uri = '/addtoplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % \
                           {'member_id': self.member_id, 
                            'playlist_id': self.id, 
@@ -63,6 +68,11 @@ class Playlist(DictObj):
         self.tracks.append(Track.get_by_id(track_id, self._client))
     
     def remove_track(self, track_id):
+        if not self.member_id:
+            raise MissingParameter('You have to specify a member_id to remove a track from a playlist')
+        if not self.id:
+            raise MissingParameter('You have to specify a playlist id to remove a track from a playlist')
+
         method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % \
                             {'member_id': self.member_id, 
                              'playlist_id': self.id, 
@@ -74,6 +84,11 @@ class Playlist(DictObj):
                 self.tracks.remove(track)
 
     def remove(self):
+        if not self.member_id:
+            raise MissingParameter('You have to specify a member_id to remove a playlist')
+        if not self.id:
+            raise MissingParameter('You have to specify a playlist id to remove a playlist')
+
         method_uri = '/removeplaylist/{{service_token}}/%(member_id)s/%(id)s' % \
                         {'member_id': self.member_id,
                          'id': self.id}
@@ -82,7 +97,6 @@ class Playlist(DictObj):
     def update(self):
         if not self.member_id:
             raise MissingParameter('You have to specify a member_id to update a playlist')
-
         if not self.id:
             raise MissingParameter('You have to specify an id to update a playlist')
 
