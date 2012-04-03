@@ -1,23 +1,18 @@
-
 # -*- coding: utf-8 -*-
-from nose.tools import raises, with_setup
-from unittest.case import SkipTest
-from urllib2 import urlopen
-import xml.etree.cElementTree as ET
-import StringIO
-
+import datetime
+import hashlib
 import mock
-import datetime, hashlib
+from nose.tools import raises
+import StringIO
+import textwrap
+import xml.etree.cElementTree as ET
+
+import harvestmedia.api.exceptions
+from harvestmedia.api.track import Track
 
 from setup import init_client
 
-import harvestmedia.api.exceptions
-import harvestmedia.api.config
-import harvestmedia.api.client
-from harvestmedia.api.track import Track
-
 api_key = '12345'
-webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
 
 class HTTPResponseMock(object):
 
@@ -28,19 +23,32 @@ class HTTPResponseMock(object):
     def read(self):
         return self.read_response
 
-@with_setup(init_client)
-def test_track_dict():
-    track_id = '17376d36f309f18d'
-    track_xml = ET.fromstring("""<track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Guerilla Pop" albumid="1c5f47572d9152f3" id="%(track_id)s" keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""" % locals())
 
-    track = Track(track_xml)
+def test_track_dict():
+    client = init_client()
+    track_id = '17376d36f309f18d'
+    track_xml = ET.fromstring(textwrap.dedent("""<track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down
+                                                  the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" 
+                                                  publisher="" name="Guerilla Pop" albumid="1c5f47572d9152f3" id="%(track_id)s" 
+                                                  keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
+                                                  bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""") % locals())
+
+    track = Track(track_xml, client)
     track_dict = track.as_dict()
     assert track_dict['id'] == track_id
 
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_tracks_get_by_id(HTTPMock):
+    client = init_client()
     track_id = '17376d36f309f18d'
     track_name = 'Guerilla Pop'
+    track_xml = ET.fromstring(textwrap.dedent("""<track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down
+                                                  the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" 
+                                                  publisher="" name="%(track_name)s" albumid="1c5f47572d9152f3" id="%(track_id)s" 
+                                                  keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
+                                                  bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""") % locals())
+
 
     return_values = [
             """<responsetracks>
@@ -126,14 +134,23 @@ def test_tracks_get_by_id(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
  
-    track = Track.get_by_id(track_id)
+    track = Track.get_by_id(track_id, client)
 
     assert track.id == track_id
     assert track.name == track_name
 
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_waveform_url(HTTPMock):
+    client = init_client()
+    track_id = '17376d36f309f18d'
+    track_name = 'Guerilla Pop'
+    track_xml = ET.fromstring(textwrap.dedent("""<track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down
+                                                  the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" 
+                                                  publisher="" name="%(track_name)s" albumid="1c5f47572d9152f3" id="%(track_id)s" 
+                                                  keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
+                                                  bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""") % locals())
+
     waveform_url = "http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}"
     width = 200
     height = 300
@@ -161,9 +178,7 @@ def test_get_waveform_url(HTTPMock):
 
     http.getresponse.side_effect = side_effect
     
-    track_id = '1c5f47572d9152f3'
-    track = Track()
-    track.id = track_id
+    track = Track(track_xml, client)
     waveform_url = track.get_waveform_url(width, height)
 
     expected_url = waveform_url.replace('{id}', track_id).replace('{width}', str(width)).replace('{height}', str(height))

@@ -42,13 +42,5 @@ def init_client(HTTPMock):
                         
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
-    
-    hmconfig = harvestmedia.api.config.Config()
-    hmconfig.api_key = api_key
-    hmconfig.webservice_url = webservice_url
-    client = harvestmedia.api.client.Client()
-
-def clear_client():
-    client = harvestmedia.api.client.Client()
-    client.config.service_token = None 
-    client.config.album_art_url = None 
+    client = harvestmedia.api.client.Client(api_key=api_key)
+    return client

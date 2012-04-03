@@ -3,7 +3,6 @@ import xml.etree.cElementTree as ET
 import logging
 
 from util import DictObj
-import client
 
 from harvestmedia.api.category import Category
 

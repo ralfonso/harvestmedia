@@ -38,7 +38,7 @@ class Library(DictObj):
         return self.albums.values()
 
     @staticmethod
-    def get_libraries(_client=None):
+    def get_libraries(_client):
         libraries = []
 
         method_uri = '/getlibraries/{{service_token}}'

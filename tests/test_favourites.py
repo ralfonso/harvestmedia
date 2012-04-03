@@ -1,21 +1,20 @@
-
 # -*- coding: utf-8 -*-
-from nose.tools import raises
-from unittest.case import SkipTest
-from urllib2 import urlopen
-import StringIO
-
+import datetime
+import hashlib
 import mock
-import datetime, hashlib
+from nose.tools import raises
+import StringIO
+import textwrap
+import xml.etree.cElementTree as ET
 
 import harvestmedia.api.exceptions
-import harvestmedia.api.config
-import harvestmedia.api.client
 from harvestmedia.api.member import Member
 from harvestmedia.api.favourite import Favourite
 
+from setup import init_client
+
 api_key = '12345'
-webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
+
 
 class HTTPResponseMock(object):
 
@@ -26,8 +25,10 @@ class HTTPResponseMock(object):
     def read(self):
         return self.read_response
 
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_member_favourites(HTTPMock):
+    client = init_client()
     now = datetime.datetime.today().isoformat()
     test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
     now = datetime.datetime.today().isoformat()
@@ -52,7 +53,7 @@ def test_get_member_favourites(HTTPMock):
 
     config = harvestmedia.api.config.Config()
     config.debug = True
-    member = Member()
+    member = Member(_client=client)
     member.id = test_member_id
     favourites = member.get_favourites()
 
@@ -65,7 +66,9 @@ def test_get_member_favourites(HTTPMock):
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_add_track(HTTPMock):
+    client = init_client()
     now = datetime.datetime.today().isoformat()
+    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
     test_track_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
 
     http = HTTPMock()
@@ -79,19 +82,14 @@ def test_add_track(HTTPMock):
     response.read_response = xml_response
     http.getresponse.return_value = response
 
-    config = harvestmedia.api.config.Config()
-    config.debug = True
-
-    favourite = Favourite()
-    favourite.member_id = 123
-    return_value = favourite.add_track(test_track_id)
-
-    assert return_value
+    Favourite.add_track(test_member_id, test_track_id, client)
 
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_remove_track(HTTPMock):
+    client = init_client()
     now = datetime.datetime.today().isoformat()
+    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
     test_track_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
 
     http = HTTPMock()
@@ -105,22 +103,4 @@ def test_remove_track(HTTPMock):
     response.read_response = xml_response
     http.getresponse.return_value = response
 
-    config = harvestmedia.api.config.Config()
-    config.debug = True
-
-    favourite = Favourite()
-    favourite.member_id = 123
-    return_value = favourite.remove_track(test_track_id)
-
-    assert return_value
-
-@raises(harvestmedia.api.exceptions.MissingParameter)
-def test_remove_member_id_missing():
-    favourite = Favourite()
-    favourite.remove_track(123)
-    
-@raises(harvestmedia.api.exceptions.MissingParameter)
-def test_remove_id_missing():
-    favourite = Favourite()
-    favourite.member_id = 123
-    favourite.remove_track(None)
+    Favourite.remove_track(test_member_id, test_track_id, client)

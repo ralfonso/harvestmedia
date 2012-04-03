@@ -12,11 +12,6 @@ from exceptions import HarvestMediaError, MissingParameter
 
 logger = logging.getLogger('harvestmedia')
 
-class MemberCreateError(HarvestMediaError):
-    pass
-
-class MemberUpdateError(HarvestMediaError):
-    pass
 
 class Member(DictObj):
     def __init__(self, xml_data=None, _client=None):
@@ -105,10 +100,10 @@ class Member(DictObj):
         xml_member = xml_data.find('memberaccount')
         return cls(xml_member, _client)
 
-    def send_password(self, username):
+    @staticmethod
+    def send_password(username, _client):
         method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': urllib.quote(username)}
-        self._client.get_xml(method_uri)
-        return True
+        _client.get_xml(method_uri)
 
     def get_playlists(self):
         method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
@@ -117,7 +112,7 @@ class Member(DictObj):
         playlists = []
         playlist_elements = xml_root.find('playlists')
         for playlist_element in playlist_elements.getchildren():
-            playlist = Playlist(playlist_element)
+            playlist = Playlist(playlist_element, self._client)
             playlist.member_id = self.id
             playlists.append(playlist)
 

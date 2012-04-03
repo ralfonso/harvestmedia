@@ -1,20 +1,16 @@
-
 # -*- coding: utf-8 -*-
-from nose.tools import raises, with_setup
-from unittest.case import SkipTest
-from urllib2 import urlopen
-import xml.etree.cElementTree as ET
-import StringIO
-
+import datetime
+import hashlib
 import mock
-import datetime, hashlib
-
-from setup import init_client
+from nose.tools import raises
+import StringIO
+import textwrap
+import xml.etree.cElementTree as ET
 
 import harvestmedia.api.exceptions
-import harvestmedia.api.config
-import harvestmedia.api.client
 from harvestmedia.api.album import Album
+
+from setup import init_client
 
 api_key = '12345'
 webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
@@ -28,29 +24,37 @@ class HTTPResponseMock(object):
     def read(self):
         return self.read_response
 
-@with_setup(init_client)
-def test_album_init():
-    album_id = '1c5f47572d9152f3'
-    album_xml = ET.fromstring("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
-                    name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id))
 
-    album = Album(album_xml)
+def test_album_init():
+    client = init_client()
+    album_id = '1c5f47572d9152f3'
+    album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
+
+    album = Album(album_xml, client)
     assert album.id == album_id
 
-@with_setup(init_client)
-def test_album_dict():
-    album_id = '1c5f47572d9152f3'
-    album_xml = ET.fromstring("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
-                    name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id))
 
-    album = Album(album_xml)
+def test_album_dict():
+    client = init_client()
+    album_id = '1c5f47572d9152f3'
+    album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
+
+    album = Album(album_xml, client)
     album_dict = album.as_dict()
     assert album_dict['id'] == album_id
 
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_album_tracks(HTTPMock):
+    client = init_client()
     album_id = '1c5f47572d9152f3'
+    album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
 
     return_values = [
         """<responsetracks>
@@ -74,14 +78,18 @@ def test_album_tracks(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
  
-    album = Album()
-    album.id = album_id
+    album = Album(album_xml, client)
     tracks = album.get_tracks(get_full_detail=False)
     assert tracks[0].albumid == album_id
 
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_album_tracks_fulldetail(HTTPMock):
+    client = init_client()
     album_id = '1c5f47572d9152f3'
+    album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
 
     return_values = [
         """<responsetracks>
@@ -174,13 +182,17 @@ def test_album_tracks_fulldetail(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
  
-    album = Album()
-    album.id = album_id
+    album = Album(album_xml, client)
     tracks = album.get_tracks()
     assert tracks[0].albumid == album_id
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_cover_url(HTTPMock):
+    client = init_client()
+    album_id = '1c5f47572d9152f3'
+    album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
     album_art_url = "http://asset.harvestmedia.net/albumart/8185d768cd8fcaa7/{id}/{width}/{height}"
     width = 200
     height = 300
@@ -211,14 +223,7 @@ def test_get_cover_url(HTTPMock):
 
     http.getresponse.side_effect = side_effect
     
-    hmconfig = harvestmedia.api.config.Config()
-    hmconfig.debug = True
-    hmconfig.api_key = api_key
-    hmconfig.webservice_url = webservice_url
-
-    album_id = '1c5f47572d9152f3'
-    album = Album()
-    album.id = album_id
+    album = Album(album_xml, client)
     cover_art_url = album.get_cover_url(width, height)
 
     expected_url = album_art_url.replace('{id}', album_id).replace('{width}', str(width)).replace('{height}', str(height))

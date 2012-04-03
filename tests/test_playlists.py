@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
+import datetime
+import hashlib
 from nose.tools import raises, with_setup
-from unittest.case import SkipTest
-from urllib2 import urlopen
-import StringIO
-import random
-
 import mock
-import datetime, hashlib
+import StringIO
+import textwrap
+import xml.etree.cElementTree as ET
+
+import harvestmedia.api.exceptions
+from harvestmedia.api.member import Member
+from harvestmedia.api.playlist import Playlist
 
 from setup import init_client
 from utils import get_random_md5
 
-import harvestmedia.api.exceptions
-import harvestmedia.api.config
-import harvestmedia.api.client
-from harvestmedia.api.member import Member
-from harvestmedia.api.playlist import Playlist
-
 api_key = '12345'
-webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
 
 class HTTPResponseMock(object):
 
@@ -29,15 +25,10 @@ class HTTPResponseMock(object):
     def read(self):
         return self.read_response
 
-@with_setup(init_client)
-@raises(harvestmedia.api.exceptions.MissingParameter)
-def test_create_member_missing_username():
-    member = Member()
-    member.create()
 
-@with_setup(init_client)
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_create_playlist(HTTPMock):
+    client = init_client()
     test_member_id = get_random_md5()
     test_playlist_id = get_random_md5()
     test_playlist_name = 'test playlist'
@@ -56,9 +47,7 @@ def test_create_playlist(HTTPMock):
     response.read_response = xml_response
     http.getresponse.return_value = response
 
-    config = harvestmedia.api.config.Config()
-    config.debug = True
-    playlist = Playlist()
+    playlist = Playlist(_client=client)
     playlist.member_id = test_member_id
     playlist.name = test_playlist_name
     playlist.create()
@@ -69,10 +58,27 @@ def test_create_playlist(HTTPMock):
  
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_member_playlists(HTTPMock):
+    client = init_client()
+    test_member_id = get_random_md5()
+    username = 'testuser'
+    firstname = 'Test'
+    lastname = 'User'
+    email = 'email@email.com'
+
+    member_xml = ET.fromstring("""<memberaccount id="%(test_member_id)s">
+                                    <username>%(username)s</username>
+                                    <firstname>%(firstname)s</firstname>
+                                    <lastname>%(lastname)s</lastname>
+                                    <email>%(email)s</email>
+                                </memberaccount>""" % {'test_member_id': test_member_id, 
+                                                       'username': username,
+                                                       'firstname': firstname,
+                                                       'lastname': lastname,
+                                                       'email': email})
     now = datetime.datetime.today().isoformat()
-    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_member_id = get_random_md5()
     now = datetime.datetime.today().isoformat()
-    test_playlist_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_playlist_id = get_random_md5()
     test_playlist_name = 'test playlist'
 
     http = HTTPMock()
@@ -93,8 +99,7 @@ def test_get_member_playlists(HTTPMock):
     response.read_response = xml_response
     http.getresponse.return_value = response
 
-    member = Member()
-    member.id = test_member_id
+    member = Member(member_xml, client)
     playlists = member.get_playlists()
 
     assert isinstance(playlists, list)
@@ -115,12 +120,13 @@ def test_create_name_missing():
     playlist.member_id = 123
     playlist.create()
     
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_add_track(HTTPMock):
+    client = init_client()
     now = datetime.datetime.today().isoformat()
-    test_playlist_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
-    track_id = hashlib.md5(str(random.random())).hexdigest() # generate an md5 from the date for testing
+    test_playlist_id = get_random_md5()
+    track_id = get_random_md5()
 
     http = HTTPMock()
 
@@ -133,18 +139,18 @@ def test_add_track(HTTPMock):
     response.read_response = xml_response
     http.getresponse.return_value = response
 
-    playlist = Playlist()
+    playlist = Playlist(_client=client)
     playlist.member_id = 123
     playlist.id = test_playlist_id
-    return_value = playlist.add_track(track_id)
+    playlist.add_track(track_id)
 
-    assert return_value
 
-@with_setup(init_client)
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_remove(HTTPMock):
+    client = init_client()
     now = datetime.datetime.today().isoformat()
-    test_playlist_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_member_id = get_random_md5()
+    test_playlist_id = get_random_md5()
 
     http = HTTPMock()
 
@@ -157,30 +163,13 @@ def test_remove(HTTPMock):
     response.read_response = xml_response
     http.getresponse.return_value = response
 
-    config = harvestmedia.api.config.Config()
-    config.debug = True
-
-    playlist = Playlist()
-    playlist.member_id = 123
-    playlist.id = test_playlist_id
-    return_value = playlist.remove()
-
-    assert return_value
-
-@raises(harvestmedia.api.exceptions.MissingParameter)
-def test_remove_member_id_missing():
-    playlist = Playlist()
-    playlist.remove()
-    
-@raises(harvestmedia.api.exceptions.MissingParameter)
-def test_remove_id_missing():
-    playlist = Playlist()
-    playlist.member_id = 123
+    playlist = Playlist(_client=client)
     playlist.remove()
 
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_remove_track(HTTPMock):
+    client = init_client()
     album_id = '1c5f47572d9152f3'
 
     now = datetime.datetime.today().isoformat()
@@ -216,14 +205,15 @@ def test_remove_track(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
 
-    member = Member()
+    member = Member(_client=client)
     member.id = test_member_id
     playlists = member.get_playlists()
-    assert playlists[0].remove_track(track_id)
+    playlists[0].remove_track(track_id)
 
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_playlist_update(HTTPMock):
+    client = init_client()
     test_member_id = get_random_md5()
     test_playlist_id = get_random_md5()
     test_playlist_name = 'test playlist'
@@ -256,7 +246,7 @@ def test_playlist_update(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
 
-    member = Member()
+    member = Member(_client=client)
     member.id = test_member_id
     playlists = member.get_playlists()
     playlist = playlists[0]
@@ -265,14 +255,14 @@ def test_playlist_update(HTTPMock):
     playlist.update()
     assert playlist.name == test_playlist_update_name
 
-@with_setup(init_client)
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_playlist_update_missing_id():
     playlist = Playlist()
     playlist.member_id = get_random_md5()
     playlist.update()
 
-@with_setup(init_client)
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_playlist_update_missing_member_id():
     playlist = Playlist()

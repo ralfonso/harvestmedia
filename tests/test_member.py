@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
-from nose.tools import raises, with_setup
-from unittest.case import SkipTest
-from urllib2 import urlopen
-import StringIO
-
+import datetime
+import hashlib
 import mock
-import datetime, hashlib
+from nose.tools import raises
+import StringIO
+import textwrap
 import xml.etree.cElementTree as ET
+
+import harvestmedia.api.exceptions
+from harvestmedia.api.member import Member
 
 from setup import init_client
 from utils import get_random_md5
 
-import harvestmedia.api.exceptions
-import harvestmedia.api.config
-import harvestmedia.api.client
-from harvestmedia.api.member import Member
 
 api_key = '12345'
 webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
@@ -28,15 +26,16 @@ class HTTPResponseMock(object):
     def read(self):
         return self.read_response
 
-@with_setup(init_client)
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_create_member_missing_username():
     member = Member()
     member.create()
 
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_create_member(HTTPMock):
+    client = init_client()
     now = datetime.datetime.today().isoformat()
     test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
     username = 'testuser'
@@ -66,7 +65,7 @@ def test_create_member(HTTPMock):
 
     config = harvestmedia.api.config.Config()
     config.debug = True
-    member = Member()
+    member = Member(_client=client)
     member.username = username
     member.first_name = first_name
     member.last_name = last_name
@@ -85,7 +84,7 @@ def test_load():
     lastname = 'User'
     email = 'email@email.com'
 
-    xml_str = """<?xml version="1.0" encoding="utf-8"?>
+    member_xml = """<?xml version="1.0" encoding="utf-8"?>
      <ResponseMember>
         <memberaccount id="%(test_member_id)s">
             <username>%(username)s</username>
@@ -99,16 +98,17 @@ def test_load():
                             'lastname': lastname,
                             'email': email}
 
-    xml_doc = ET.fromstring(xml_str)
+    xml_doc = ET.fromstring(member_xml)
     xml_member = xml_doc.find('memberaccount')
     member = Member(xml_member)
 
     assert member.id == test_member_id
     assert member.firstname == firstname
 
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_member_update(HTTPMock):
+    client = init_client()
     test_member_id = get_random_md5()
     test_username = 'username'
     test_email = 'test@test.com'
@@ -148,15 +148,16 @@ def test_member_update(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
 
-    member = Member.get_by_id(test_member_id)
+    member = Member.get_by_id(test_member_id, client)
     assert member.username == test_username
     member.username = test_username_update
     member.update()
     assert member.username == test_username_update
 
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_member_authenticate(HTTPMock):
+    client = init_client()
     test_member_id = get_random_md5()
     test_username = 'username'
     test_password = get_random_md5()
@@ -187,13 +188,13 @@ def test_member_authenticate(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
 
-    member = Member()
-    member.authenticate(test_username, test_password)
+    member = Member.authenticate(test_username, test_password, client)
     assert member.id == test_member_id
 
-@with_setup(init_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_send_password(HTTPMock):
+    client = init_client()
     test_username = 'username'
     http = HTTPMock()
 
@@ -205,5 +206,4 @@ def test_send_password(HTTPMock):
     response = HTTPResponseMock()
     response.read_response = xml_response
     http.getresponse.return_value = response
-    member = Member()
-    member.send_password(test_username)
+    Member.send_password(test_username, client)

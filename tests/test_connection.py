@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
-from nose.tools import raises, with_setup
-from unittest.case import SkipTest
-from urllib2 import urlopen
-import StringIO
-
+import datetime
+import hashlib
 import mock
-import pytz
-import iso8601
-import datetime, hashlib
-from datetime import timedelta
-
-from setup import init_client, clear_client
+from nose.tools import raises
+import StringIO
+import textwrap
+import xml.etree.cElementTree as ET
 
 import harvestmedia.api.exceptions
-import harvestmedia.api.config
-import harvestmedia.api.client
 from harvestmedia.api.library import Library
 
-api_key = '12345'
-webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
+from setup import init_client
 
-@with_setup(init_client)
+api_key = '12345'
+
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 @raises(harvestmedia.api.exceptions.InvalidAPIResponse)
 def test_xml_failure(HTTPMock):
@@ -28,19 +22,14 @@ def test_xml_failure(HTTPMock):
     mock_response = StringIO.StringIO('<xml><this xml is malformed</xml>')
     mock_response.status = 200
     http.getresponse.return_value = mock_response
-
-    hmconfig = harvestmedia.api.config.Config()
-    hmconfig.api_key = api_key
-    hmconfig.debug = True
-    hmconfig.webservice_url = webservice_url
-    client = harvestmedia.api.client.Client()
+    client = harvestmedia.api.client.Client(api_key=api_key)
     client.get_service_info()
 
-@with_setup(clear_client)
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_service_token(HTTPMock):
     expiry = datetime.datetime.now()
-    expiry += timedelta(hours=22) # offset for HM timezone
+    expiry += datetime.timedelta(hours=22) # offset for HM timezone
     test_token = hashlib.md5(str(expiry)).hexdigest() # generate an md5 from the date for testing
 
     return_values = [
@@ -67,26 +56,20 @@ def test_get_service_token(HTTPMock):
                         
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
-    
-    hmconfig = harvestmedia.api.config.Config()
-    hmconfig.api_key = api_key
-    hmconfig.webservice_url = webservice_url
-    client = harvestmedia.api.client.Client()
+    client = harvestmedia.api.client.Client(api_key=api_key)
     
     assert client.config.service_token.token == test_token
     assert client.config.service_token.expiry == expiry.strftime("%Y-%m-%dT%H:%M:%S")
 
+
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_get_libraries(HTTPMock):
+    client = init_client()
     http = HTTPMock()
     expiry = datetime.datetime.today().isoformat()
     test_token = hashlib.md5(expiry).hexdigest() # generate an md5 from the date for testing
     http.getresponse.return_value = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry))
     
-    hmconfig = harvestmedia.api.config.Config()
-    hmconfig.api_key = api_key
-    hmconfig.webservice_url = webservice_url
-    client = harvestmedia.api.client.Client()
     mock_response = StringIO.StringIO("""
         <ResponseLibraries>
             <libraries> 
@@ -97,12 +80,13 @@ def test_get_libraries(HTTPMock):
     mock_response.status = 200
     http.getresponse.return_value = mock_response
 
-    libraries = Library.get_libraries()
+    libraries = Library.get_libraries(client)
     assert isinstance(libraries, list)
 
     library = libraries[0]
     assert library.id == 'abc123'
     assert library.name == 'VIDEOHELPER'
+
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 @raises(harvestmedia.api.exceptions.InvalidToken)
@@ -111,18 +95,15 @@ def test_invalid_token(HTTPMock):
     mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><memberaccount><error><code>5</code><description>Invalid Token</description></error></memberaccount>')
     mock_response.status = 200
     http.getresponse.return_value = mock_response
-    hmconfig = harvestmedia.api.config.Config()
-    hmconfig.api_key = api_key
-    hmconfig.debug = True
-    hmconfig.webservice_url = webservice_url
-    client = harvestmedia.api.client.Client()
-    libraries = Library.get_libraries()
+    client = harvestmedia.api.client.Client(api_key=api_key)
+    libraries = Library.get_libraries(client)
+
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_expired_token(HTTPMock):
     http = HTTPMock()
     expiry = datetime.datetime.now()
-    expiry2 = expiry + timedelta(hours=22)
+    expiry2 = expiry + datetime.timedelta(hours=22)
     test_token = hashlib.md5(str(expiry)).hexdigest() # generate an md5 from the date for testing
     return_values = [
                      '<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry.strftime("%Y-%m-%dT%H:%M:%S")),
@@ -149,11 +130,7 @@ def test_expired_token(HTTPMock):
 
     http.getresponse.side_effect = side_effect
     
-    hmconfig = harvestmedia.api.config.Config()
-    hmconfig.debug = True
-    hmconfig.api_key = api_key
-    hmconfig.webservice_url = webservice_url
-    client = harvestmedia.api.client.Client()
+    client = init_client()
     client.config.service_token.expiry = (datetime.datetime.now() - datetime.timedelta(hours=12)).isoformat()
     try:
         client.get_service_info()
