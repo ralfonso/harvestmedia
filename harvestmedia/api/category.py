@@ -7,61 +7,74 @@ import client
 import config
 
 
-class Attribute(DictObj):
-    
-    def __init__(self, xml_data=None):
-        self._load(xml_data)
+class CategoryQuery(object):
 
-    def _load(self, xmldata):
-        """
-        Convert the Harvest Media XML tree to our Attribute object
-        """
-        self.id = xmldata.get('id')
-        name_value = xmldata.get('name')
-        if ' - ' in name_value:
-            self.value, self.name = name_value.split(' - ')
-        else:
-            self.name = name_value
-            self.value = None
-
-        self.attributes = []
-
-        _attributes = xmldata.find('attributes')
-
-        if _attributes:
-            for attribute_xml in _attributes:
-                self.attributes.append(Attribute(attribute_xml))
-
-
-class Category(DictObj):
-    
-    def __init__(self, xml_data=None):
-        self._load(xml_data)
-
-    def _load(self, xmldata):
-        """
-        Convert the Harvest Media XML tree to our Category object
-        """
-        self.id = xmldata.get('id')
-        self.name = xmldata.get('name')
-        self.attributes = []
-
-        _attributes = xmldata.find('attributes')
-
-        if _attributes:
-            for attribute_xml in _attributes.getchildren():
-                self.attributes.append(Attribute(attribute_xml))
-
-    @staticmethod
-    def get_categories(client):
+    def get_categories(self, _client):
         categories = []
 
         method_uri = '/getcategories/{{service_token}}'
-        xml_root = client.get_xml(method_uri)
+        xml_root = _client.get_xml(method_uri)
 
         xml_categories = xml_root.find('categories').getchildren()
         for xml_category in xml_categories:
-            category = Category(xml_category)
+            category = Category.from_xml(xml_category, _client)
             categories.append(category)
 
         return categories
+
+
+class Attribute(DictObj):
+    
+    def __init__(self, xml_data=None):
+        self.attributes = []
+
+    @classmethod
+    def from_xml(cls, xml_data, _client):
+        """
+        Convert the Harvest Media XML tree to our Attribute object
+        """
+
+        instance = cls(_client)
+        instance.id = xml_data.get('id')
+        name_value = xml_data.get('name')
+
+        if ' - ' in name_value:
+            instance.value, instance.name = name_value.split(' - ')
+        else:
+            instance.name = name_value
+            instance.value = None
+
+        _attributes = xml_data.find('attributes')
+
+        if _attributes:
+            for attribute_xml in _attributes:
+               instance.attributes.append(Attribute.from_xml(attribute_xml, _client))
+
+        return instance
+
+
+class Category(DictObj):
+
+    query = CategoryQuery()
+    
+    def __init__(self, _client):
+        self._client = _client
+        self.attributes = []
+
+    @classmethod
+    def from_xml(cls, xml_data, _client):
+        """
+        Convert the Harvest Media XML tree to our Category object
+        """
+
+        instance = cls(_client)
+        for attribute, value in xml_data.items():
+            setattr(instance, attribute, value)
+
+        _attributes = xml_data.find('attributes')
+
+        if _attributes:
+            for attribute_xml in _attributes.getchildren():
+                instance.attributes.append(Attribute.from_xml(attribute_xml, _client))
+
+        return instance

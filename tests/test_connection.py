@@ -22,7 +22,18 @@ def test_xml_failure(HTTPMock):
     mock_response = StringIO.StringIO('<xml><this xml is malformed</xml>')
     mock_response.status = 200
     http.getresponse.return_value = mock_response
-    client = harvestmedia.api.client.Client(api_key=api_key)
+    client = harvestmedia.api.client.Client(api_key=api_key, debug_level='DEBUG')
+    client.get_service_info()
+
+
+@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@raises(harvestmedia.api.exceptions.InvalidAPIResponse)
+def test_non_200(HTTPMock):
+    http = HTTPMock()
+    mock_response = StringIO.StringIO('<xml><this xml is malformed</xml>')
+    mock_response.status = 400
+    http.getresponse.return_value = mock_response
+    client = harvestmedia.api.client.Client(api_key=api_key, debug_level='DEBUG')
     client.get_service_info()
 
 
@@ -56,7 +67,10 @@ def test_get_service_token(HTTPMock):
                         
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
-    client = harvestmedia.api.client.Client(api_key=api_key)
+    client = harvestmedia.api.client.Client(api_key=api_key, debug_level='DEBUG')
+
+    # get the debug level to cover the getter
+    print client.debug_level
     
     assert client.config.service_token.token == test_token
     assert client.config.service_token.expiry == expiry.strftime("%Y-%m-%dT%H:%M:%S")
@@ -80,7 +94,7 @@ def test_get_libraries(HTTPMock):
     mock_response.status = 200
     http.getresponse.return_value = mock_response
 
-    libraries = Library.get_libraries(client)
+    libraries = Library.query.get_libraries(client)
     assert isinstance(libraries, list)
 
     library = libraries[0]
@@ -93,6 +107,28 @@ def test_get_libraries(HTTPMock):
 def test_invalid_token(HTTPMock):
     http = HTTPMock()
     mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><memberaccount><error><code>5</code><description>Invalid Token</description></error></memberaccount>')
+    mock_response.status = 200
+    http.getresponse.return_value = mock_response
+    client = harvestmedia.api.client.Client(api_key=api_key)
+    libraries = Library.get_libraries(client)
+
+
+@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@raises(harvestmedia.api.exceptions.InvalidToken)
+def test_corrupt_input_data(HTTPMock):
+    http = HTTPMock()
+    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><memberaccount><error><code>1</code><description>Corrupt Input Data</description></error></memberaccount>')
+    mock_response.status = 200
+    http.getresponse.return_value = mock_response
+    client = harvestmedia.api.client.Client(api_key=api_key)
+    libraries = Library.get_libraries(client)
+
+
+@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@raises(harvestmedia.api.exceptions.InvalidToken)
+def test_invalid_input_data(HTTPMock):
+    http = HTTPMock()
+    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><memberaccount><error><code>2</code><description>Corrupt Input Data</description></error></memberaccount>')
     mock_response.status = 200
     http.getresponse.return_value = mock_response
     client = harvestmedia.api.client.Client(api_key=api_key)

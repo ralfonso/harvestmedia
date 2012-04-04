@@ -2,15 +2,52 @@
 import logging
 from urllib import quote as url_quote
 
-from exceptions import HarvestMediaError, MissingParameter
+from exceptions import MissingParameter
 from track import Track
 from util import DictObj
 
-logger = logging.getLogger('harvestmedia')
+
+class PlaylistQuery(object):
+    
+    def get_member_playlists(self, member_id, _client):
+        method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % { 'member_id': member_id}
+        xml_root = _client.get_xml(method_uri)
+
+        playlists = []
+        playlist_elements = xml_root.find('playlists')
+        for playlist_element in playlist_elements.getchildren():
+            playlist = Playlist.from_xml(playlist_element, _client)
+            playlist.member_id = member_id
+            playlists.append(playlist)
+
+        return playlists
+
+    def add_track(self, member_id, playlist_id, track_id, _client):
+        method_uri = '/addtoplaylist/{{u}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % \
+                          {'member_id': member_id, 
+                           'playlist_id': id, 
+                           'track_id': track_id}
+        _client.get_xml(method_uri)
+    
+    def remove_track(self, member_id, playlist_id, track_id, _client):
+        method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % \
+                            {'member_id': member_id, 
+                             'playlist_id': id, 
+                             'track_id': track_id}
+        _client.get_xml(method_uri)
+
+    def remove(self, member_id, playlist_id, _client):
+        method_uri = '/removeplaylist/{{service_token}}/%(member_id)s/%(id)s' % \
+                        {'member_id': member_id,
+                         'id': id}
+        _client.get_xml(method_uri)
 
 
 class Playlist(DictObj):
-    def __init__(self, xml_data=None, _client=None):
+    
+    query = PlaylistQuery()
+
+    def __init__(self, _client):
         """ Create a new Favourite object from an ElementTree.Element object
 
         xml_data: the ElementTree.Element object to parse
@@ -18,88 +55,63 @@ class Playlist(DictObj):
         """
 
         self.tracks = []
+        self._client = _client
 
-        if _client:
-            self._client = _client
+    @classmethod
+    def from_xml(cls, xml_data, _client):
+        instance = cls(_client)
+        instance.id = xml_data.get('id')
+        for attribute, value in xml_data.items():
+            setattr(instance, attribute, value)
 
-        if xml_data:
-            self._load(xml_data)
- 
-    def _load(self, xml_playlist):
-        self.id = xml_playlist.get('id')
-        for attribute, value in xml_playlist.items():
-            setattr(self, attribute, value)
-
-        tracks = xml_playlist.find('tracks')
+        tracks = xml_data.find('tracks')
         if tracks:
             for track in tracks.getchildren():
-                self.tracks.append(Track(track, self._client))
+                instance.tracks.append(Track.from_xml(track, _client))
+        
+        return instance
+    
+    @classmethod
+    def create(cls, **kwargs):
+        _client = kwargs.get('_client', None)
+        if not _client:
+            raise MissingParameter('You must pass _client to Playlist.create')
 
-    def create(self):
-        if not self.member_id:
-            raise MissingParameter('You have to specify a member_id to create a playlist')
+        member_id = kwargs.get('member_id', None)
+        if not member_id:
+            raise MissingParameter('You must pass member_id to Playlist.create')
 
-        if not self.name:
-            raise MissingParameter('You have to specify a playlist name to create a playlist')
+        playlist_name = kwargs.get('playlist_name', None)
+        if not playlist_name:
+            raise MissingParameter('You must pass playlist_name to Playlist.create')
 
         method_uri = '/addplaylist/{{service_token}}/%(member_id)s/%(playlist_name)s/' % \
-                        {'member_id': self.member_id, 
-                         'playlist_name': url_quote(self.name.encode('utf-8'))}
-        xml_root = self._client.get_xml(method_uri)
+                        {'member_id': member_id, 
+                         'playlist_name': url_quote(playlist_name.encode('utf-8'))}
+        xml_root = _client.get_xml(method_uri)
         playlists = xml_root.find('playlists')
 
         if playlists is not None:
-            for playlist in playlists.getchildren():
-                name = playlist.get('name')
-                if name == self.name:
-                    self._load(playlist)
+            for playlist_xml in playlists.getchildren():
+                name = playlist_xml.get('name')
+                if name == playlist_name:
+                    return cls.from_xml(playlist_xml, _client)
 
     def add_track(self, track_id):
-        if not self.member_id:
-            raise MissingParameter('You have to specify a member_id to add a track to a playlist')
-        if not self.id:
-            raise MissingParameter('You have to specify a playlist id to add a track to a playlist')
+        self.query.add_track(self.member_id, self.playlist_id, track_id, self._client)
+        self.tracks.append(Track.query.get_by_id(track_id, self._client))
 
-        method_uri = '/addtoplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % \
-                          {'member_id': self.member_id, 
-                           'playlist_id': self.id, 
-                           'track_id': track_id}
-        self._client.get_xml(method_uri)
-        self.tracks.append(Track.get_by_id(track_id, self._client))
-    
     def remove_track(self, track_id):
-        if not self.member_id:
-            raise MissingParameter('You have to specify a member_id to remove a track from a playlist')
-        if not self.id:
-            raise MissingParameter('You have to specify a playlist id to remove a track from a playlist')
-
-        method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % \
-                            {'member_id': self.member_id, 
-                             'playlist_id': self.id, 
-                             'track_id': track_id}
-        self._client.get_xml(method_uri)
+        self.query.remove_track(self.member_id, self.id, track_id, self._client)
 
         for track in self.tracks:
             if track.id == track_id:
                 self.tracks.remove(track)
 
     def remove(self):
-        if not self.member_id:
-            raise MissingParameter('You have to specify a member_id to remove a playlist')
-        if not self.id:
-            raise MissingParameter('You have to specify a playlist id to remove a playlist')
-
-        method_uri = '/removeplaylist/{{service_token}}/%(member_id)s/%(id)s' % \
-                        {'member_id': self.member_id,
-                         'id': self.id}
-        self._client.get_xml(method_uri)
+        self.query.remove(self.member_id, self.playlist_id, self._client)
 
     def update(self):
-        if not self.member_id:
-            raise MissingParameter('You have to specify a member_id to update a playlist')
-        if not self.id:
-            raise MissingParameter('You have to specify an id to update a playlist')
-
         method_uri = '/updateplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/%(playlist_name)s' % { 'member_id': self.member_id,
                                                                                                             'playlist_id': self.id,
                                                                                                             'playlist_name': url_quote(self.name.encode('utf-8'))}

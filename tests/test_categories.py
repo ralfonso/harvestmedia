@@ -30,4 +30,4 @@ def test_get_categories(HTTPMock):
 
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
-    categories = Category.get_categories(client)
+    categories = Category.query.get_categories(client)

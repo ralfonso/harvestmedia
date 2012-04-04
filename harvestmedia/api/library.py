@@ -12,7 +12,7 @@ class LibraryQuery(object):
         xml_root = _client.get_xml(method_uri)
         xml_libraries = xml_root.find('libraries').getchildren()
         for library_element in xml_libraries:
-            library = Library(library_element, _client=_client)
+            library = Library.from_xml(library_element, _client=_client)
             libraries.append(library)
 
         return libraries
@@ -22,7 +22,7 @@ class Library(DictObj):
 
     query = LibraryQuery()
     
-    def __init__(self,_client):
+    def __init__(self ,_client):
         self._client = _client
 
     @classmethod

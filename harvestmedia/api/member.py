@@ -10,57 +10,61 @@ from favourite import Favourite
 from track import Track
 from exceptions import HarvestMediaError, MissingParameter
 
-logger = logging.getLogger('harvestmedia')
+
+class MemberQuery(object):
+    
+    def get_by_id(self, member_id, _client):
+        method_uri = '/getmember/{{service_token}}/%(member_id)s' % {'member_id': member_id}
+        xml_data = _client.get_xml(method_uri)
+        xml_member = xml_data.find('memberaccount')
+        return Member.from_xml(xml_member, _client)
 
 
 class Member(DictObj):
-    def __init__(self, xml_data=None, _client=None):
+    
+    query = MemberQuery()
+
+    def __init__(self, _client):
         """ Create a new Member object from an ElementTree.Element object
 
         xml_data: the ElementTree.Element object to parse
 
         """
 
-        if _client:
-            self._client = _client
-
-        if xml_data:
-            self._load(xml_data)
+        self._client = _client
  
-    def _load(self, xml_member):
-        self.id = xml_member.get('id')
+    @classmethod
+    def from_xml(cls, xml_member, _client):
+        instance = cls(_client)
+        instance.id = xml_member.get('id')
         for child_element in xml_member.getchildren():
-            setattr(self, child_element.tag, child_element.text)
+            setattr(instance, child_element.tag, child_element.text)
 
-    def create(self, ):
-        if not self.username:
-            raise MissingParameter('You have to specify a username to register a member')
+        return instance
 
+    @classmethod
+    def create(cls, **kwargs):
+        _client = kwargs.get('_client', None)
+        if not _client:
+            raise MissingParameter('You must pass _client to Member.create')
+        
         root = ET.Element('requestmember')
         member = ET.Element('memberaccount')
 
-        for prop, value in vars(self).items():
+        for prop, value in kwargs.items():
             if not prop.startswith('_'):
                 el = ET.Element(prop)
                 el.text = value
                 member.append(el)
-
-        terms = ET.Element('termsaccept')
-        terms.text = 'true'
-        member.append(terms)
-
-        fileformat = ET.Element('fileformat')
-        fileformat.text = 'MP3'
-        member.append(fileformat)
 
         root.append(member)
 
         method_uri = '/registermember/{{service_token}}'
         xml_post_body = ET.tostring(root)
 
-        xml_data = self._client.post_xml(method_uri, xml_post_body)
+        xml_data = _client.post_xml(method_uri, xml_post_body)
         xml_member = xml_data.find('memberaccount')
-        self._load(xml_member)
+        return cls.from_xml(xml_member, _client)
 
     def update(self):
         root = ET.Element('requestmember')
@@ -79,11 +83,8 @@ class Member(DictObj):
         method_uri = '/updatemember/{{service_token}}'
         xml_post_body = ET.tostring(root)
 
+        # if this is successful, we can just use the current object
         xml_data = self._client.post_xml(method_uri, xml_post_body)
-
-        xml_member = xml_data.find('memberaccount')
-        self._load(xml_member)
-        
 
     @classmethod
     def authenticate(cls, username, password, _client):
@@ -91,14 +92,7 @@ class Member(DictObj):
         xml_root = _client.get_xml(method_uri)
 
         xml_member = xml_root.find('memberaccount')
-        return cls(xml_member, _client)
-
-    @classmethod
-    def get_by_id(cls, member_id, _client):
-        method_uri = '/getmember/{{service_token}}/%(member_id)s' % {'member_id': member_id}
-        xml_data = _client.get_xml(method_uri)
-        xml_member = xml_data.find('memberaccount')
-        return cls(xml_member, _client)
+        return Member.from_xml(xml_member, _client)
 
     @staticmethod
     def send_password(username, _client):
@@ -106,17 +100,7 @@ class Member(DictObj):
         _client.get_xml(method_uri)
 
     def get_playlists(self):
-        method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
-        xml_root = self._client.get_xml(method_uri)
-
-        playlists = []
-        playlist_elements = xml_root.find('playlists')
-        for playlist_element in playlist_elements.getchildren():
-            playlist = Playlist(playlist_element, self._client)
-            playlist.member_id = self.id
-            playlists.append(playlist)
-
-        return playlists
+        return Playlist.query.get_member_playlists(self.id, self._client)
 
     def get_favourites(self):
         method_uri = '/getfavourites/{{service_token}}/%(member_id)s' % { 'member_id': self.id }

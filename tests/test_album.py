@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 import datetime
-import hashlib
 import mock
-from nose.tools import raises
 import StringIO
 import textwrap
 import xml.etree.cElementTree as ET
 
-import harvestmedia.api.exceptions
 from harvestmedia.api.album import Album
 
 from setup import init_client
+from utils import get_random_md5
 
 api_key = '12345'
 webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
@@ -29,10 +27,10 @@ def test_album_init():
     client = init_client()
     album_id = '1c5f47572d9152f3'
     album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
-                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude."
                                                     name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
 
-    album = Album(album_xml, client)
+    album = Album.from_xml(album_xml, client)
     assert album.id == album_id
 
 
@@ -40,10 +38,10 @@ def test_album_dict():
     client = init_client()
     album_id = '1c5f47572d9152f3'
     album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
-                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude."
                                                     name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
 
-    album = Album(album_xml, client)
+    album = Album.from_xml(album_xml, client)
     album_dict = album.as_dict()
     assert album_dict['id'] == album_id
 
@@ -53,32 +51,48 @@ def test_album_tracks(HTTPMock):
     client = init_client()
     album_id = '1c5f47572d9152f3'
     album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
-                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude."
                                                     name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
 
     return_values = [
-        """<responsetracks>
+        textwrap.dedent("""<responsetracks>
             <tracks>
-                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
-                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather" albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
+                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for
+                       this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher=""
+                       name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords=""
+                       displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout=""
+                       frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
+                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding
+                acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather"
+                albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather"
+                genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411"
+                dateingested="2008-05-15 06:08:18"/>
             </tracks>
-        </responsetracks>""" % locals(),
-        """<responsetracks>
+        </responsetracks>""") % locals(),
+        textwrap.dedent("""<responsetracks>
             <tracks>
-                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
-                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather" albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
+                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for
+                this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher=""
+                name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords=""
+                displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout=""
+                frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
+                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding
+                acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather"
+                albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather"
+                genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411"
+                dateingested="2008-05-15 06:08:18"/>
             </tracks>
-        </responsetracks>""" % locals()]
+        </responsetracks>""") % locals()]
 
     def side_effect(*args):
         mock_response = StringIO.StringIO(return_values.pop(0))
         mock_response.status = 200
         return mock_response
-                        
+
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
- 
-    album = Album(album_xml, client)
+
+    album = Album.from_xml(album_xml, client)
     tracks = album.get_tracks(get_full_detail=False)
     assert tracks[0].albumid == album_id
 
@@ -88,19 +102,31 @@ def test_album_tracks_fulldetail(HTTPMock):
     client = init_client()
     album_id = '1c5f47572d9152f3'
     album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
-                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude."
                                                     name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
 
     return_values = [
-        """<responsetracks>
+        textwrap.dedent("""<responsetracks>
             <tracks>
-                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
-                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather" albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
+                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for
+                       this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher=""
+                       name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords=""
+                       displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout=""
+                       frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
+                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding
+                acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather"
+                albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather"
+                genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411"
+                dateingested="2008-05-15 06:08:18"/>
             </tracks>
-        </responsetracks>""" % locals(),
-        """<responsetracks>
+        </responsetracks>""") % locals(),
+        textwrap.dedent("""<responsetracks>
             <tracks>
-                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18">
+                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for
+                       this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher=""
+                       name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords=""
+                       displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout=""
+                       frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18">
                     <categories>
                       <category name="Tuning" id="07615de0da9a3d50">
                         <attributes>
@@ -170,19 +196,23 @@ def test_album_tracks_fulldetail(HTTPMock):
                       </category>
                     </categories>
                 </track>
-                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather" albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
+                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding
+                acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather"
+                albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather"
+                genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411"
+                dateingested="2008-05-15 06:08:18"/>
             </tracks>
-        </responsetracks>""" % locals(),]
+        </responsetracks>""") % locals(),]
 
     def side_effect(*args):
         mock_response = StringIO.StringIO(return_values.pop(0))
         mock_response.status = 200
         return mock_response
-                        
+
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
- 
-    album = Album(album_xml, client)
+
+    album = Album.from_xml(album_xml, client)
     tracks = album.get_tracks()
     assert tracks[0].albumid == album_id
 
@@ -191,39 +221,39 @@ def test_get_cover_url(HTTPMock):
     client = init_client()
     album_id = '1c5f47572d9152f3'
     album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
-                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude." 
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude."
                                                     name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
     album_art_url = "http://asset.harvestmedia.net/albumart/8185d768cd8fcaa7/{id}/{width}/{height}"
     width = 200
     height = 300
     http = HTTPMock()
     expiry = datetime.datetime.now()
-    test_token = hashlib.md5(str(expiry)).hexdigest() # generate an md5 from the date for testing
+    test_token = get_random_md5()
     return_values = [
                      '<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry.strftime("%Y-%m-%dT%H:%M:%S")),
                      """<?xml version="1.0" encoding="utf-8"?>
                         <responseserviceinfo>
                             <asseturl
                                 albumart="%(album_art_url)s"
-                                waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}" 
-                                trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}" 
-                                trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}" /> 
+                                waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}"
+                                trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}"
+                                trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}" />
                             <trackformats>
-                              <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" /> 
-                              <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" /> 
-                              <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" /> 
+                              <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" />
+                              <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" />
+                              <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" />
                             </trackformats>
                         </responseserviceinfo>""" % locals(),
                     ]
-                        
+
     def side_effect(*args):
         mock_response = StringIO.StringIO(return_values.pop(0))
         mock_response.status = 200
         return mock_response
 
     http.getresponse.side_effect = side_effect
-    
-    album = Album(album_xml, client)
+
+    album = Album.from_xml(album_xml, client)
     cover_art_url = album.get_cover_url(width, height)
 
     expected_url = album_art_url.replace('{id}', album_id).replace('{width}', str(width)).replace('{height}', str(height))

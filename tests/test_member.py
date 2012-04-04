@@ -29,15 +29,15 @@ class HTTPResponseMock(object):
 
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_create_member_missing_username():
-    member = Member()
+    client = init_client()
+    member = Member(client)
     member.create()
 
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
 def test_create_member(HTTPMock):
     client = init_client()
-    now = datetime.datetime.today().isoformat()
-    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_member_id = get_random_md5()
     username = 'testuser'
     first_name = 'Test'
     last_name = 'User'
@@ -65,18 +65,22 @@ def test_create_member(HTTPMock):
 
     config = harvestmedia.api.config.Config()
     config.debug = True
-    member = Member(_client=client)
-    member.username = username
-    member.first_name = first_name
-    member.last_name = last_name
-    member.email = email
-    member.create()
+    username = username
+    first_name = first_name
+    last_name = last_name
+    email = email
+    termsaccept = 'true'
+    fileformat = 'MP3'
+    member = Member.create(_client=client, username=username, first_name=first_name,
+                           last_name=last_name, email=email, termsaccept=termsaccept,
+                           fileformat=fileformat)
 
     assert member.id == test_member_id
     assert member.username == username
 
 
-def test_load():
+def test_from_xml():
+    client = init_client()
     now = datetime.datetime.today().isoformat()
     test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
     username = 'testuser'
@@ -100,7 +104,7 @@ def test_load():
 
     xml_doc = ET.fromstring(member_xml)
     xml_member = xml_doc.find('memberaccount')
-    member = Member(xml_member)
+    member = Member.from_xml(xml_member, client)
 
     assert member.id == test_member_id
     assert member.firstname == firstname
@@ -148,7 +152,7 @@ def test_member_update(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
 
-    member = Member.get_by_id(test_member_id, client)
+    member = Member.query.get_by_id(test_member_id, client)
     assert member.username == test_username
     member.username = test_username_update
     member.update()
@@ -161,11 +165,9 @@ def test_member_authenticate(HTTPMock):
     test_member_id = get_random_md5()
     test_username = 'username'
     test_password = get_random_md5()
+    test_firstname = 'first'
+    test_lastname = 'last'
     test_email = 'test@test.com'
-    test_firstname = 'test'
-    test_lastname = 'user'
-
-    http = HTTPMock()
 
     return_values = [
     """<?xml version="1.0" encoding="utf-8"?>
@@ -178,8 +180,6 @@ def test_member_authenticate(HTTPMock):
             </memberaccount>
         </ResponseMember>""" % locals(),]
 
-
-
     def side_effect(*args):
         mock_response = StringIO.StringIO(return_values.pop(0))
         mock_response.status = 200
@@ -190,6 +190,35 @@ def test_member_authenticate(HTTPMock):
 
     member = Member.authenticate(test_username, test_password, client)
     assert member.id == test_member_id
+
+
+@raises(harvestmedia.api.exceptions.InvalidLoginDetails)
+@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+def test_member_authenticate_fail(HTTPMock):
+    client = init_client()
+    test_username = 'username'
+    test_password = get_random_md5()
+
+    http = HTTPMock()
+    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><responsemember><error><code>6</code><description>Invalid Login Details</description></error></responsemember>')
+    mock_response.status = 200
+    http.getresponse.return_value = mock_response
+
+    member = Member.authenticate(test_username, test_password, client)
+
+
+@raises(harvestmedia.api.exceptions.MemberDoesNotExist)
+@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+def test_member_invalid(HTTPMock):
+    client = init_client()
+    test_member_id = get_random_md5()
+
+    http = HTTPMock()
+    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><responsemember><error><code>7</code><description>Member Does Not Exist</description></error></responsemember>')
+    mock_response.status = 200
+    http.getresponse.return_value = mock_response
+
+    member = Member.query.get_by_id(test_member_id, client)
 
 
 @mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')

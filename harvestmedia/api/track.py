@@ -15,7 +15,7 @@ class TrackQuery(object):
         tracks = xml_root.find('tracks').getchildren()
 
         for track_element in tracks:
-            track = Track(track_element, _client)
+            track = Track.from_xml(track_element, _client)
             track_list.append(track)
 
         if len(track_list) == 0:
@@ -73,7 +73,7 @@ class Track(DictObj):
 
     query = TrackQuery()
 
-    def __init__(self, xml_data, _client):
+    def __init__(self, _client):
         """ Create a new Track object from an ElementTree.Element object
 
         track_element: the ElementTree.Element object to parse
@@ -81,12 +81,11 @@ class Track(DictObj):
         """
 
         self.categories = []
-        self._load(xml_data)
         self._client = _client
 
     @classmethod
     def from_xml(cls, xml_data, _client):
-        instance = cls()
+        instance = cls(_client)
         for attribute, value in xml_data.items():
             setattr(instance, attribute, value)
 

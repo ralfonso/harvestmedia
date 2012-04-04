@@ -20,17 +20,11 @@ class Client(object):
     :param webservice_url: the base Harvest Media API URL
     """
 
-    def _set(self, param, default=None, **kwargs):
-        if kwargs.get(param, None):
-            setattr(self, param, kwargs[param])
-        else:
-            setattr(self, param, default)
+    def __init__(self, api_key, debug_level='INFO', webservice_url='https://service.harvestmedia.net/HMP-WS.svc'):
 
-    def __init__(self, api_key, debug_level=None, webservice_url=None):
-
-        self._set('api_key', api_key)
-        self._set('debug_level', 'DEBUG', debug_level)
-        self._set('webservice_url', 'https://service.harvestmedia.net/HMP-WS.svc', webservice_url)
+        self.api_key = api_key
+        self.debug_level = debug_level
+        self.webservice_url = webservice_url
 
         self.config = Config()
         self.config.webservice_url = self.webservice_url

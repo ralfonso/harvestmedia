@@ -33,7 +33,7 @@ def test_track_dict():
                                                   keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
                                                   bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""") % locals())
 
-    track = Track(track_xml, client)
+    track = Track.from_xml(track_xml, client)
     track_dict = track.as_dict()
     assert track_dict['id'] == track_id
 
@@ -51,9 +51,13 @@ def test_tracks_get_by_id(HTTPMock):
 
 
     return_values = [
-            """<responsetracks>
+            textwrap.dedent("""<responsetracks>
                 <tracks>
-                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="%(track_name)s" albumid="1111001010001aaabeb" id="17376d36f309f18d" keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18">
+                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front
+                for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher=""
+                name="%(track_name)s" albumid="1111001010001aaabeb" id="17376d36f309f18d" keywords=""
+                displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout=""
+                frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18">
                     <categories>
                       <category name="Tuning" id="07615de0da9a3d50">
                         <attributes>
@@ -124,7 +128,7 @@ def test_tracks_get_by_id(HTTPMock):
                     </categories>
                 </track>
             </tracks>
-        </responsetracks>""" % locals(),]
+        </responsetracks>""") % locals(),]
 
     def side_effect(*args):
         mock_response = StringIO.StringIO(return_values.pop(0))
@@ -134,7 +138,7 @@ def test_tracks_get_by_id(HTTPMock):
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
  
-    track = Track.get_by_id(track_id, client)
+    track = Track.query.get_by_id(track_id, client)
 
     assert track.id == track_id
     assert track.name == track_name
@@ -178,7 +182,7 @@ def test_get_waveform_url(HTTPMock):
 
     http.getresponse.side_effect = side_effect
     
-    track = Track(track_xml, client)
+    track = Track.from_xml(track_xml, client)
     waveform_url = track.get_waveform_url(width, height)
 
     expected_url = waveform_url.replace('{id}', track_id).replace('{width}', str(width)).replace('{height}', str(height))
