@@ -21,8 +21,8 @@ class LibraryQuery(object):
 class Library(DictObj):
 
     query = LibraryQuery()
-    
-    def __init__(self ,_client):
+
+    def __init__(self, _client):
         self._client = _client
 
     @classmethod
@@ -34,13 +34,4 @@ class Library(DictObj):
         return instance
 
     def get_albums(self):
-        album_list = []
-        method_uri = '/getalbums/{{service_token}}/' + self.id
-        xml_root = self._client.get_xml(method_uri)
-        albums = xml_root.find('albums').getchildren()
-
-        for album_element in albums:
-            album = Album.from_xml(album_element, _client=self._client)
-            album_list.append(album)
-
-        return album_list
+        return Album.query.get_albums_for_library(self.id, self._client)

@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
-import xml.etree.cElementTree as ET
-import logging
 import urllib
+import xml.etree.cElementTree as ET
 
-from util import DictObj
-import client
-from playlist import Playlist
-from favourite import Favourite
-from track import Track
-from exceptions import HarvestMediaError, MissingParameter
+from .exceptions import MissingParameter
+from .playlist import Playlist
+from .track import Track
+from .util import DictObj
 
 
 class MemberQuery(object):
-    
+
     def get_by_id(self, member_id, _client):
         method_uri = '/getmember/{{service_token}}/%(member_id)s' % {'member_id': member_id}
         xml_data = _client.get_xml(method_uri)
@@ -21,7 +18,7 @@ class MemberQuery(object):
 
 
 class Member(DictObj):
-    
+
     query = MemberQuery()
 
     def __init__(self, _client):
@@ -32,7 +29,7 @@ class Member(DictObj):
         """
 
         self._client = _client
- 
+
     @classmethod
     def from_xml(cls, xml_member, _client):
         instance = cls(_client)
@@ -47,7 +44,7 @@ class Member(DictObj):
         _client = kwargs.get('_client', None)
         if not _client:
             raise MissingParameter('You must pass _client to Member.create')
-        
+
         root = ET.Element('requestmember')
         member = ET.Element('memberaccount')
 
@@ -88,7 +85,9 @@ class Member(DictObj):
 
     @classmethod
     def authenticate(cls, username, password, _client):
-        method_uri = '/authenticatemember/{{service_token}}/%(username)s/%(password)s' % {'username': urllib.quote(username), 'password': urllib.quote(password)}
+        method_uri = '/authenticatemember/{{service_token}}/%(username)s/%(password)s' % \
+                        {'username': urllib.quote(username),
+                         'password': urllib.quote(password)}
         xml_root = _client.get_xml(method_uri)
 
         xml_member = xml_root.find('memberaccount')
@@ -96,14 +95,16 @@ class Member(DictObj):
 
     @staticmethod
     def send_password(username, _client):
-        method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % {'username': urllib.quote(username)}
+        method_uri = '/sendmemberpassword/{{service_token}}/%(username)s' % \
+                        {'username': urllib.quote(username)}
         _client.get_xml(method_uri)
 
     def get_playlists(self):
         return Playlist.query.get_member_playlists(self.id, self._client)
 
     def get_favourites(self):
-        method_uri = '/getfavourites/{{service_token}}/%(member_id)s' % { 'member_id': self.id }
+        method_uri = '/getfavourites/{{service_token}}/%(member_id)s' % \
+                        {'member_id': self.id}
 
         xml_root = self._client.get_xml(method_uri)
 
@@ -111,7 +112,7 @@ class Member(DictObj):
         favourites_element = xml_root.find('favourites')
         track_elements = favourites_element.find('tracks')
         for track_element in track_elements.getchildren():
-            favourite = Track(track_element, self._client)
+            favourite = Track.from_xml(track_element, self._client)
             favourites.append(favourite)
 
         return favourites

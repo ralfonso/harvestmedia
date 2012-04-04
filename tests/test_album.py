@@ -46,7 +46,7 @@ def test_album_dict():
     assert album_dict['id'] == album_id
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_album_tracks(HTTPMock):
     client = init_client()
     album_id = '1c5f47572d9152f3'
@@ -68,21 +68,7 @@ def test_album_tracks(HTTPMock):
                 genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411"
                 dateingested="2008-05-15 06:08:18"/>
             </tracks>
-        </responsetracks>""") % locals(),
-        textwrap.dedent("""<responsetracks>
-            <tracks>
-                <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for
-                this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher=""
-                name="Guerilla Pop" albumid="%(album_id)s" id="17376d36f309f18d" keywords=""
-                displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout=""
-                frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>
-                <track tracknumber="2" time="02:46" lengthseconds="166" comment="Poignant electric guitars. Brooding
-                acoustic strums." composer="&quot;S. Milton, J. Wygens&quot;" publisher="" name="Hat And Feather"
-                albumid="%(album_id)s" id="635f90a4db673855" keywords="" displaytitle="Hat And Feather"
-                genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411"
-                dateingested="2008-05-15 06:08:18"/>
-            </tracks>
-        </responsetracks>""") % locals()]
+        </responsetracks>""") % locals(),]
 
     def side_effect(*args):
         mock_response = StringIO.StringIO(return_values.pop(0))
@@ -97,7 +83,34 @@ def test_album_tracks(HTTPMock):
     assert tracks[0].albumid == album_id
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_album_notracks(HTTPMock):
+    client = init_client()
+    album_id = '1c5f47572d9152f3'
+    album_xml = ET.fromstring(textwrap.dedent("""<album featured="false" code="HM001" detail="Razor-sharp pop&amp; rock bristling
+                                                    with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude."
+                                                    name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
+
+    return_values = [
+        textwrap.dedent("""<responsetracks>
+            <tracks>
+            </tracks>
+        </responsetracks>""") % locals(),]
+
+    def side_effect(*args):
+        mock_response = StringIO.StringIO(return_values.pop(0))
+        mock_response.status = 200
+        return mock_response
+
+    http = HTTPMock()
+    http.getresponse.side_effect = side_effect
+
+    album = Album.from_xml(album_xml, client)
+    tracks = album.get_tracks(get_full_detail=False)
+    assert len(tracks) == 0
+
+
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_album_tracks_fulldetail(HTTPMock):
     client = init_client()
     album_id = '1c5f47572d9152f3'
@@ -216,7 +229,7 @@ def test_album_tracks_fulldetail(HTTPMock):
     tracks = album.get_tracks()
     assert tracks[0].albumid == album_id
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_get_cover_url(HTTPMock):
     client = init_client()
     album_id = '1c5f47572d9152f3'

@@ -97,7 +97,7 @@ class Track(DictObj):
         return instance
 
     def as_dict(self):
-        return dict([(k, v) for k,v in self.__dict__.items()])
+        return dict([(k, v) for k, v in self.__dict__.items()])
 
     def get_waveform_url(self, width=None, height=None):
         asset_url = self._client.config.waveform_url

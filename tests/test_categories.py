@@ -14,7 +14,7 @@ from harvestmedia.api.category import Category
 from setup import init_client
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_get_categories(HTTPMock):
     client = init_client()
     cwd = os.path.dirname(__file__)

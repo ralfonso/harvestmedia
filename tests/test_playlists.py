@@ -26,7 +26,7 @@ class HTTPResponseMock(object):
         return self.read_response
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_create_playlist(HTTPMock):
     client = init_client()
     test_member_id = get_random_md5()
@@ -53,7 +53,7 @@ def test_create_playlist(HTTPMock):
     assert playlist.name == test_playlist_name
 
  
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_get_member_playlists(HTTPMock):
     client = init_client()
     test_member_id = get_random_md5()
@@ -122,7 +122,7 @@ def test_create_name_missing():
     playlist = Playlist.create(_client=client, member_id=test_member_id)
     
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_add_track(HTTPMock):
     client = init_client()
     now = datetime.datetime.today().isoformat()
@@ -146,27 +146,44 @@ def test_add_track(HTTPMock):
     playlist.add_track(track_id)
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_remove(HTTPMock):
     client = init_client()
     test_member_id = get_random_md5()
     test_playlist_id = get_random_md5()
+    test_playlist_name = 'test playlist'
+    test_track_id = get_random_md5()
 
-    http = HTTPMock()
-
-    xml_response = """<?xml version="1.0" encoding="utf-8"?>
+    return_values = [
+        """<?xml version="1.0" encoding="utf-8"?>
+         <ResponsePlaylists>
+            <playlists>
+                <playlist id="%(test_playlist_id)s" name="%(test_playlist_name)s">
+                    <tracks>
+                        <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM" name="Guerilla Pop" id="%(test_track_id)s" keywords="" lyrics="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" />
+                    </tracks>
+                </playlist>
+            </playlists>
+        </ResponsePlaylists>""" % locals(),
+        """<?xml version="1.0" encoding="utf-8"?>
         <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <code>OK</code>
-        </responsecode>"""
+        </responsecode>""",]
 
-    response = HTTPResponseMock()
-    response.read_response = xml_response
-    http.getresponse.return_value = response
+    def side_effect(*args):
+        mock_response = StringIO.StringIO(return_values.pop(0))
+        mock_response.status = 200
+        return mock_response
+                        
+    http = HTTPMock()
+    http.getresponse.side_effect = side_effect
+    member = Member(_client=client)
+    member.id = test_member_id
+    playlists = member.get_playlists()
+    playlists[0].remove()
 
-    playlist = Playlist.query.remove(test_member_id, test_playlist_id, _client=client)
 
-
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_remove_track(HTTPMock):
     client = init_client()
     album_id = '1c5f47572d9152f3'
@@ -177,8 +194,6 @@ def test_remove_track(HTTPMock):
     test_playlist_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
     test_playlist_name = 'test playlist'
     track_id = '17376d36f309f18d'
-
-    http = HTTPMock()
 
     return_values = [
         """<?xml version="1.0" encoding="utf-8"?>
@@ -210,7 +225,7 @@ def test_remove_track(HTTPMock):
     playlists[0].remove_track(track_id)
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_playlist_update(HTTPMock):
     client = init_client()
     test_member_id = get_random_md5()

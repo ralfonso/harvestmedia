@@ -12,6 +12,7 @@ from harvestmedia.api.member import Member
 from harvestmedia.api.favourite import Favourite
 
 from setup import init_client
+from utils import get_random_md5
 
 api_key = '12345'
 
@@ -26,13 +27,36 @@ class HTTPResponseMock(object):
         return self.read_response
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_get_member_favourites(HTTPMock):
     client = init_client()
-    now = datetime.datetime.today().isoformat()
-    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
-    now = datetime.datetime.today().isoformat()
-    test_track_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_member_id = get_random_md5()
+    username = 'testuser'
+    firstname = 'Test'
+    lastname = 'User'
+    email = 'email@email.com'
+
+    member_xml = """<?xml version="1.0" encoding="utf-8"?>
+     <ResponseMember>
+        <memberaccount id="%(test_member_id)s">
+            <username>%(username)s</username>
+            <firstname>%(firstname)s</firstname>
+            <lastname>%(lastname)s</lastname>
+            <email>%(email)s</email>
+        </memberaccount>
+    </ResponseMember>""" % {'test_member_id': test_member_id,
+                            'username': username,
+                            'firstname': firstname,
+                            'lastname': lastname,
+                            'email': email}
+
+    xml_doc = ET.fromstring(member_xml)
+    xml_member = xml_doc.find('memberaccount')
+
+    member = Member.from_xml(xml_member, client)
+
+    test_member_id = get_random_md5()
+    test_track_id = get_random_md5()
     test_track_name = 'test track'
 
     http = HTTPMock()
@@ -44,7 +68,7 @@ def test_get_member_favourites(HTTPMock):
                 <track id="%(id)s" name="%(name)s" />
             </tracks>
         </favourites>
-    </ResponseFavourites>""" % {'id': test_track_id, 
+    </ResponseFavourites>""" % {'id': test_track_id,
                             'name': test_track_name,}
 
     response = HTTPResponseMock()
@@ -53,8 +77,6 @@ def test_get_member_favourites(HTTPMock):
 
     config = harvestmedia.api.config.Config()
     config.debug = True
-    member = Member(_client=client)
-    member.id = test_member_id
     favourites = member.get_favourites()
 
     assert isinstance(favourites, list)
@@ -64,13 +86,21 @@ def test_get_member_favourites(HTTPMock):
     assert favourite.id == test_track_id
     assert favourite.name == test_track_name
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_add_track(HTTPMock):
     client = init_client()
-    now = datetime.datetime.today().isoformat()
-    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
-    test_track_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_member_id = get_random_md5()
+    test_track_id = get_random_md5()
+    test_track_name = 'test track'
 
+    favourite_xml = ET.fromstring("""<favourites>
+                                        <tracks>
+                                            <track id="%(id)s" name="%(name)s" />
+                                        </tracks>
+                                    </favourites>""" % {'id': test_track_id,
+                                                        'name': test_track_name,})
+
+    favourites = Favourite.from_xml(favourite_xml, client)
     http = HTTPMock()
 
     xml_response = """<?xml version="1.0" encoding="utf-8"?>
@@ -81,16 +111,25 @@ def test_add_track(HTTPMock):
     response = HTTPResponseMock()
     response.read_response = xml_response
     http.getresponse.return_value = response
+    test_track_id_add = get_random_md5()
+    favourites.add_track(test_track_id_add)
 
-    Favourite.add_track(test_member_id, test_track_id, client)
 
-
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_remove_track(HTTPMock):
     client = init_client()
-    now = datetime.datetime.today().isoformat()
-    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
-    test_track_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_member_id = get_random_md5()
+    test_track_id = get_random_md5()
+    test_track_name = 'test track'
+
+    favourite_xml = ET.fromstring("""<favourites>
+                                        <tracks>
+                                            <track id="%(id)s" name="%(name)s" />
+                                        </tracks>
+                                    </favourites>""" % {'id': test_track_id,
+                                                        'name': test_track_name,})
+
+    favourites = Favourite.from_xml(favourite_xml, client)
 
     http = HTTPMock()
 
@@ -103,4 +142,4 @@ def test_remove_track(HTTPMock):
     response.read_response = xml_response
     http.getresponse.return_value = response
 
-    Favourite.remove_track(test_member_id, test_track_id, client)
+    favourites.remove_track(test_track_id)

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-import logging
 from urllib import quote as url_quote
 
-from exceptions import MissingParameter
-from track import Track
-from util import DictObj
+from .exceptions import MissingParameter
+from .track import Track
+from .util import DictObj
 
 
 class PlaylistQuery(object):
-    
+
     def get_member_playlists(self, member_id, _client):
-        method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % { 'member_id': member_id}
+        method_uri = '/getmemberplaylists/{{service_token}}/%(member_id)s' % \
+                        {'member_id': member_id}
         xml_root = _client.get_xml(method_uri)
 
         playlists = []
@@ -24,15 +24,15 @@ class PlaylistQuery(object):
 
     def add_track(self, member_id, playlist_id, track_id, _client):
         method_uri = '/addtoplaylist/{{u}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % \
-                          {'member_id': member_id, 
-                           'playlist_id': id, 
+                          {'member_id': member_id,
+                           'playlist_id': id,
                            'track_id': track_id}
         _client.get_xml(method_uri)
-    
+
     def remove_track(self, member_id, playlist_id, track_id, _client):
         method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % \
-                            {'member_id': member_id, 
-                             'playlist_id': id, 
+                            {'member_id': member_id,
+                             'playlist_id': id,
                              'track_id': track_id}
         _client.get_xml(method_uri)
 
@@ -44,7 +44,7 @@ class PlaylistQuery(object):
 
 
 class Playlist(DictObj):
-    
+
     query = PlaylistQuery()
 
     def __init__(self, _client):
@@ -68,9 +68,9 @@ class Playlist(DictObj):
         if tracks:
             for track in tracks.getchildren():
                 instance.tracks.append(Track.from_xml(track, _client))
-        
+
         return instance
-    
+
     @classmethod
     def create(cls, **kwargs):
         _client = kwargs.get('_client', None)
@@ -86,7 +86,7 @@ class Playlist(DictObj):
             raise MissingParameter('You must pass playlist_name to Playlist.create')
 
         method_uri = '/addplaylist/{{service_token}}/%(member_id)s/%(playlist_name)s/' % \
-                        {'member_id': member_id, 
+                        {'member_id': member_id,
                          'playlist_name': url_quote(playlist_name.encode('utf-8'))}
         xml_root = _client.get_xml(method_uri)
         playlists = xml_root.find('playlists')
@@ -112,9 +112,10 @@ class Playlist(DictObj):
         self.query.remove(self.member_id, self.playlist_id, self._client)
 
     def update(self):
-        method_uri = '/updateplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/%(playlist_name)s' % { 'member_id': self.member_id,
-                                                                                                            'playlist_id': self.id,
-                                                                                                            'playlist_name': url_quote(self.name.encode('utf-8'))}
+        method_uri = '/updateplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/%(playlist_name)s' % \
+                        {'member_id': self.member_id,
+                         'playlist_id': self.id,
+                         'playlist_name': url_quote(self.name.encode('utf-8'))}
 
         self._client.get_xml(method_uri)
         return True

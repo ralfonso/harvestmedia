@@ -1,18 +1,28 @@
 # -*- coding: utf-8 -*-
-import xml.etree.cElementTree as ET
-import logging
-from urllib import quote as url_quote
+from .util import DictObj
+from .track import Track
 
-from util import DictObj
-import client
-from exceptions import MissingParameter
 
-from track import Track
+class FavoriteQuery(object):
 
-logger = logging.getLogger('harvestmedia')
+    def add_track(self, member_id, track_id, _client):
+        method_uri = '/addtofavourites/{{service_token}}/%(member_id)s/track/%(track_id)s' % \
+                        {'member_id': member_id,
+                         'track_id': track_id}
+        _client.get_xml(method_uri)
+
+    def remove_track(self, member_id, track_id, _client):
+        method_uri = '/removefavouritestrack/{{service_token}}/%(member_id)s/%(track_id)s' % \
+                        {'member_id': member_id,
+                         'track_id': track_id}
+        _client.get_xml(method_uri)
+
 
 class Favourite(DictObj):
-    def __init__(self, xml_data, _client):
+
+    query = FavoriteQuery()
+
+    def __init__(self, _client):
         """ Create a new Favourite object from an ElementTree.Element object
 
         xml_data: the ElementTree.Element object to parse
@@ -20,24 +30,21 @@ class Favourite(DictObj):
         """
 
         self._client = _client
-        self._load(xml_data)
- 
-    def _load(self, xml_playlist):
-        self.id = xml_playlist.get('id')
-        for attribute, value in xml_playlist.items():
-            setattr(self, attribute, value)
+        self.tracks = []
 
-        tracks = xml_playlist.find('tracks')
+    @classmethod
+    def from_xml(cls, xml_data, _client):
+        instance = cls(_client)
+
+        tracks = xml_data.find('tracks')
         if tracks:
             for track in tracks.getchildren():
-                self.tracks.append(Track(track, self._client))
+                instance.tracks.append(Track.from_xml(track, _client))
 
-    @classmethod
-    def add_track(cls, member_id, track_id, _client):
-        method_uri = '/addtofavourites/{{service_token}}/%(member_id)s/track/%(track_id)s' % {'member_id': member_id, 'track_id': track_id}
-        _client.get_xml(method_uri)
-    
-    @classmethod
-    def remove_track(cls, member_id, track_id, client):
-        method_uri = '/removefavouritestrack/{{service_token}}/%(member_id)s/%(track_id)s' % {'member_id': member_id, 'track_id': track_id}
-        client.get_xml(method_uri)
+        return instance
+
+    def add_track(self, track_id):
+        self.query.add_track(self.member_id, self.track_id, self._client)
+
+    def remove_track(self, track_id):
+        self.query.remove_track(self.member_id, self.track_id, self._client)

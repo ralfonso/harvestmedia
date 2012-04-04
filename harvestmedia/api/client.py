@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
-import httplib
+import httplib2
 import xml.etree.cElementTree as ET
 
+from .config import Config, ServiceToken
 import exceptions
-from config import Config, ServiceToken
 
 
 logger = logging.getLogger('harvestmedia')
@@ -20,14 +20,14 @@ class Client(object):
     :param webservice_url: the base Harvest Media API URL
     """
 
-    def __init__(self, api_key, debug_level='INFO', webservice_url='https://service.harvestmedia.net/HMP-WS.svc'):
+    def __init__(self, api_key, debug_level='INFO',
+                    webservice_url='https://service.harvestmedia.net/HMP-WS.svc'):
 
         self.api_key = api_key
         self.debug_level = debug_level
         self.webservice_url = webservice_url
 
-        self.config = Config()
-        self.config.webservice_url = self.webservice_url
+        self.config = Config(debug_level=debug_level, webservice_url=webservice_url)
         self.request_service_token()
         self.get_service_info()
 
@@ -62,7 +62,8 @@ class Client(object):
             response_body = response.read()
             logger.debug('HTTP: non 200 status received from server: ' + str(response_status))
 
-            exc = exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + str(response_status) + ': ' + str(response_body))
+            exc = exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + \
+                                                 str(response_status) + ': ' + str(response_body))
             exc.code = response.status
             raise exc
 
@@ -72,7 +73,8 @@ class Client(object):
         try:
             root = ET.fromstring(xml_doc_str)
         except ET.ParseError, e:
-            raise exceptions.InvalidAPIResponse, "Unable to read the XML from the API server: " + e.message
+            raise exceptions.InvalidAPIResponse, \
+                            "Unable to read the XML from the API server: " + e.message
 
         error = root.find('error')
         if error is not None:
@@ -100,14 +102,13 @@ class Client(object):
         """
 
         method_uri = self.config.webservice_prefix + self.__add_service_token(method_uri)
-        if self.config.webservice_url_parsed.scheme == 'http':
-            http = httplib.HTTPConnection(self.config.webservice_host)
-        elif self.config.webservice_url_parsed.scheme == 'https':
-            http = httplib.HTTPSConnection(self.config.webservice_host)
-        http.request('GET', method_uri)
+        http = httplib2.Http()
+        http.request(method_uri, 'GET')
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("url: %s://%s%s" % (self.config.webservice_url_parsed.scheme, self.config.webservice_host, method_uri))
+            logger.debug("url: %s://%s%s" % (self.config.webservice_url_parsed.scheme,
+                                             self.config.webservice_host,
+                                             method_uri))
 
         response = http.getresponse()
 
@@ -120,17 +121,13 @@ class Client(object):
         """
 
         method_url = self.config.webservice_url + self.__add_service_token(method_uri)
-
-        if self.config.webservice_url_parsed.scheme == 'http':
-            http = httplib.HTTPConnection(self.config.webservice_host)
-        elif self.config.webservice_url_parsed.scheme == 'https':
-            http = httplib.HTTPSConnection(self.config.webservice_host)
+        http = httplib2.Http()
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug("url: " + method_url)
             logger.debug("posting XML: " + xml_post_body)
 
-        http.request('POST', method_url, xml_post_body, {'Content-Type': 'application/xml'})
+        http.request(method_url, 'POST', xml_post_body, {'Content-Type': 'application/xml'})
 
         response = http.getresponse()
         return self._handle_response(response)
@@ -147,16 +144,14 @@ class Client(object):
         root = self.get_xml(method_uri)
         xml_token = root.find('token')
 
-        if xml_token is None:
-            raise exceptions.InvalidAPIResponse('server did not return token')
-
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug('got token: %s (expires: %s)' % (xml_token.get('value'), xml_token.get('expiry')))
+            logger.debug('got token: %s (expires: %s)' % \
+                (xml_token.get('value'), xml_token.get('expiry')))
+
         token = xml_token.get('value')
         expiry = xml_token.get('expiry')
 
         self.config.service_token = ServiceToken(self.config, token, expiry)
-
 
     def get_service_info(self):
         """Gets the service info for the current HM account.

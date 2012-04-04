@@ -24,7 +24,7 @@ class CategoryQuery(object):
 
 
 class Attribute(DictObj):
-    
+
     def __init__(self, xml_data=None):
         self.attributes = []
 
@@ -48,7 +48,7 @@ class Attribute(DictObj):
 
         if _attributes:
             for attribute_xml in _attributes:
-               instance.attributes.append(Attribute.from_xml(attribute_xml, _client))
+                instance.attributes.append(Attribute.from_xml(attribute_xml, _client))
 
         return instance
 
@@ -56,7 +56,7 @@ class Attribute(DictObj):
 class Category(DictObj):
 
     query = CategoryQuery()
-    
+
     def __init__(self, _client):
         self._client = _client
         self.attributes = []

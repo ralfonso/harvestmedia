@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
-from urlparse import urlparse
 import datetime
 import iso8601
-import pytz
 import logging
-from exceptions import TokenExpired
-from signals import signals
+import pytz
+from urlparse import urlparse
+
+from .exceptions import TokenExpired
+
 
 logger = logging.getLogger('harvestmedia')
+
 
 class ServiceToken(object):
     def __init__(self, config, token, expiry):
         self._token = None
         self._expiry = None
         self._expiry_dt = None
-        
+
         self.config = config
         self.expiry = expiry
         self.token = token
@@ -29,7 +31,7 @@ class ServiceToken(object):
         service_token_expires_date = iso8601.parse_date(value)
         hm_tz = pytz.timezone(self.config.timezone)
         service_token_expires_date = service_token_expires_date.replace(tzinfo=hm_tz)
-        utc_tz =  pytz.timezone('UTC')
+        utc_tz = pytz.timezone('UTC')
         self._expiry_dt = service_token_expires_date.astimezone(utc_tz)
         self._expiry = value
 
@@ -43,8 +45,9 @@ class ServiceToken(object):
         return self._token
 
     @token.setter
-    def token(self, value): 
-        self._token = value 
+    def token(self, value):
+        self._token = value
+
 
 class Config(object):
 
@@ -57,7 +60,7 @@ class Config(object):
     def __init__(self, *args, **kwargs):
         self._set('waveform_url', **kwargs)
         self._set('webservice_url', **kwargs)
-        self._set('debug', **kwargs)
+        self._set('debug_level', **kwargs)
         self._set('timezone', 'Australia/Sydney', **kwargs)
 
     @property

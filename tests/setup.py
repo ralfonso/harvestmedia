@@ -12,7 +12,7 @@ import harvestmedia.api.client
 api_key = '12345'
 webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def init_client(HTTPMock):
     expiry = datetime.datetime.now()
     expiry += timedelta(hours=22) # offset for HM timezone
@@ -42,5 +42,5 @@ def init_client(HTTPMock):
                         
     http = HTTPMock()
     http.getresponse.side_effect = side_effect
-    client = harvestmedia.api.client.Client(api_key=api_key)
+    client = harvestmedia.api.client.Client(api_key=api_key, debug_level='DEBUG')
     return client

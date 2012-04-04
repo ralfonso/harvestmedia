@@ -15,7 +15,7 @@ from setup import init_client
 api_key = '12345'
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 @raises(harvestmedia.api.exceptions.InvalidAPIResponse)
 def test_xml_failure(HTTPMock):
     http = HTTPMock()
@@ -26,7 +26,7 @@ def test_xml_failure(HTTPMock):
     client.get_service_info()
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 @raises(harvestmedia.api.exceptions.InvalidAPIResponse)
 def test_non_200(HTTPMock):
     http = HTTPMock()
@@ -37,7 +37,7 @@ def test_non_200(HTTPMock):
     client.get_service_info()
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_get_service_token(HTTPMock):
     expiry = datetime.datetime.now()
     expiry += datetime.timedelta(hours=22) # offset for HM timezone
@@ -76,33 +76,7 @@ def test_get_service_token(HTTPMock):
     assert client.config.service_token.expiry == expiry.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
-def test_get_libraries(HTTPMock):
-    client = init_client()
-    http = HTTPMock()
-    expiry = datetime.datetime.today().isoformat()
-    test_token = hashlib.md5(expiry).hexdigest() # generate an md5 from the date for testing
-    http.getresponse.return_value = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><responseservicetoken><token value="%s" expiry="%s"/></responseservicetoken>' % (test_token, expiry))
-    
-    mock_response = StringIO.StringIO("""
-        <ResponseLibraries>
-            <libraries> 
-                <library id="abc123" name="VIDEOHELPER" detail="Library description" />
-                <library id="abc125" name="MODULES" detail="Library description" />
-            </libraries>
-        </ResponseLibraries>""")
-    mock_response.status = 200
-    http.getresponse.return_value = mock_response
-
-    libraries = Library.query.get_libraries(client)
-    assert isinstance(libraries, list)
-
-    library = libraries[0]
-    assert library.id == 'abc123'
-    assert library.name == 'VIDEOHELPER'
-
-
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 @raises(harvestmedia.api.exceptions.InvalidToken)
 def test_invalid_token(HTTPMock):
     http = HTTPMock()
@@ -113,8 +87,8 @@ def test_invalid_token(HTTPMock):
     libraries = Library.get_libraries(client)
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
-@raises(harvestmedia.api.exceptions.InvalidToken)
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+@raises(harvestmedia.api.exceptions.CorruptInputData)
 def test_corrupt_input_data(HTTPMock):
     http = HTTPMock()
     mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><memberaccount><error><code>1</code><description>Corrupt Input Data</description></error></memberaccount>')
@@ -124,18 +98,18 @@ def test_corrupt_input_data(HTTPMock):
     libraries = Library.get_libraries(client)
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
-@raises(harvestmedia.api.exceptions.InvalidToken)
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+@raises(harvestmedia.api.exceptions.IncorrectInputData)
 def test_invalid_input_data(HTTPMock):
     http = HTTPMock()
-    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><memberaccount><error><code>2</code><description>Corrupt Input Data</description></error></memberaccount>')
+    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><memberaccount><error><code>2</code><description>Invalid Input Data</description></error></memberaccount>')
     mock_response.status = 200
     http.getresponse.return_value = mock_response
     client = harvestmedia.api.client.Client(api_key=api_key)
     libraries = Library.get_libraries(client)
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_expired_token(HTTPMock):
     http = HTTPMock()
     expiry = datetime.datetime.now()

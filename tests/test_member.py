@@ -34,7 +34,7 @@ def test_create_member_missing_username():
     member.create()
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_create_member(HTTPMock):
     client = init_client()
     test_member_id = get_random_md5()
@@ -81,8 +81,7 @@ def test_create_member(HTTPMock):
 
 def test_from_xml():
     client = init_client()
-    now = datetime.datetime.today().isoformat()
-    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_member_id = get_random_md5()
     username = 'testuser'
     firstname = 'Test'
     lastname = 'User'
@@ -110,7 +109,7 @@ def test_from_xml():
     assert member.firstname == firstname
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_member_update(HTTPMock):
     client = init_client()
     test_member_id = get_random_md5()
@@ -159,7 +158,7 @@ def test_member_update(HTTPMock):
     assert member.username == test_username_update
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_member_authenticate(HTTPMock):
     client = init_client()
     test_member_id = get_random_md5()
@@ -193,7 +192,7 @@ def test_member_authenticate(HTTPMock):
 
 
 @raises(harvestmedia.api.exceptions.InvalidLoginDetails)
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_member_authenticate_fail(HTTPMock):
     client = init_client()
     test_username = 'username'
@@ -208,7 +207,7 @@ def test_member_authenticate_fail(HTTPMock):
 
 
 @raises(harvestmedia.api.exceptions.MemberDoesNotExist)
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_member_invalid(HTTPMock):
     client = init_client()
     test_member_id = get_random_md5()
@@ -221,7 +220,7 @@ def test_member_invalid(HTTPMock):
     member = Member.query.get_by_id(test_member_id, client)
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_send_password(HTTPMock):
     client = init_client()
     test_username = 'username'

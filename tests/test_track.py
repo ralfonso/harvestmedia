@@ -38,7 +38,7 @@ def test_track_dict():
     assert track_dict['id'] == track_id
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_tracks_get_by_id(HTTPMock):
     client = init_client()
     track_id = '17376d36f309f18d'
@@ -144,7 +144,7 @@ def test_tracks_get_by_id(HTTPMock):
     assert track.name == track_name
 
 
-@mock.patch('harvestmedia.api.client.httplib.HTTPSConnection')
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_get_waveform_url(HTTPMock):
     client = init_client()
     track_id = '17376d36f309f18d'
