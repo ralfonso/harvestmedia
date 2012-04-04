@@ -11,42 +11,26 @@ import harvestmedia.api.exceptions
 from harvestmedia.api.member import Member
 from harvestmedia.api.playlist import Playlist
 
-from setup import init_client
-from utils import get_random_md5
-
-api_key = '12345'
-
-class HTTPResponseMock(object):
-
-    @property
-    def status(self):
-        return 200
-
-    def read(self):
-        return self.read_response
+from utils import build_http_mock, get_random_md5, init_client
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_create_playlist(HTTPMock):
+def test_create_playlist(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     test_playlist_id = get_random_md5()
     test_playlist_name = 'test playlist'
 
-    http = HTTPMock()
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                 <ResponsePlaylists>
+                    <playlists>
+                        <playlist id="%(id)s" name="%(name)s" />
+                    </playlists>
+                </ResponsePlaylists>""" % \
+                    {'id': test_playlist_id, 
+                     'name': test_playlist_name,}
 
-    xml_response = """<?xml version="1.0" encoding="utf-8"?>
-     <ResponsePlaylists>
-        <playlists>
-            <playlist id="%(id)s" name="%(name)s" />
-        </playlists>
-    </ResponsePlaylists>""" % {'id': test_playlist_id, 
-                            'name': test_playlist_name,}
-
-    response = HTTPResponseMock()
-    response.read_response = xml_response
-    http.getresponse.return_value = response
-
+    http = build_http_mock(HttpMock, content=content)
     playlist = Playlist.create(_client=client, member_id=test_member_id, playlist_name=test_playlist_name)
 
     assert playlist.id == test_playlist_id
@@ -54,7 +38,7 @@ def test_create_playlist(HTTPMock):
 
  
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_get_member_playlists(HTTPMock):
+def test_get_member_playlists(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     username = 'testuser'
@@ -72,31 +56,30 @@ def test_get_member_playlists(HTTPMock):
                                                        'firstname': firstname,
                                                        'lastname': lastname,
                                                        'email': email})
-    now = datetime.datetime.today().isoformat()
-    test_member_id = get_random_md5()
-    now = datetime.datetime.today().isoformat()
+
+    member = Member.from_xml(member_xml, client)
+
     test_playlist_id = get_random_md5()
     test_playlist_name = 'test playlist'
 
-    http = HTTPMock()
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                     <ResponsePlaylists>
+                        <playlists>
+                            <playlist id="%(id)s" name="%(name)s">
+                                <tracks>
+                                    <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure 
+                                        you’re down the front for this fiery Post Punk workout." 
+                                        composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM" 
+                                        name="Guerilla Pop" id="17376d36f309f18d" keywords="" lyrics="" 
+                                        displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
+                                        bpm="" mixout="" frequency="44100" bitrate="1411" />
+                                </tracks>
+                            </playlist>
+                        </playlists>
+                    </ResponsePlaylists>""" % {'id': test_playlist_id,
+                                            'name': test_playlist_name,}
 
-    xml_response = """<?xml version="1.0" encoding="utf-8"?>
-     <ResponsePlaylists>
-        <playlists>
-            <playlist id="%(id)s" name="%(name)s">
-                <tracks>
-                    <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM" name="Guerilla Pop" id="17376d36f309f18d" keywords="" lyrics="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" />
-                </tracks>
-            </playlist>
-        </playlists>
-    </ResponsePlaylists>""" % {'id': test_playlist_id, 
-                            'name': test_playlist_name,}
-
-    response = HTTPResponseMock()
-    response.read_response = xml_response
-    http.getresponse.return_value = response
-
-    member = Member.from_xml(member_xml, client)
+    http = build_http_mock(HttpMock, content=content)
     playlists = member.get_playlists()
 
     assert isinstance(playlists, list)
@@ -106,40 +89,37 @@ def test_get_member_playlists(HTTPMock):
     assert playlist.id == test_playlist_id
     assert playlist.name == test_playlist_name
 
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_create_client_missing():
     playlist = Playlist.create()
+
 
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_create_member_id_missing():
     client = init_client()
     playlist = Playlist.create(_client=client)
 
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_create_name_missing():
     client = init_client()
     test_member_id = 123
     playlist = Playlist.create(_client=client, member_id=test_member_id)
-    
+
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_add_track(HTTPMock):
+def test_add_track(HttpMock):
     client = init_client()
-    now = datetime.datetime.today().isoformat()
     test_playlist_id = get_random_md5()
     track_id = get_random_md5()
 
-    http = HTTPMock()
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                    <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                        <code>OK</code>
+                    </responsecode>"""
 
-    xml_response = """<?xml version="1.0" encoding="utf-8"?>
-        <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <code>OK</code>
-        </responsecode>"""
-
-    response = HTTPResponseMock()
-    response.read_response = xml_response
-    http.getresponse.return_value = response
-
+    http = build_http_mock(HttpMock, content=content)
     playlist = Playlist(_client=client)
     playlist.member_id = 123
     playlist.id = test_playlist_id
@@ -147,7 +127,7 @@ def test_add_track(HTTPMock):
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_remove(HTTPMock):
+def test_remove(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     test_playlist_id = get_random_md5()
@@ -155,28 +135,28 @@ def test_remove(HTTPMock):
     test_track_id = get_random_md5()
 
     return_values = [
-        """<?xml version="1.0" encoding="utf-8"?>
-         <ResponsePlaylists>
-            <playlists>
-                <playlist id="%(test_playlist_id)s" name="%(test_playlist_name)s">
-                    <tracks>
-                        <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM" name="Guerilla Pop" id="%(test_track_id)s" keywords="" lyrics="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" />
-                    </tracks>
-                </playlist>
-            </playlists>
-        </ResponsePlaylists>""" % locals(),
-        """<?xml version="1.0" encoding="utf-8"?>
-        <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <code>OK</code>
-        </responsecode>""",]
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                 <ResponsePlaylists>
+                    <playlists>
+                        <playlist id="%(test_playlist_id)s" name="%(test_playlist_name)s">
+                            <tracks>
+                                <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure you’re
+                                down the front for this fiery Post Punk workout."
+                                composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM"
+                                name="Guerilla Pop" id="%(test_track_id)s" keywords=""
+                                lyrics="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo=""
+                                instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" />
+                            </tracks>
+                        </playlist>
+                    </playlists>
+                </ResponsePlaylists>""" % locals()),
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                 <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                    <code>OK</code>
+                 </responsecode>""",),
+    ]
 
-    def side_effect(*args):
-        mock_response = StringIO.StringIO(return_values.pop(0))
-        mock_response.status = 200
-        return mock_response
-                        
-    http = HTTPMock()
-    http.getresponse.side_effect = side_effect
+    http = build_http_mock(HttpMock, responses=return_values)
     member = Member(_client=client)
     member.id = test_member_id
     playlists = member.get_playlists()
@@ -184,7 +164,7 @@ def test_remove(HTTPMock):
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_remove_track(HTTPMock):
+def test_remove_track(HttpMock):
     client = init_client()
     album_id = '1c5f47572d9152f3'
 
@@ -196,28 +176,28 @@ def test_remove_track(HTTPMock):
     track_id = '17376d36f309f18d'
 
     return_values = [
-        """<?xml version="1.0" encoding="utf-8"?>
-         <ResponsePlaylists>
-            <playlists>
-                <playlist id="%(test_playlist_id)s" name="%(test_playlist_name)s">
-                    <tracks>
-                        <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM" name="Guerilla Pop" id="%(track_id)s" keywords="" lyrics="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" />
-                    </tracks>
-                </playlist>
-            </playlists>
-        </ResponsePlaylists>""" % locals(),
-        """<?xml version="1.0" encoding="utf-8"?>
-        <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <code>OK</code>
-        </responsecode>""",]
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                     <ResponsePlaylists>
+                        <playlists>
+                            <playlist id="%(test_playlist_id)s" name="%(test_playlist_name)s">
+                                <tracks>
+                                    <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make
+                                    sure you’re down the front for this fiery Post Punk workout."
+                                    composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM"
+                                    name="Guerilla Pop" id="%(track_id)s" keywords="" lyrics=""
+                                    displaytitle="Guerilla Pop" genre="Pop / Rock" tempo=""
+                                    instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" />
+                                </tracks>
+                            </playlist>
+                        </playlists>
+                    </ResponsePlaylists>""" % locals(),), 
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                    <code>OK</code>
+                </responsecode>"""),
+    ]
 
-    def side_effect(*args):
-        mock_response = StringIO.StringIO(return_values.pop(0))
-        mock_response.status = 200
-        return mock_response
-                        
-    http = HTTPMock()
-    http.getresponse.side_effect = side_effect
+    http = build_http_mock(HttpMock, responses=return_values)
 
     member = Member(_client=client)
     member.id = test_member_id
@@ -226,7 +206,7 @@ def test_remove_track(HTTPMock):
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_playlist_update(HTTPMock):
+def test_playlist_update(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     test_playlist_id = get_random_md5()
@@ -234,31 +214,29 @@ def test_playlist_update(HTTPMock):
     test_playlist_update_name = 'test playlist update'
     track_id = '17376d36f309f18d'
 
-    http = HTTPMock()
-
     return_values = [
-        """<?xml version="1.0" encoding="utf-8"?>
-         <ResponsePlaylists>
-            <playlists>
-                <playlist id="%(test_playlist_id)s" name="%(test_playlist_name)s">
-                    <tracks>
-                        <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM" name="Guerilla Pop" id="%(track_id)s" keywords="" lyrics="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" />
-                    </tracks>
-                </playlist>
-            </playlists>
-        </ResponsePlaylists>""" % locals(),
-        """<?xml version="1.0" encoding="utf-8"?>
-        <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-            <code>OK</code>
-        </responsecode>""",]
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                 <ResponsePlaylists>
+                    <playlists>
+                        <playlist id="%(test_playlist_id)s" name="%(test_playlist_name)s">
+                            <tracks>
+                                <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make
+                                sure you’re down the front for this fiery Post Punk workout."
+                                composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM"
+                                name="Guerilla Pop" id="%(track_id)s" keywords="" lyrics=""
+                                displaytitle="Guerilla Pop" genre="Pop / Rock" tempo=""
+                                instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411" />
+                            </tracks>
+                        </playlist>
+                    </playlists>
+                </ResponsePlaylists>""" % locals()),
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                 <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+                     <code>OK</code>
+                 </responsecode>"""),
+    ]
 
-    def side_effect(*args):
-        mock_response = StringIO.StringIO(return_values.pop(0))
-        mock_response.status = 200
-        return mock_response
-                        
-    http = HTTPMock()
-    http.getresponse.side_effect = side_effect
+    http = build_http_mock(HttpMock, responses=return_values)
 
     member = Member(_client=client)
     member.id = test_member_id

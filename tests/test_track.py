@@ -10,18 +10,7 @@ import xml.etree.cElementTree as ET
 import harvestmedia.api.exceptions
 from harvestmedia.api.track import Track
 
-from setup import init_client
-
-api_key = '12345'
-
-class HTTPResponseMock(object):
-
-    @property
-    def status(self):
-        return 200
-
-    def read(self):
-        return self.read_response
+from utils import build_http_mock, get_random_md5, init_client
 
 
 def test_track_dict():
@@ -39,7 +28,7 @@ def test_track_dict():
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_tracks_get_by_id(HTTPMock):
+def test_tracks_get_by_id(HttpMock):
     client = init_client()
     track_id = '17376d36f309f18d'
     track_name = 'Guerilla Pop'
@@ -51,7 +40,7 @@ def test_tracks_get_by_id(HTTPMock):
 
 
     return_values = [
-            textwrap.dedent("""<responsetracks>
+        (200, """<responsetracks>
                 <tracks>
                 <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front
                 for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;" publisher=""
@@ -128,15 +117,10 @@ def test_tracks_get_by_id(HTTPMock):
                     </categories>
                 </track>
             </tracks>
-        </responsetracks>""") % locals(),]
+        </responsetracks>""" % locals(),), 
+    ]
 
-    def side_effect(*args):
-        mock_response = StringIO.StringIO(return_values.pop(0))
-        mock_response.status = 200
-        return mock_response
-                        
-    http = HTTPMock()
-    http.getresponse.side_effect = side_effect
+    http = build_http_mock(HttpMock, responses=return_values)
  
     track = Track.query.get_by_id(track_id, client)
 

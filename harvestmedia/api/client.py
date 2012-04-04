@@ -40,7 +40,7 @@ class Client(object):
         self._debug_level = value
         logger.setLevel(value)
 
-    def __add_service_token(self, uri):
+    def _add_service_token(self, uri):
         if '{{service_token}}' not in uri:
             return uri
 
@@ -54,24 +54,24 @@ class Client(object):
 
         return uri
 
-    def _handle_response(self, response):
-        xml_doc_str = response.read()
+    def _build_url(self, path):
+        return self.config.webservice_url + self._add_service_token(path)
 
+    def _handle_response(self, response, content):
         if response.status != 200:
             response_status = response.status
-            response_body = response.read()
             logger.debug('HTTP: non 200 status received from server: ' + str(response_status))
 
             exc = exceptions.InvalidAPIResponse('non 200 HTTP error returned from server: ' + \
-                                                 str(response_status) + ': ' + str(response_body))
+                                                 str(response_status) + ': ' + str(content))
             exc.code = response.status
             raise exc
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("server response: " + xml_doc_str)
+            logger.debug("server response: " + content)
 
         try:
-            root = ET.fromstring(xml_doc_str)
+            root = ET.fromstring(content)
         except ET.ParseError, e:
             raise exceptions.InvalidAPIResponse, \
                             "Unable to read the XML from the API server: " + e.message
@@ -101,18 +101,14 @@ class Client(object):
 
         """
 
-        method_uri = self.config.webservice_prefix + self.__add_service_token(method_uri)
+        method_url = self._build_url(method_uri)
         http = httplib2.Http()
-        http.request(method_uri, 'GET')
+        response, content = http.request(method_url, 'GET')
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("url: %s://%s%s" % (self.config.webservice_url_parsed.scheme,
-                                             self.config.webservice_host,
-                                             method_uri))
+            logger.debug('get_xml url: %s' % method_url)
 
-        response = http.getresponse()
-
-        return self._handle_response(response)
+        return self._handle_response(response, content)
 
     def post_xml(self, method_uri, xml_post_body):
         """Called by the model classes to perform an HTTP POST and receive
@@ -120,17 +116,15 @@ class Client(object):
 
         """
 
-        method_url = self.config.webservice_url + self.__add_service_token(method_uri)
+        method_url = self._build_url(method_uri)
         http = httplib2.Http()
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("url: " + method_url)
+            logger.debug('post_xml url: %s' % method_url)
             logger.debug("posting XML: " + xml_post_body)
 
-        http.request(method_url, 'POST', xml_post_body, {'Content-Type': 'application/xml'})
-
-        response = http.getresponse()
-        return self._handle_response(response)
+        response, content = http.request(method_url, 'POST', xml_post_body, {'Content-Type': 'application/xml'})
+        return self._handle_response(response, content)
 
     def request_service_token(self):
         """Uses the API key to get a valid service token from the HM api.

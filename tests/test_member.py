@@ -10,21 +10,7 @@ import xml.etree.cElementTree as ET
 import harvestmedia.api.exceptions
 from harvestmedia.api.member import Member
 
-from setup import init_client
-from utils import get_random_md5
-
-
-api_key = '12345'
-webservice_url = 'https://service.harvestmedia.net/HMP-WS.svc'
-
-class HTTPResponseMock(object):
-
-    @property
-    def status(self):
-        return 200
-
-    def read(self):
-        return self.read_response
+from utils import build_http_mock, get_random_md5, init_client
 
 
 @raises(harvestmedia.api.exceptions.MissingParameter)
@@ -35,15 +21,13 @@ def test_create_member_missing_username():
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_create_member(HTTPMock):
+def test_create_member(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     username = 'testuser'
     first_name = 'Test'
     last_name = 'User'
     email = 'email@email.com'
-
-    http = HTTPMock()
 
     xml_response = """<?xml version="1.0" encoding="utf-8"?>
      <ResponseMember>
@@ -59,18 +43,14 @@ def test_create_member(HTTPMock):
                             'last_name': last_name,
                             'email': email}
 
-    response = HTTPResponseMock()
-    response.read_response = xml_response
-    http.getresponse.return_value = response
-
-    config = harvestmedia.api.config.Config()
-    config.debug = True
     username = username
     first_name = first_name
     last_name = last_name
     email = email
     termsaccept = 'true'
     fileformat = 'MP3'
+
+    http = build_http_mock(HttpMock, content=xml_response)
     member = Member.create(_client=client, username=username, first_name=first_name,
                            last_name=last_name, email=email, termsaccept=termsaccept,
                            fileformat=fileformat)
@@ -87,30 +67,27 @@ def test_from_xml():
     lastname = 'User'
     email = 'email@email.com'
 
-    member_xml = """<?xml version="1.0" encoding="utf-8"?>
-     <ResponseMember>
-        <memberaccount id="%(test_member_id)s">
-            <username>%(username)s</username>
-            <firstname>%(firstname)s</firstname>
-            <lastname>%(lastname)s</lastname>
-            <email>%(email)s</email>
-        </memberaccount>
-    </ResponseMember>""" % {'test_member_id': test_member_id, 
-                            'username': username,
-                            'firstname': firstname,
-                            'lastname': lastname,
-                            'email': email}
+    xml_str = """<memberaccount id="%(test_member_id)s">
+                    <username>%(username)s</username>
+                    <firstname>%(firstname)s</firstname>
+                    <lastname>%(lastname)s</lastname>
+                    <email>%(email)s</email>
+                </memberaccount>""" % \
+                    {'test_member_id': test_member_id, 
+                     'username': username,
+                     'firstname': firstname,
+                     'lastname': lastname,
+                     'email': email}
 
-    xml_doc = ET.fromstring(member_xml)
-    xml_member = xml_doc.find('memberaccount')
-    member = Member.from_xml(xml_member, client)
+    member_xml = ET.fromstring(xml_str)                     
+    member = Member.from_xml(member_xml, client)
 
     assert member.id == test_member_id
     assert member.firstname == firstname
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_member_update(HTTPMock):
+def test_member_update(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     test_username = 'username'
@@ -119,37 +96,28 @@ def test_member_update(HTTPMock):
     test_lastname = 'user'
     test_username_update = 'new name'
 
-    http = HTTPMock()
-
     return_values = [
-    """<?xml version="1.0" encoding="utf-8"?>
-         <ResponseMember>
-            <memberaccount id="%(test_member_id)s">
-                <username>%(test_username)s</username>
-                <firstname>%(test_firstname)s</firstname>
-                <lastname>%(test_lastname)s</lastname>
-                <email>%(test_email)s</email>
-            </memberaccount>
-        </ResponseMember>""" % locals(),
-    """<?xml version="1.0" encoding="utf-8"?>
-         <ResponseMember>
-            <memberaccount id="%(test_member_id)s">
-                <username>%(test_username_update)s</username>
-                <firstname>%(test_firstname)s</firstname>
-                <lastname>%(test_lastname)s</lastname>
-                <email>%(test_email)s</email>
-            </memberaccount>
-        </ResponseMember>""" % locals(),]
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                 <ResponseMember>
+                    <memberaccount id="%(test_member_id)s">
+                        <username>%(test_username)s</username>
+                        <firstname>%(test_firstname)s</firstname>
+                        <lastname>%(test_lastname)s</lastname>
+                        <email>%(test_email)s</email>
+                    </memberaccount>
+                </ResponseMember>""" % locals()),
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                 <ResponseMember>
+                    <memberaccount id="%(test_member_id)s">
+                        <username>%(test_username_update)s</username>
+                        <firstname>%(test_firstname)s</firstname>
+                        <lastname>%(test_lastname)s</lastname>
+                        <email>%(test_email)s</email>
+                    </memberaccount>
+                </ResponseMember>""" % locals()), 
+    ]
 
-
-
-    def side_effect(*args):
-        mock_response = StringIO.StringIO(return_values.pop(0))
-        mock_response.status = 200
-        return mock_response
-                        
-    http = HTTPMock()
-    http.getresponse.side_effect = side_effect
+    http = build_http_mock(HttpMock, responses=return_values)
 
     member = Member.query.get_by_id(test_member_id, client)
     assert member.username == test_username
@@ -159,7 +127,7 @@ def test_member_update(HTTPMock):
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_member_authenticate(HTTPMock):
+def test_member_authenticate(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     test_username = 'username'
@@ -168,70 +136,67 @@ def test_member_authenticate(HTTPMock):
     test_lastname = 'last'
     test_email = 'test@test.com'
 
-    return_values = [
-    """<?xml version="1.0" encoding="utf-8"?>
-         <ResponseMember>
-            <memberaccount id="%(test_member_id)s">
-                <username>%(test_username)s</username>
-                <firstname>%(test_firstname)s</firstname>
-                <lastname>%(test_lastname)s</lastname>
-                <email>%(test_email)s</email>
-            </memberaccount>
-        </ResponseMember>""" % locals(),]
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                 <ResponseMember>
+                    <memberaccount id="%(test_member_id)s">
+                        <username>%(test_username)s</username>
+                        <firstname>%(test_firstname)s</firstname>
+                        <lastname>%(test_lastname)s</lastname>
+                        <email>%(test_email)s</email>
+                    </memberaccount>
+                </ResponseMember>""" % locals()
 
-    def side_effect(*args):
-        mock_response = StringIO.StringIO(return_values.pop(0))
-        mock_response.status = 200
-        return mock_response
-                        
-    http = HTTPMock()
-    http.getresponse.side_effect = side_effect
-
+    http = build_http_mock(HttpMock, content=content)
     member = Member.authenticate(test_username, test_password, client)
     assert member.id == test_member_id
 
 
 @raises(harvestmedia.api.exceptions.InvalidLoginDetails)
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_member_authenticate_fail(HTTPMock):
+def test_member_authenticate_fail(HttpMock):
     client = init_client()
     test_username = 'username'
     test_password = get_random_md5()
 
-    http = HTTPMock()
-    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><responsemember><error><code>6</code><description>Invalid Login Details</description></error></responsemember>')
-    mock_response.status = 200
-    http.getresponse.return_value = mock_response
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                    <responsemember>
+                    <error>
+                        <code>6</code>
+                        <description>Invalid Login Details</description>
+                    </error>
+                 </responsemember>"""
 
+    http = build_http_mock(HttpMock, content=content)                 
     member = Member.authenticate(test_username, test_password, client)
 
 
 @raises(harvestmedia.api.exceptions.MemberDoesNotExist)
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_member_invalid(HTTPMock):
+def test_member_invalid(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
 
-    http = HTTPMock()
-    mock_response = StringIO.StringIO('<?xml version="1.0" encoding="utf-8"?><responsemember><error><code>7</code><description>Member Does Not Exist</description></error></responsemember>')
-    mock_response.status = 200
-    http.getresponse.return_value = mock_response
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                    <responsemember>
+                    <error>
+                        <code>7</code>
+                        <description>Member Does Not Exist</description>
+                    </error>
+                 </responsemember>"""
 
+    http = build_http_mock(HttpMock, content=content)                    
     member = Member.query.get_by_id(test_member_id, client)
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_send_password(HTTPMock):
+def test_send_password(HttpMock):
     client = init_client()
     test_username = 'username'
-    http = HTTPMock()
 
-    xml_response = """<?xml version="1.0" encoding="utf-8"?>
+    content = """<?xml version="1.0" encoding="utf-8"?>
         <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
             <code>OK</code>
         </responsecode>"""
 
-    response = HTTPResponseMock()
-    response.read_response = xml_response
-    http.getresponse.return_value = response
+    http = build_http_mock(HttpMock, content=content)                    
     Member.send_password(test_username, client)
