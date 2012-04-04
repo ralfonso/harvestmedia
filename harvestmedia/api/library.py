@@ -1,44 +1,11 @@
 # -*- coding: utf-8 -*-
-from util import DictObj
-import xml.etree.cElementTree as ET
-import exceptions
-import client
-import config
 from album import Album
+from util import DictObj
 
 
-class Library(DictObj):
-    
-    def __init__(self, xml_data, _client):
-        self._config = config.Config()
-        self._client = _client
-        self._load(xml_data)
+class LibraryQuery(object):
 
-    def _load(self, xmldata):
-        """
-        Convert the Harvest Media XML tree to our Library object
-        """
-        self.id = xmldata.get('id')
-        self.detail = xmldata.get('detail')
-        self.name = xmldata.get('name')
-
-
-    def get_albums(self):
-        # reset internal album list
-        self.albums = {}
-
-        method_uri = '/getalbums/{{service_token}}/' + self.id
-        xml_root = self._client.get_xml(method_uri)
-        albums = xml_root.find('albums').getchildren()
-
-        for album_element in albums:
-            album = Album(album_element)
-            self.albums[album.id] = album
-
-        return self.albums.values()
-
-    @staticmethod
-    def get_libraries(_client):
+    def get_libraries(self, _client):
         libraries = []
 
         method_uri = '/getlibraries/{{service_token}}'
@@ -49,3 +16,31 @@ class Library(DictObj):
             libraries.append(library)
 
         return libraries
+
+
+class Library(DictObj):
+
+    query = LibraryQuery()
+    
+    def __init__(self,_client):
+        self._client = _client
+
+    @classmethod
+    def from_xml(cls, xml_data, _client):
+        instance = cls(_client)
+        for attribute, value in xml_data.items():
+            setattr(instance, attribute, value)
+
+        return instance
+
+    def get_albums(self):
+        album_list = []
+        method_uri = '/getalbums/{{service_token}}/' + self.id
+        xml_root = self._client.get_xml(method_uri)
+        albums = xml_root.find('albums').getchildren()
+
+        for album_element in albums:
+            album = Album.from_xml(album_element, _client=self._client)
+            album_list.append(album)
+
+        return album_list

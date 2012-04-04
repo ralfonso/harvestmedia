@@ -1,44 +1,33 @@
 # -*- coding: utf-8 -*-
-from util import DictObj
-import exceptions
 from track import Track
-import client
+from util import DictObj
+
+
+class AlbumQuery(object):
+    
+    pass
 
 
 class Album(DictObj):
-    
-    def __init__(self, xml_data, _client):
-        self._client = _client
-        self._load(xml_data)
 
-    def _load(self, xml_data):
+    query = AlbumQuery()
+    
+    def __init__(self, _client):
+        self._client = _client
+
+    def get_tracks(self, get_full_detail=True):
+        return Track.query.get_tracks_for_album(self.id, self._client, get_full_detail) 
+
+    @classmethod
+    def from_xml(cls, xml_data, _client):
+        instance = cls(_client) 
         for attribute, value in xml_data.items():
-            setattr(self, attribute, value)
+            setattr(instance, attribute, value)
+        return instance
 
     def as_dict(self):
         return dict([(k,v) for k,v in self.__dict__.items()])
-
-    def get_tracks(self, get_full_detail=True):
-        track_list = []
-        method_uri = '/getalbumtracks/{{service_token}}/' + self.id
-
-        xml_root = self._client.get_xml(method_uri)
-        tracks = xml_root.find('tracks').getchildren()
-
-        for track_element in tracks:
-            track = Track(track_element, self._client)
-            track_list.append(track)
-
-        if len(track_list) == 0:
-            return track_list
-
-        if get_full_detail:
-            # now we need to get the fulldetail
-            track_ids = [t.id for t in track_list]
-            return Track.get_multiple(track_ids, self._client)
-        else:
-            return track_list
-    
+            
     def get_cover_url(self, width=None, height=None):
         asset_url = self._client.config.album_art_url
         asset_url = asset_url.replace('{id}', self.id)
