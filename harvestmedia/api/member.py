@@ -16,6 +16,18 @@ class MemberQuery(object):
         xml_member = xml_data.find('memberaccount')
         return Member.from_xml(xml_member, _client)
 
+    def add_favourite(self, member_id, track_id, _client):
+        method_uri = '/addtofavourites/{{service_token}}/%(member_id)s/track/%(track_id)s' % \
+                        {'member_id': member_id,
+                         'track_id': track_id}
+        _client.get_xml(method_uri)
+
+    def remove_favourite(self, member_id, track_id, _client):
+        method_uri = '/removefavouritestrack/{{service_token}}/%(member_id)s/%(track_id)s' % \
+                        {'member_id': member_id,
+                         'track_id': track_id}
+        _client.get_xml(method_uri)
+
 
 class Member(DictObj):
 
@@ -116,3 +128,9 @@ class Member(DictObj):
             favourites.append(favourite)
 
         return favourites
+
+    def add_favourite(self, track_id):
+        self.query.add_favourite(self.member_id, track_id, self._client)
+
+    def remove_favourite(self, track_id):
+        self.query.remove_favourite(self.member_id, track_id, self._client)

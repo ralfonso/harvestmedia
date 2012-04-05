@@ -68,7 +68,7 @@ class Client(object):
             raise exc
 
         if logger.isEnabledFor(logging.DEBUG):
-            logger.debug("server response: " + content)
+            logger.debug("server response: " + str(content))
 
         try:
             root = ET.fromstring(content)

@@ -42,7 +42,6 @@ def build_http_mock(http_mock, response_status=200, response=None, content=None,
             mock_response = mock.Mock()
             mock_response.status = response_status
 
-        print 'MOCK CONTENT %s' % str(content)
         mock_return = (mock_response, content)            
         http.request.return_value = mock_return
 

@@ -23,16 +23,16 @@ class PlaylistQuery(object):
         return playlists
 
     def add_track(self, member_id, playlist_id, track_id, _client):
-        method_uri = '/addtoplaylist/{{u}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % \
+        method_uri = '/addtoplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/track/%(track_id)s' % \
                           {'member_id': member_id,
-                           'playlist_id': id,
+                           'playlist_id': playlist_id,
                            'track_id': track_id}
         _client.get_xml(method_uri)
 
     def remove_track(self, member_id, playlist_id, track_id, _client):
         method_uri = '/removeplaylisttrack/{{service_token}}/%(member_id)s/%(playlist_id)s/%(track_id)s' % \
                             {'member_id': member_id,
-                             'playlist_id': id,
+                             'playlist_id': playlist_id,
                              'track_id': track_id}
         _client.get_xml(method_uri)
 
