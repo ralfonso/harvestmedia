@@ -12,7 +12,7 @@ class LibraryQuery(object):
         xml_root = _client.get_xml(method_uri)
         xml_libraries = xml_root.find('libraries').getchildren()
         for library_element in xml_libraries:
-            library = Library.from_xml(library_element, _client=_client)
+            library = Library._from_xml(library_element, _client=_client)
             libraries.append(library)
 
         return libraries
@@ -26,7 +26,7 @@ class Library(DictObj):
         self._client = _client
 
     @classmethod
-    def from_xml(cls, xml_data, _client):
+    def _from_xml(cls, xml_data, _client):
         instance = cls(_client)
         for attribute, value in xml_data.items():
             setattr(instance, attribute, value)

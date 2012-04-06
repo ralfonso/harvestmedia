@@ -22,7 +22,7 @@ def test_track_dict():
                                                   keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
                                                   bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""") % locals())
 
-    track = Track.from_xml(track_xml, client)
+    track = Track._from_xml(track_xml, client)
     track_dict = track.as_dict()
     assert track_dict['id'] == track_id
 
@@ -138,7 +138,7 @@ def test_get_waveform_url(HttpMock):
                                                   keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
                                                   bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""") % locals())
 
-    track = Track.from_xml(track_xml, client)
+    track = Track._from_xml(track_xml, client)
 
     expiry = datetime.datetime.now()
     expiry += datetime.timedelta(hours=22)  # offset for HM timezone

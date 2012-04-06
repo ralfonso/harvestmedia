@@ -12,7 +12,7 @@ class AlbumQuery(object):
         albums = xml_root.find('albums').getchildren()
 
         for album_element in albums:
-            album = Album.from_xml(album_element, _client=_client)
+            album = Album._from_xml(album_element, _client=_client)
             album_list.append(album)
 
         return album_list
@@ -38,7 +38,7 @@ class Album(DictObj):
         return Track.query.get_tracks_for_album(self.id, self._client, get_full_detail)
 
     @classmethod
-    def from_xml(cls, xml_data, _client):
+    def _from_xml(cls, xml_data, _client):
         instance = cls(_client)
         for attribute, value in xml_data.items():
             setattr(instance, attribute, value)

@@ -57,7 +57,7 @@ def test_get_member_playlists(HttpMock):
                                                        'lastname': lastname,
                                                        'email': email})
 
-    member = Member.from_xml(member_xml, client)
+    member = Member._from_xml(member_xml, client)
 
     test_playlist_id = get_random_md5()
     test_playlist_name = 'test playlist'

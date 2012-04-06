@@ -14,7 +14,7 @@ class MemberQuery(object):
         method_uri = '/getmember/{{service_token}}/%(member_id)s' % {'member_id': member_id}
         xml_data = _client.get_xml(method_uri)
         xml_member = xml_data.find('memberaccount')
-        return Member.from_xml(xml_member, _client)
+        return Member._from_xml(xml_member, _client)
 
     def add_favourite(self, member_id, track_id, _client):
         method_uri = '/addtofavourites/{{service_token}}/%(member_id)s/track/%(track_id)s' % \
@@ -48,7 +48,7 @@ class MemberQuery(object):
         # if this is successful, we can just use the current object
         xml_data = _client.post_xml(method_uri, xml_post_body)
         xml_member = xml_data.find('memberaccount')
-        return Member.from_xml(xml_member, _client)
+        return Member._from_xml(xml_member, _client)
 
 
 class Member(DictObj):
@@ -65,7 +65,7 @@ class Member(DictObj):
         self._client = _client
 
     @classmethod
-    def from_xml(cls, xml_member, _client):
+    def _from_xml(cls, xml_member, _client):
         instance = cls(_client)
         instance.id = xml_member.get('id')
         for child_element in xml_member.getchildren():
@@ -95,7 +95,7 @@ class Member(DictObj):
 
         xml_data = _client.post_xml(method_uri, xml_post_body)
         xml_member = xml_data.find('memberaccount')
-        return cls.from_xml(xml_member, _client)
+        return cls._from_xml(xml_member, _client)
 
     def update(self):
         update_vars = vars(self).copy()
@@ -112,7 +112,7 @@ class Member(DictObj):
         xml_root = _client.get_xml(method_uri)
 
         xml_member = xml_root.find('memberaccount')
-        return Member.from_xml(xml_member, _client)
+        return Member._from_xml(xml_member, _client)
 
     @staticmethod
     def send_password(username, _client):
@@ -133,7 +133,7 @@ class Member(DictObj):
         favourites_element = xml_root.find('favourites')
         track_elements = favourites_element.find('tracks')
         for track_element in track_elements.getchildren():
-            favourite = Track.from_xml(track_element, self._client)
+            favourite = Track._from_xml(track_element, self._client)
             favourites.append(favourite)
 
         return favourites

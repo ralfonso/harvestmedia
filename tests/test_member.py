@@ -80,7 +80,7 @@ def test_from_xml():
                      'email': email}
 
     member_xml = ET.fromstring(xml_str)
-    member = Member.from_xml(member_xml, client)
+    member = Member._from_xml(member_xml, client)
 
     assert member.id == test_member_id
     assert member.firstname == firstname
@@ -223,7 +223,7 @@ def test_get_member_favourites(HttpMock):
                                      'lastname': lastname,
                                      'email': email})
 
-    member = Member.from_xml(member_xml, client)
+    member = Member._from_xml(member_xml, client)
 
     test_track_id = get_random_md5()
     test_track_name = 'test track'
@@ -271,7 +271,7 @@ def test_add_track(HttpMock):
                      'email': email}
 
     member_xml = ET.fromstring(xml_str)
-    member = Member.from_xml(member_xml, client)
+    member = Member._from_xml(member_xml, client)
 
     xml_response = """<?xml version="1.0" encoding="utf-8"?>
         <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
@@ -305,7 +305,7 @@ def test_remove_track(HttpMock):
                      'email': email}
 
     member_xml = ET.fromstring(xml_str)
-    member = Member.from_xml(member_xml, client)
+    member = Member._from_xml(member_xml, client)
 
     xml_response = """<?xml version="1.0" encoding="utf-8"?>
         <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">

@@ -16,7 +16,7 @@ class PlaylistQuery(object):
         playlists = []
         playlist_elements = xml_root.find('playlists')
         for playlist_element in playlist_elements.getchildren():
-            playlist = Playlist.from_xml(playlist_element, _client)
+            playlist = Playlist._from_xml(playlist_element, _client)
             playlist.member_id = member_id
             playlists.append(playlist)
 
@@ -58,7 +58,7 @@ class Playlist(DictObj):
         self._client = _client
 
     @classmethod
-    def from_xml(cls, xml_data, _client):
+    def _from_xml(cls, xml_data, _client):
         instance = cls(_client)
         instance.id = xml_data.get('id')
         for attribute, value in xml_data.items():
@@ -67,7 +67,7 @@ class Playlist(DictObj):
         tracks = xml_data.find('tracks')
         if tracks:
             for track in tracks.getchildren():
-                instance.tracks.append(Track.from_xml(track, _client))
+                instance.tracks.append(Track._from_xml(track, _client))
 
         return instance
 
@@ -95,7 +95,7 @@ class Playlist(DictObj):
             for playlist_xml in playlists.getchildren():
                 name = playlist_xml.get('name')
                 if name == playlist_name:
-                    return cls.from_xml(playlist_xml, _client)
+                    return cls._from_xml(playlist_xml, _client)
 
     def add_track(self, track_id):
         self.query.add_track(self.member_id, self.playlist_id, track_id, self._client)

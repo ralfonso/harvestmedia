@@ -28,7 +28,7 @@ class TrackQuery(object):
         tracks = xml_root.find('tracks').getchildren()
 
         for track_element in tracks:
-            track = Track.from_xml(track_element, _client)
+            track = Track._from_xml(track_element, _client)
             track_list.append(track)
 
         if len(track_list) == 0:
@@ -68,7 +68,7 @@ class TrackQuery(object):
 
         if xml_tracks is not None:
             for xml_track in xml_tracks.getchildren():
-                tracks.append(Track.from_xml(xml_track, _client))
+                tracks.append(Track._from_xml(xml_track, _client))
 
         return tracks
 
@@ -94,7 +94,7 @@ class TrackQuery(object):
         if xml_tracks is not None:
             xml_track = xml_tracks.find('track')
             if xml_track is not None:
-                return Track.from_xml(xml_track, _client)
+                return Track._from_xml(xml_track, _client)
 
 
 class Track(DictObj):
@@ -112,7 +112,7 @@ class Track(DictObj):
         self._client = _client
 
     @classmethod
-    def from_xml(cls, xml_data, _client):
+    def _from_xml(cls, xml_data, _client):
         """Internally-used classmethod to create an instance of :class:`Track` from
         the XML returned by Harvest Media. Converts all attributes 
         on the node to instance properties.

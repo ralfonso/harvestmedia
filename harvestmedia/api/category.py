@@ -17,7 +17,7 @@ class CategoryQuery(object):
 
         xml_categories = xml_root.find('categories').getchildren()
         for xml_category in xml_categories:
-            category = Category.from_xml(xml_category, _client)
+            category = Category._from_xml(xml_category, _client)
             categories.append(category)
 
         return categories
@@ -36,7 +36,7 @@ class Attribute(DictObj):
         self._client = _client
 
     @classmethod
-    def from_xml(cls, xml_data, _client):
+    def _from_xml(cls, xml_data, _client):
         """Internally-used classmethod to recursively convert the Harvest Media XML tree to
         our Attribute object with :class:`Attribute` children.
 
@@ -67,7 +67,7 @@ class Attribute(DictObj):
 
         if _attributes:
             for attribute_xml in _attributes:
-                instance.attributes.append(Attribute.from_xml(attribute_xml, _client))
+                instance.attributes.append(Attribute._from_xml(attribute_xml, _client))
 
         return instance
 
@@ -87,7 +87,7 @@ class Category(DictObj):
         self.attributes = []
 
     @classmethod
-    def from_xml(cls, xml_data, _client):
+    def _from_xml(cls, xml_data, _client):
         """Internally-used classmethod to convert the Harvest Media XML tree to our Category object with
         :class:`Attribute` children.
 
@@ -113,6 +113,6 @@ class Category(DictObj):
 
         if _attributes:
             for attribute_xml in _attributes.getchildren():
-                instance.attributes.append(Attribute.from_xml(attribute_xml, _client))
+                instance.attributes.append(Attribute._from_xml(attribute_xml, _client))
 
         return instance

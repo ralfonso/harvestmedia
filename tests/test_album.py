@@ -17,7 +17,7 @@ def test_album_init():
                                                     with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude."
                                                     name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
 
-    album = Album.from_xml(album_xml, client)
+    album = Album._from_xml(album_xml, client)
     assert album.id == album_id
 
 
@@ -28,7 +28,7 @@ def test_album_dict():
                                                     with spiky guitars &amp; infectious, feelgood inspiration … and tons of attitude."
                                                     name="HM 001 Sample Album" displaytitle="HM 001 Sample Album " id="%s"/> """ % (album_id)))
 
-    album = Album.from_xml(album_xml, client)
+    album = Album._from_xml(album_xml, client)
     album_dict = album.as_dict()
     assert album_dict['id'] == album_id
 
@@ -59,7 +59,7 @@ def test_album_tracks(HttpMock):
     ]
 
     http = build_http_mock(HttpMock, responses=return_values)
-    album = Album.from_xml(album_xml, client)
+    album = Album._from_xml(album_xml, client)
     tracks = album.get_tracks(get_full_detail=False)
     assert tracks[0].albumid == album_id
 
@@ -81,7 +81,7 @@ def test_album_notracks(HttpMock):
 
     http = build_http_mock(HttpMock, responses=return_values)
 
-    album = Album.from_xml(album_xml, client)
+    album = Album._from_xml(album_xml, client)
     tracks = album.get_tracks(get_full_detail=False)
     assert len(tracks) == 0
 
@@ -195,7 +195,7 @@ def test_album_tracks_fulldetail(HttpMock):
     ]
 
     http = build_http_mock(HttpMock, responses=return_values)
-    album = Album.from_xml(album_xml, client)
+    album = Album._from_xml(album_xml, client)
     tracks = album.get_tracks()
     assert tracks[0].albumid == album_id
 
@@ -237,7 +237,7 @@ def test_get_cover_url(HttpMock):
     width = 200
     height = 300
 
-    album = Album.from_xml(album_xml, client)
+    album = Album._from_xml(album_xml, client)
     cover_art_url = album.get_cover_url(width, height)
 
     expected_url = album_art_url.replace('{id}', album_id).replace('{width}', str(width)).replace('{height}', str(height))
