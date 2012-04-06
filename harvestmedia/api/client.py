@@ -18,6 +18,7 @@ class Client(object):
     :param api_key: the Harvest Media API key to use
     :param debug_level: a Python logging debug level to use for the HM logger
     :param webservice_url: the base Harvest Media API URL
+
     """
 
     def __init__(self, api_key, debug_level='INFO',
@@ -102,6 +103,9 @@ class Client(object):
         """Called by the model classes to perform an HTTP GET and receive
         XML from the HM API
 
+        :param method_uri: The Harvest Media endpoint to hit, *without* the host \
+        e.g. /getserviceinfo/{{service_token}}
+
         """
 
         method_url = self._build_url(method_uri)
@@ -116,6 +120,10 @@ class Client(object):
     def post_xml(self, method_uri, xml_post_body):
         """Called by the model classes to perform an HTTP POST and receive
         XML from the HM API
+
+        :param method_uri: The Harvest Media endpoint to hit, *without* the host \
+        e.g. /gettracks/{{service_token}}
+        :param xml_post_body: The XML string to POST to the API
 
         """
 
@@ -135,6 +143,7 @@ class Client(object):
         Service tokens are used for every call to the API, embedded in the URL
 
         This method is called automatically on client init
+
         """
 
         method_uri = '/getservicetoken/' + self.api_key

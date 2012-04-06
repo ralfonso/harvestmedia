@@ -24,14 +24,33 @@ class CategoryQuery(object):
 
 
 class Attribute(DictObj):
+    """ Represents a Harvest Media category attibute.
+    Consists of a name and a collection of sub-attributes
 
-    def __init__(self, xml_data=None):
+    :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+
+    """
+
+    def __init__(self, _client):
         self.attributes = []
+        self._client = _client
 
     @classmethod
     def from_xml(cls, xml_data, _client):
-        """
-        Convert the Harvest Media XML tree to our Attribute object
+        """Internally-used classmethod to recursively convert the Harvest Media XML tree to
+        our Attribute object with :class:`Attribute` children.
+
+        Example XML::
+
+            <attribute name="Keyboard" id="da2362b0e30b131f" />
+                <attributes>
+                    <attribute name="Piano" id="6185334915adc56b" />
+                    <attribute name="Organ" id="98098098a0c8" />
+              </attributes>                
+            </attribute>              
+
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+
         """
 
         instance = cls(_client)
@@ -54,6 +73,12 @@ class Attribute(DictObj):
 
 
 class Category(DictObj):
+    """ Represents a Harvest Media category item.
+    Consists of a name and a collection of sub-attributes
+
+    :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+
+    """
 
     query = CategoryQuery()
 
@@ -63,8 +88,21 @@ class Category(DictObj):
 
     @classmethod
     def from_xml(cls, xml_data, _client):
-        """
-        Convert the Harvest Media XML tree to our Category object
+        """Internally-used classmethod to convert the Harvest Media XML tree to our Category object with
+        :class:`Attribute` children.
+
+        Example XML::
+
+            <category name="Instruments" id="098acb89c8bc">
+              <attributes>
+                <attribute name="Piano" id="da2362b0e30b131f" />
+                <attribute name="Drums" id="6185334915adc56b" />
+                <attribute name="Guitar" id="98098098a0c8" />
+                <attribute name="Bass" id="980a80d98a80c8" />
+              </attributes>                
+            </category>
+
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
         """
 
         instance = cls(_client)
