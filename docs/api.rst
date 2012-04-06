@@ -15,6 +15,17 @@ Client
    :members:
    :inherited-members:
 
+Member
+------
+
+.. autoclass:: harvestmedia.api.member.Member
+   :members:
+   :inherited-members:
+
+.. autoclass:: harvestmedia.api.member.MemberQuery
+   :members:
+   :inherited-members:
+
 
 Track
 -----
