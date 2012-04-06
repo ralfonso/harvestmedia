@@ -109,7 +109,7 @@ class Client(object):
         """
 
         method_url = self._build_url(method_uri)
-        http = httplib2.Http()
+        http = httplib2.Http(disable_ssl_certificate_validation=True)
         response, content = http.request(method_url, 'GET')
 
         if logger.isEnabledFor(logging.DEBUG):
@@ -128,7 +128,7 @@ class Client(object):
         """
 
         method_url = self._build_url(method_uri)
-        http = httplib2.Http()
+        http = httplib2.Http(disable_ssl_certificate_validation=True)
 
         if logger.isEnabledFor(logging.DEBUG):
             logger.debug('post_xml url: %s' % method_url)
