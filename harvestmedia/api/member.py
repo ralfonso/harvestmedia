@@ -9,26 +9,65 @@ from .util import DictObj
 
 
 class MemberQuery(object):
+    """Performs calls for the Member model, also useful in a static
+    context.  Available at `Member.query`
+
+    """
 
     def get_by_id(self, member_id, _client):
+        """Takes takes a single member id and returns a
+        :class:`harvestmedia.api.member.Member` object.
+
+        :param member_id: The Harvest Media member identifer
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+
+        """
+
         method_uri = '/getmember/{{service_token}}/%(member_id)s' % {'member_id': member_id}
         xml_data = _client.get_xml(method_uri)
         xml_member = xml_data.find('memberaccount')
         return Member._from_xml(xml_member, _client)
 
     def add_favourite(self, member_id, track_id, _client):
+        """Adds a track to a member's favourites
+
+        :param member_id: The Harvest Media member identifer
+        :param track_id: The Harvest Media track identifer
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+
+        """
+
         method_uri = '/addtofavourites/{{service_token}}/%(member_id)s/track/%(track_id)s' % \
                         {'member_id': member_id,
                          'track_id': track_id}
         _client.get_xml(method_uri)
 
     def remove_favourite(self, member_id, track_id, _client):
+        """Removes a track from a member's favourites
+
+        :param member_id: The Harvest Media member identifer
+        :param track_id: The Harvest Media track identifer
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+
+        """
+
         method_uri = '/removefavouritestrack/{{service_token}}/%(member_id)s/%(track_id)s' % \
                         {'member_id': member_id,
                          'track_id': track_id}
         _client.get_xml(method_uri)
 
     def update_member(self, member_id, _client, **kwargs):
+        """Updates a member's preferences and profile in the
+        Harvest Media database. Values in `kwargs`  need to 
+        match the nodes in the XML submission, see 
+        `Update Member <http://developer.harvestmedia.net/managing-members/update-member/>`_
+
+        :param member_id: The Harvest Media member identifer
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+        :param kwargs: 
+
+        """
+
         root = ET.Element('requestmember')
         member = ET.Element('memberaccount')
 
@@ -52,20 +91,37 @@ class MemberQuery(object):
 
 
 class Member(DictObj):
+    """ Represents a Harvest Media Member
+
+    :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+
+    """
 
     query = MemberQuery()
 
     def __init__(self, _client):
-        """ Create a new Member object from an ElementTree.Element object
-
-        xml_data: the ElementTree.Element object to parse
-
-        """
-
         self._client = _client
 
     @classmethod
     def _from_xml(cls, xml_member, _client):
+        """Internally-used classmethod to create an instance of :class:`Member` from
+        the XML returned by Harvest Media. Converts all child nodes 
+        on the node to instance properties.
+
+        Example XML::
+
+            <memberaccount id="08098a908a098a0">
+                <username>simontieda</username>
+                <firstname>Simon</firstname>
+                <lastname>Tieda</lastname>
+                <email>fake@fake.com</email>
+            </memberaccount>
+
+        :param xml_data: The Harvest Media XML node
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+
+        """
+
         instance = cls(_client)
         instance.id = xml_member.get('id')
         for child_element in xml_member.getchildren():
@@ -74,10 +130,20 @@ class Member(DictObj):
         return instance
 
     @classmethod
-    def create(cls, **kwargs):
+    def register(cls, **kwargs):
+        """Creates a new member from the params in kwargs.
+        
+        See
+        `Register Member <http://developer.harvestmedia.net/managing-members/register-member/>`_
+        for valid arguments.
+
+        :param kwargs: 
+
+        """
+
         _client = kwargs.get('_client', None)
         if not _client:
-            raise MissingParameter('You must pass _client to Member.create')
+            raise MissingParameter('You must pass _client to Member.register')
 
         root = ET.Element('requestmember')
         member = ET.Element('memberaccount')

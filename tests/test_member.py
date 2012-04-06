@@ -13,15 +13,8 @@ from harvestmedia.api.member import Member
 from utils import build_http_mock, get_random_md5, init_client
 
 
-@raises(harvestmedia.api.exceptions.MissingParameter)
-def test_create_member_missing_username():
-    client = init_client()
-    member = Member(client)
-    member.create()
-
-
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_create_member(HttpMock):
+def test_register_member(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     username = 'testuser'
@@ -51,12 +44,49 @@ def test_create_member(HttpMock):
     fileformat = 'MP3'
 
     http = build_http_mock(HttpMock, content=xml_response)
-    member = Member.create(_client=client, username=username, first_name=first_name,
-                           last_name=last_name, email=email, termsaccept=termsaccept,
-                           fileformat=fileformat)
+    member = Member.register(_client=client, username=username, first_name=first_name,
+                             last_name=last_name, email=email, termsaccept=termsaccept,
+                             fileformat=fileformat)
 
     assert member.id == test_member_id
     assert member.username == username
+
+@raises(harvestmedia.api.exceptions.MissingParameter)
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_register_no_client(HttpMock):
+    client = init_client()
+    test_member_id = get_random_md5()
+    username = 'testuser'
+    first_name = 'Test'
+    last_name = 'User'
+    email = 'email@email.com'
+
+    xml_response = """<?xml version="1.0" encoding="utf-8"?>
+     <ResponseMember>
+        <memberaccount id="%(test_member_id)s">
+            <username>%(username)s</username>
+            <first_name>%(first_name)s</first_name>
+            <last_name>%(last_name)s</last_name>
+            <email>%(email)s</email>
+        </memberaccount>
+    </ResponseMember>""" % {'test_member_id': test_member_id,
+                            'username': username,
+                            'first_name': first_name,
+                            'last_name': last_name,
+                            'email': email}
+
+    username = username
+    first_name = first_name
+    last_name = last_name
+    email = email
+    termsaccept = 'true'
+    fileformat = 'MP3'
+
+    http = build_http_mock(HttpMock, content=xml_response)
+    member = Member.register(username=username, first_name=first_name,
+                             last_name=last_name, email=email, termsaccept=termsaccept,
+                             fileformat=fileformat)
+
 
 
 def test_from_xml():
@@ -149,7 +179,6 @@ def test_member_authenticate(HttpMock):
     http = build_http_mock(HttpMock, content=content)
     member = Member.authenticate(test_username, test_password, client)
     assert member.id == test_member_id
-
 
 @raises(harvestmedia.api.exceptions.InvalidLoginDetails)
 @mock.patch('harvestmedia.api.client.httplib2.Http')

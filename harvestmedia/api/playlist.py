@@ -36,10 +36,52 @@ class PlaylistQuery(object):
                              'track_id': track_id}
         _client.get_xml(method_uri)
 
-    def remove(self, member_id, playlist_id, _client):
+    def remove_playlist(self, member_id, playlist_id, _client):
         method_uri = '/removeplaylist/{{service_token}}/%(member_id)s/%(id)s' % \
                         {'member_id': member_id,
                          'id': playlist_id}
+        _client.get_xml(method_uri)
+
+    def _add_playlist(self, **kwargs):
+        """This method is private because the class method on :class:`Playlist`
+        should be used instead
+
+        :param kwargs: The values for the playlist.  See \
+        `Add Playlist <http://developer.harvestmedia.net/working-with-members-2/add-a-member-playlist/>`_
+
+        """
+
+        _client = kwargs.get('_client', None)
+        if not _client:
+            raise MissingParameter('You must pass _client to Playlist.add')
+
+        member_id = kwargs.get('member_id', None)
+        if not member_id:
+            raise MissingParameter('You must pass member_id to Playlist.add')
+
+        playlist_name = kwargs.get('playlist_name', None)
+        if not playlist_name:
+            raise MissingParameter('You must pass playlist_name to Playlist.add')
+
+        method_uri = '/addplaylist/{{service_token}}/%(member_id)s/%(playlist_name)s/' % \
+                        {'member_id': member_id,
+                         'playlist_name': url_quote(playlist_name.encode('utf-8'))}
+        xml_root = _client.get_xml(method_uri)
+        playlists = xml_root.find('playlists')
+
+        if playlists is not None:
+            for playlist_xml in playlists.getchildren():
+                name = playlist_xml.get('name')
+                if name == playlist_name:
+                    return Playlist._from_xml(playlist_xml, _client)
+
+
+    def update_playlist(self, member_id, playlist_id, playlist_name, _client):
+        method_uri = '/updateplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/%(playlist_name)s' % \
+                        {'member_id': member_id,
+                         'playlist_id': playlist_id,
+                         'playlist_name': url_quote(playlist_name.encode('utf-8'))}
+
         _client.get_xml(method_uri)
 
 
@@ -72,30 +114,8 @@ class Playlist(DictObj):
         return instance
 
     @classmethod
-    def create(cls, **kwargs):
-        _client = kwargs.get('_client', None)
-        if not _client:
-            raise MissingParameter('You must pass _client to Playlist.create')
-
-        member_id = kwargs.get('member_id', None)
-        if not member_id:
-            raise MissingParameter('You must pass member_id to Playlist.create')
-
-        playlist_name = kwargs.get('playlist_name', None)
-        if not playlist_name:
-            raise MissingParameter('You must pass playlist_name to Playlist.create')
-
-        method_uri = '/addplaylist/{{service_token}}/%(member_id)s/%(playlist_name)s/' % \
-                        {'member_id': member_id,
-                         'playlist_name': url_quote(playlist_name.encode('utf-8'))}
-        xml_root = _client.get_xml(method_uri)
-        playlists = xml_root.find('playlists')
-
-        if playlists is not None:
-            for playlist_xml in playlists.getchildren():
-                name = playlist_xml.get('name')
-                if name == playlist_name:
-                    return cls._from_xml(playlist_xml, _client)
+    def add(cls, **kwargs):
+        return cls.query._add_playlist(**kwargs)
 
     def add_track(self, track_id):
         self.query.add_track(self.member_id, self.playlist_id, track_id, self._client)
@@ -109,13 +129,7 @@ class Playlist(DictObj):
                 self.tracks.remove(track)
 
     def remove(self):
-        self.query.remove(self.member_id, self.playlist_id, self._client)
+        self.query.remove_playlist(self.member_id, self.playlist_id, self._client)
 
     def update(self):
-        method_uri = '/updateplaylist/{{service_token}}/%(member_id)s/%(playlist_id)s/%(playlist_name)s' % \
-                        {'member_id': self.member_id,
-                         'playlist_id': self.id,
-                         'playlist_name': url_quote(self.name.encode('utf-8'))}
-
-        self._client.get_xml(method_uri)
-        return True
+        self.query.update_playlist(self.member_id, self.id, self.name, self._client)

@@ -15,7 +15,7 @@ from utils import build_http_mock, get_random_md5, init_client
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
-def test_create_playlist(HttpMock):
+def test_add_playlist(HttpMock):
     client = init_client()
     test_member_id = get_random_md5()
     test_playlist_id = get_random_md5()
@@ -31,7 +31,7 @@ def test_create_playlist(HttpMock):
                      'name': test_playlist_name}
 
     http = build_http_mock(HttpMock, content=content)
-    playlist = Playlist.create(_client=client, member_id=test_member_id, playlist_name=test_playlist_name)
+    playlist = Playlist.add(_client=client, member_id=test_member_id, playlist_name=test_playlist_name)
 
     assert playlist.id == test_playlist_id
     assert playlist.name == test_playlist_name
@@ -91,21 +91,21 @@ def test_get_member_playlists(HttpMock):
 
 
 @raises(harvestmedia.api.exceptions.MissingParameter)
-def test_create_client_missing():
-    playlist = Playlist.create()
+def test_add_playlist_client_missing():
+    playlist = Playlist.add()
 
 
 @raises(harvestmedia.api.exceptions.MissingParameter)
-def test_create_member_id_missing():
+def test_add_playlist_member_id_missing():
     client = init_client()
-    playlist = Playlist.create(_client=client)
+    playlist = Playlist.add(_client=client)
 
 
 @raises(harvestmedia.api.exceptions.MissingParameter)
-def test_create_name_missing():
+def test_add_playlist_name_missing():
     client = init_client()
     test_member_id = 123
-    playlist = Playlist.create(_client=client, member_id=test_member_id)
+    playlist = Playlist.add(_client=client, member_id=test_member_id)
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
@@ -246,17 +246,3 @@ def test_playlist_update(HttpMock):
     playlist.name = test_playlist_update_name
     playlist.update()
     assert playlist.name == test_playlist_update_name
-
-
-@raises(harvestmedia.api.exceptions.MissingParameter)
-def test_playlist_update_missing_member_id():
-    client = init_client()
-    test_playlist_name = 'test playlist'
-    playlist = Playlist.create(playlist_name=test_playlist_name, _client=client)
-
-
-@raises(harvestmedia.api.exceptions.MissingParameter)
-def test_playlist_update_missing_playlist_name():
-    client = init_client()
-    test_member_id = get_random_md5()
-    playlist = Playlist.create(member_id=test_member_id, _client=client)
