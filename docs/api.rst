@@ -15,6 +15,29 @@ Client
    :members:
    :inherited-members:
 
+Library
+-------
+
+.. autoclass:: harvestmedia.api.library.Library
+   :members:
+   :inherited-members:
+
+.. autoclass:: harvestmedia.api.library.LibraryQuery
+   :members:
+   :inherited-members:
+
+
+Album
+-----
+
+.. autoclass:: harvestmedia.api.album.Album
+   :members:
+   :inherited-members:
+
+.. autoclass:: harvestmedia.api.album.AlbumQuery
+   :members:
+   :inherited-members:
+
 Member
 ------
 
@@ -23,6 +46,17 @@ Member
    :inherited-members:
 
 .. autoclass:: harvestmedia.api.member.MemberQuery
+   :members:
+   :inherited-members:
+
+Playlists
+---------
+
+.. autoclass:: harvestmedia.api.playlist.Playlist
+   :members:
+   :inherited-members:
+
+.. autoclass:: harvestmedia.api.playlist.PlaylistQuery
    :members:
    :inherited-members:
 

@@ -6,6 +6,9 @@
 Welcome to Harvest Media API's documentation!
 =============================================
 
+Welcome to the documentation for the Harvest Media API library.  You probably
+want the :ref:`quickstart`.
+
 Contents:
 
 .. toctree::

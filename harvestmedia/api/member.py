@@ -137,8 +137,6 @@ class Member(DictObj):
         `Register Member <http://developer.harvestmedia.net/managing-members/register-member/>`_
         for valid arguments.
 
-        :param kwargs: 
-
         """
 
         _client = kwargs.get('_client', None)

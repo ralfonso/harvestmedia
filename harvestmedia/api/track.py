@@ -6,8 +6,8 @@ from .util import DictObj
 
 
 class TrackQuery(object):
-    """Performs calls for the Track model, also useful in a static
-    context.  Available at `Track.query`
+    """Performs calls for the :class:`Track` model, also useful in a static
+    context.  Available at `Track.query` or `track_instance.query`
 
     """
 
