@@ -1,1 +1,422 @@
-<?xml version="1.0" encoding="utf-8"?><responsecategories xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"><categories><category name="Tuning" id="07615de0da9a3d50"><attributes><attribute name="0" id="da2362b0e30b131f"/><attribute name="1" id="6185334915adc56b"/><attribute name="1 - Dark" id="b403776ec4239f98"/><attribute name="1 - Drone" id="f260201c3e67367a"/><attribute name="1 - Organic" id="8e7e7da666dfa63e"/><attribute name="1 - Serious/Negative" id="527d6c887023f4ee"/><attribute name="1 - Very Slow" id="12686fbe3e027d52"/><attribute name="2 - Leaning Dark" id="aa9c33fef3c5756f"/><attribute name="2 - Leaning Negative" id="bf037eccc508299a"/><attribute name="2 - Leaning Organic" id="672943149dd4886b"/><attribute name="2 - Slower" id="b2927d5885423cd5"/><attribute name="2 - Take It Easy" id="42c0769733468f65"/><attribute name="3 - Average" id="76ab3da78eb67d2d"/><attribute name="3 - Balanced" id="99cf91a48d60a45c"/><attribute name="3 - Blended" id="387b65044f597b48"/><attribute name="3 - Medium" id="b7f9cd0ca260b61a"/><attribute name="3 - Neutral" id="0e04d790426e94d1"/><attribute name="4 - Faster" id="ce5ca8c9d3221d28"/><attribute name="4 - In Motion" id="97fda140bf94f8ca"/><attribute name="4 - Leaning Bright" id="0b71a8e28e9cdcda"/><attribute name="4 - Leaning Electronic" id="f8c5a1f9a757660a"/><attribute name="4 - Leaning Positive" id="62008a716f04daf4"/><attribute name="5 - Bright" id="d26011882954cb23"/><attribute name="5 - Chaotic" id="dd116b77ef6c9851"/><attribute name="5 - Electronic" id="61d8ad4472c7d718"/><attribute name="5 - Happy/Positive" id="aed5418c1ca410fc"/><attribute name="5 - Very Fast" id="fc4e0bec7ad28319"/><attribute name="Energy" id="a7cc2fe1b4075e51"><attributes><attribute name="1 - Drone" id="f260201c3e67367a"/><attribute name="2 - Take It Easy" id="42c0769733468f65"/><attribute name="3 - Average" id="76ab3da78eb67d2d"/><attribute name="4 - In Motion" id="97fda140bf94f8ca"/><attribute name="5 - Chaotic" id="dd116b77ef6c9851"/></attributes></attribute><attribute name="Genetics" id="a5306d79fa80d3da"><attributes><attribute name="1 - Organic" id="8e7e7da666dfa63e"/><attribute name="2 - Leaning Organic" id="672943149dd4886b"/><attribute name="3 - Blended" id="387b65044f597b48"/><attribute name="4 - Leaning Electronic" id="f8c5a1f9a757660a"/><attribute name="5 - Electronic" id="61d8ad4472c7d718"/></attributes></attribute><attribute name="Mood" id="05c1d9f5bb63b113"><attributes><attribute name="1 - Serious/Negative" id="527d6c887023f4ee"/><attribute name="2 - Leaning Negative" id="bf037eccc508299a"/><attribute name="3 - Neutral" id="0e04d790426e94d1"/><attribute name="4 - Leaning Positive" id="62008a716f04daf4"/><attribute name="5 - Happy/Positive" id="aed5418c1ca410fc"/></attributes></attribute><attribute name="Tempo" id="65ea5898a4549788"><attributes><attribute name="1 - Very Slow" id="12686fbe3e027d52"/><attribute name="2 - Slower" id="b2927d5885423cd5"/><attribute name="3 - Medium" id="b7f9cd0ca260b61a"/><attribute name="4 - Faster" id="ce5ca8c9d3221d28"/><attribute name="5 - Very Fast" id="fc4e0bec7ad28319"/></attributes></attribute><attribute name="Tone" id="22aadd9f2935aabe"><attributes><attribute name="1 - Dark" id="b403776ec4239f98"/><attribute name="2 - Leaning Dark" id="aa9c33fef3c5756f"/><attribute name="3 - Balanced" id="99cf91a48d60a45c"/><attribute name="4 - Leaning Bright" id="0b71a8e28e9cdcda"/><attribute name="5 - Bright" id="d26011882954cb23"/></attributes></attribute><attribute name="Vocals" id="ea584a3d9b4fb116"><attributes><attribute name="0" id="da2362b0e30b131f"/><attribute name="1" id="6185334915adc56b"/></attributes></attribute></attributes></category><category name="Instrumentation" id="7907138b683424f4"><attributes><attribute name="A Capella" id="d69ca22efb7ac248"/><attribute name="Accordion" id="7a95697f9d590778"/><attribute name="Acoustic" id="34ba238b25cf4e84"/><attribute name="Acoustic" id="a35d92ce17194d0e"/><attribute name="Acoustic" id="9801fbc2d575b92d"/><attribute name="Acoustic 12-string" id="4f24b8670aa7fe15"/><attribute name="Acoustic 6-string" id="645732ba70dae88e"/><attribute name="Acoustic Banjo" id="3c10d638ed09a44d"/><attribute name="Acoustic Celeste" id="e0600ea5d0844989"/><attribute name="Acoustic Glockenspiel" id="e06bbd26717fc396"/><attribute name="Acoustic Harpsichord" id="45979045a2be09eb"/><attribute name="Acoustic Honkey Tonk" id="75e6995a44c6155b"/><attribute name="Acoustic Honkey Tonk" id="82e1eeca21e06e61"/><attribute name="Acoustic Mandolin" id="76afaecb09e15a44"/><attribute name="Acoustic Piano" id="eab21b6b20c6a0c7"/><attribute name="Acoustic Toy Piano" id="44dd558437de9cb9"/><attribute name="Acoustic Ukulele" id="f66869095b54a359"/><attribute name="Acoustic Upright" id="e832de2f36882d48"/><attribute name="Acoustic Upright" id="4e8c2d38edf532fc"/><attribute name="Arab" id="0a320a9ea013a675"/><attribute name="Asian" id="22efb8700ab5b349"/><attribute name="Balaban" id="a7cd15d2c165dc7a"/><attribute name="Bass" id="080a1841ed350bbb"><attributes><attribute name="Acoustic" id="a35d92ce17194d0e"/><attribute name="Acoustic Upright" id="4e8c2d38edf532fc"/><attribute name="Electric" id="a4fc0c1d3ad2cd64"/><attribute name="Synth" id="8a4f93782c60d5b2"/></attributes></attribute><attribute name="Bass" id="24900efb2fe2f786"/><attribute name="Brass" id="b427df8f9e658c72"/><attribute name="Brass Section" id="3e249a070f08081e"/><attribute name="Brass Trumpet" id="6d295458d751b4fe"/><attribute name="Brass Trumpet Muted" id="54bfe112f83f8e98"/><attribute name="Brass Tuba" id="d8a3116eb2f4eb18"/><attribute name="Brass War Horns" id="035ad3c78301c7ac"/><attribute name="Cello" id="b90948683057b538"/><attribute name="Conga" id="e15832fb25b582e9"/><attribute name="Crowd Noise" id="0457d1ce7158c4b9"/><attribute name="DJ/Turntable" id="a5cba4e9dc2ae510"/><attribute name="Drums" id="16fd25d513dce9dd"><attributes><attribute name="Live" id="35babb65b41e2028"/><attribute name="Live Brushes" id="079ef6c198b622c5"/><attribute name="Programmed" id="92e679274cccd373"/><attribute name="Programmed 808" id="60daf5ae76eaf32a"/><attribute name="Programmed Drum Machine" id="c61c40ba51a88d39"/><attribute name="Programmed Glitch" id="d2cccfecae6032b7"/><attribute name="Programmed Loops" id="ee5a2b12321f215e"/></attributes></attribute><attribute name="Effects" id="628308584b41b777"><attributes><attribute name="Crowd Noise" id="0457d1ce7158c4b9"/><attribute name="DJ/Turntable" id="a5cba4e9dc2ae510"/><attribute name="Samples" id="ae733704ed1f5543"/><attribute name="Sound Design" id="246218dd9f49a962"/><attribute name="Vinyl" id="249afffa12bc144e"/></attributes></attribute><attribute name="Electric" id="ad2af9ee090d1bde"/><attribute name="Electric" id="a4fc0c1d3ad2cd64"/><attribute name="Electric" id="ac75060028c5b7d0"/><attribute name="Electric Clean" id="f423d0a45762362b"/><attribute name="Electric Distorted" id="96d809f485c198d4"/><attribute name="Electric Ebow" id="d928a9afc8ab6150"/><attribute name="Electric Mellotron" id="42f74553eeb8e080"/><attribute name="Electric Piano" id="fbdae3d61dde7f5e"/><attribute name="Electronic" id="29aefdd818757ea3"/><attribute name="Group" id="9a2f997a5a92d87b"/><attribute name="Group Boys Choir" id="29f980d185a35e85"/><attribute name="Group Choral" id="e537f41498ff25e5"/><attribute name="Guitars" id="abf2d935cb4182b7"><attributes><attribute name="Acoustic" id="9801fbc2d575b92d"/><attribute name="Acoustic 12-string" id="4f24b8670aa7fe15"/><attribute name="Acoustic 6-string" id="645732ba70dae88e"/><attribute name="Acoustic Banjo" id="3c10d638ed09a44d"/><attribute name="Acoustic Mandolin" id="76afaecb09e15a44"/><attribute name="Acoustic Ukulele" id="f66869095b54a359"/><attribute name="Electric" id="ad2af9ee090d1bde"/><attribute name="Electric Clean" id="f423d0a45762362b"/><attribute name="Electric Distorted" id="96d809f485c198d4"/><attribute name="Electric Ebow" id="d928a9afc8ab6150"/></attributes></attribute><attribute name="Harp" id="fd3688a162793a08"/><attribute name="Keyboards" id="660d379e9f7a6faf"><attributes><attribute name="Accordion" id="7a95697f9d590778"/><attribute name="Acoustic" id="34ba238b25cf4e84"/><attribute name="Acoustic Celeste" id="e0600ea5d0844989"/><attribute name="Acoustic Glockenspiel" id="e06bbd26717fc396"/><attribute name="Acoustic Harpsichord" id="45979045a2be09eb"/><attribute name="Acoustic Honkey Tonk" id="75e6995a44c6155b"/><attribute name="Acoustic Honkey Tonk" id="82e1eeca21e06e61"/><attribute name="Acoustic Piano" id="eab21b6b20c6a0c7"/><attribute name="Acoustic Toy Piano" id="44dd558437de9cb9"/><attribute name="Acoustic Upright" id="e832de2f36882d48"/><attribute name="Electric" id="ac75060028c5b7d0"/><attribute name="Electric Mellotron" id="42f74553eeb8e080"/><attribute name="Electric Piano" id="fbdae3d61dde7f5e"/><attribute name="Melodica" id="3c04f616a4a55a23"/><attribute name="Organ" id="c11aef51737ea17c"/><attribute name="Organ Church/Pipe" id="aaecd881a05b51a5"/><attribute name="Organ Rock/Hammond" id="b51e565cfd909a94"/><attribute name="Synth" id="61454b4396a1f362"/><attribute name="Synth Drone" id="0bcc5e929896df4f"/><attribute name="Synth Pad" id="75e67905f7431070"/><attribute name="Synth Theremin" id="91119c2b555aaf96"/><attribute name="Synth Vocoder" id="47be24bc8ebfd5fa"/></attributes></attribute><attribute name="Koto" id="56023e48eb8400dd"/><attribute name="Live" id="35babb65b41e2028"/><attribute name="Live Brushes" id="079ef6c198b622c5"/><attribute name="Mallets" id="86c394603ad0c4ec"><attributes><attribute name="Marimba" id="a4087def56046c06"/><attribute name="Xylophone" id="bb3ace29a1b1641a"/></attributes></attribute><attribute name="Marimba" id="a4087def56046c06"/><attribute name="Melodica" id="3c04f616a4a55a23"/><attribute name="Orchestral" id="0fd10ee2293ac94e"/><attribute name="Orchestral" id="f5537d597960af22"/><attribute name="Orchestral Bells" id="63b49b52222416c3"/><attribute name="Orchestral Chime" id="64b20ac874ba3370"/><attribute name="Orchestral Church Bell" id="5cf1f11eb4cab67a"/><attribute name="Orchestral Timpani" id="63c4f4f2bb5fa639"/><attribute name="Orchestral Triangle" id="60621c09ad5556ad"/><attribute name="Organ" id="c11aef51737ea17c"/><attribute name="Organ Church/Pipe" id="aaecd881a05b51a5"/><attribute name="Organ Rock/Hammond" id="b51e565cfd909a94"/><attribute name="Other" id="7baeb3dc7f0d44c9"/><attribute name="Other Claps" id="2cd7fbb97db48a71"/><attribute name="Other Snaps" id="6673c67078a6c7cf"/><attribute name="Other Stomps" id="b3af73dda2e0fb9c"/><attribute name="Oud" id="1c2b808a017ef986"/><attribute name="Percussion" id="aa2850c4d1579d12"><attributes><attribute name="Conga" id="e15832fb25b582e9"/><attribute name="Electronic" id="29aefdd818757ea3"/><attribute name="Orchestral" id="f5537d597960af22"/><attribute name="Orchestral Bells" id="63b49b52222416c3"/><attribute name="Orchestral Chime" id="64b20ac874ba3370"/><attribute name="Orchestral Church Bell" id="5cf1f11eb4cab67a"/><attribute name="Orchestral Timpani" id="63c4f4f2bb5fa639"/><attribute name="Orchestral Triangle" id="60621c09ad5556ad"/><attribute name="Other" id="7baeb3dc7f0d44c9"/><attribute name="Other Claps" id="2cd7fbb97db48a71"/><attribute name="Other Snaps" id="6673c67078a6c7cf"/><attribute name="Other Stomps" id="b3af73dda2e0fb9c"/><attribute name="Tambourine" id="047f60ef4d0b737a"/><attribute name="World" id="034ed28abb30357a"/></attributes></attribute><attribute name="Programmed" id="92e679274cccd373"/><attribute name="Programmed 808" id="60daf5ae76eaf32a"/><attribute name="Programmed Drum Machine" id="c61c40ba51a88d39"/><attribute name="Programmed Glitch" id="d2cccfecae6032b7"/><attribute name="Programmed Loops" id="ee5a2b12321f215e"/><attribute name="Samples" id="ae733704ed1f5543"/><attribute name="Sitar" id="389985da6b86deea"/><attribute name="Solo" id="b8ba6bd739c9aebc"/><attribute name="Solo Child" id="571d2fc23640e5aa"/><attribute name="Solo Female" id="f85281cf6c7febe4"/><attribute name="Solo Male" id="8c610b465004e909"/><attribute name="Solo Synthesized" id="3342703265b91add"/><attribute name="Sound Design" id="246218dd9f49a962"/><attribute name="Strings" id="56be9af5959c094a"><attributes><attribute name="Bass" id="24900efb2fe2f786"/><attribute name="Cello" id="b90948683057b538"/><attribute name="Harp" id="fd3688a162793a08"/><attribute name="Orchestral" id="0fd10ee2293ac94e"/><attribute name="Viola" id="ce3473265a1f51fd"/><attribute name="Violin" id="30f47c7e501612f1"/></attributes></attribute><attribute name="Synth" id="8a4f93782c60d5b2"/><attribute name="Synth" id="61454b4396a1f362"/><attribute name="Synth Drone" id="0bcc5e929896df4f"/><attribute name="Synth Pad" id="75e67905f7431070"/><attribute name="Synth Theremin" id="91119c2b555aaf96"/><attribute name="Synth Vocoder" id="47be24bc8ebfd5fa"/><attribute name="Tambourine" id="047f60ef4d0b737a"/><attribute name="Vinyl" id="249afffa12bc144e"/><attribute name="Viola" id="ce3473265a1f51fd"/><attribute name="Violin" id="30f47c7e501612f1"/><attribute name="Voices" id="04cbe187635f3370"><attributes><attribute name="A Capella" id="d69ca22efb7ac248"/><attribute name="Group" id="9a2f997a5a92d87b"/><attribute name="Group Boys Choir" id="29f980d185a35e85"/><attribute name="Group Choral" id="e537f41498ff25e5"/><attribute name="Solo" id="b8ba6bd739c9aebc"/><attribute name="Solo Child" id="571d2fc23640e5aa"/><attribute name="Solo Female" id="f85281cf6c7febe4"/><attribute name="Solo Male" id="8c610b465004e909"/><attribute name="Solo Synthesized" id="3342703265b91add"/></attributes></attribute><attribute name="Whistle" id="79bad595e679514e"/><attribute name="Whistle Human" id="0f1ce56e6de02764"/><attribute name="Whistle Penny" id="fc601a4ffc4bfea6"/><attribute name="Whistle Slide" id="1f5b8866a9a454f8"/><attribute name="Winds" id="4427aac92b9c0621"><attributes><attribute name="Brass" id="b427df8f9e658c72"/><attribute name="Brass Section" id="3e249a070f08081e"/><attribute name="Brass Trumpet" id="6d295458d751b4fe"/><attribute name="Brass Trumpet Muted" id="54bfe112f83f8e98"/><attribute name="Brass Tuba" id="d8a3116eb2f4eb18"/><attribute name="Brass War Horns" id="035ad3c78301c7ac"/><attribute name="Whistle" id="79bad595e679514e"/><attribute name="Whistle Human" id="0f1ce56e6de02764"/><attribute name="Whistle Penny" id="fc601a4ffc4bfea6"/><attribute name="Whistle Slide" id="1f5b8866a9a454f8"/><attribute name="Woodwinds" id="9f400967f16d0df7"/><attribute name="Woodwinds Bassoon" id="05692b9496a16f6f"/><attribute name="Woodwinds Clarinet" id="88fc0a5c81501440"/><attribute name="Woodwinds Oboe" id="13a8e5e06a1f05fa"/><attribute name="Woodwinds Saxophone" id="2ed8e501a797dff3"/></attributes></attribute><attribute name="Woodwinds" id="9f400967f16d0df7"/><attribute name="Woodwinds Bassoon" id="05692b9496a16f6f"/><attribute name="Woodwinds Clarinet" id="88fc0a5c81501440"/><attribute name="Woodwinds Oboe" id="13a8e5e06a1f05fa"/><attribute name="Woodwinds Saxophone" id="2ed8e501a797dff3"/><attribute name="World" id="c12458f48d45a92b"><attributes><attribute name="Arab" id="0a320a9ea013a675"/><attribute name="Asian" id="22efb8700ab5b349"/><attribute name="Balaban" id="a7cd15d2c165dc7a"/><attribute name="Koto" id="56023e48eb8400dd"/><attribute name="Oud" id="1c2b808a017ef986"/><attribute name="Sitar" id="389985da6b86deea"/></attributes></attribute><attribute name="World" id="034ed28abb30357a"/><attribute name="Xylophone" id="bb3ace29a1b1641a"/></attributes></category></categories></responsecategories>
+<?xml version="1.0" encoding="utf-8"?>
+<responsecategories xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <categories>
+    <category name="Tuning" id="07615de0da9a3d50">
+      <attributes>
+        <attribute name="0" id="da2362b0e30b131f" />
+        <attribute name="1" id="6185334915adc56b" />
+        <attribute name="1 - Dark" id="b403776ec4239f98" />
+        <attribute name="1 - Drone" id="f260201c3e67367a" />
+        <attribute name="1 - Organic" id="8e7e7da666dfa63e" />
+        <attribute name="1 - Serious/Negative"
+        id="527d6c887023f4ee" />
+        <attribute name="1 - Very Slow" id="12686fbe3e027d52" />
+        <attribute name="2 - Leaning Dark" id="aa9c33fef3c5756f" />
+        <attribute name="2 - Leaning Negative"
+        id="bf037eccc508299a" />
+        <attribute name="2 - Leaning Organic"
+        id="672943149dd4886b" />
+        <attribute name="2 - Slower" id="b2927d5885423cd5" />
+        <attribute name="2 - Take It Easy" id="42c0769733468f65" />
+        <attribute name="3 - Average" id="76ab3da78eb67d2d" />
+        <attribute name="3 - Balanced" id="99cf91a48d60a45c" />
+        <attribute name="3 - Blended" id="387b65044f597b48" />
+        <attribute name="3 - Medium" id="b7f9cd0ca260b61a" />
+        <attribute name="3 - Neutral" id="0e04d790426e94d1" />
+        <attribute name="4 - Faster" id="ce5ca8c9d3221d28" />
+        <attribute name="4 - In Motion" id="97fda140bf94f8ca" />
+        <attribute name="4 - Leaning Bright"
+        id="0b71a8e28e9cdcda" />
+        <attribute name="4 - Leaning Electronic"
+        id="f8c5a1f9a757660a" />
+        <attribute name="4 - Leaning Positive"
+        id="62008a716f04daf4" />
+        <attribute name="5 - Bright" id="d26011882954cb23" />
+        <attribute name="5 - Chaotic" id="dd116b77ef6c9851" />
+        <attribute name="5 - Electronic" id="61d8ad4472c7d718" />
+        <attribute name="5 - Happy/Positive"
+        id="aed5418c1ca410fc" />
+        <attribute name="5 - Very Fast" id="fc4e0bec7ad28319" />
+        <attribute name="Energy" id="a7cc2fe1b4075e51">
+          <attributes>
+            <attribute name="1 - Drone" id="f260201c3e67367a" />
+            <attribute name="2 - Take It Easy"
+            id="42c0769733468f65" />
+            <attribute name="3 - Average" id="76ab3da78eb67d2d" />
+            <attribute name="4 - In Motion"
+            id="97fda140bf94f8ca" />
+            <attribute name="5 - Chaotic" id="dd116b77ef6c9851" />
+          </attributes>
+        </attribute>
+        <attribute name="Genetics" id="a5306d79fa80d3da">
+          <attributes>
+            <attribute name="1 - Organic" id="8e7e7da666dfa63e" />
+            <attribute name="2 - Leaning Organic"
+            id="672943149dd4886b" />
+            <attribute name="3 - Blended" id="387b65044f597b48" />
+            <attribute name="4 - Leaning Electronic"
+            id="f8c5a1f9a757660a" />
+            <attribute name="5 - Electronic"
+            id="61d8ad4472c7d718" />
+          </attributes>
+        </attribute>
+        <attribute name="Mood" id="05c1d9f5bb63b113">
+          <attributes>
+            <attribute name="1 - Serious/Negative"
+            id="527d6c887023f4ee" />
+            <attribute name="2 - Leaning Negative"
+            id="bf037eccc508299a" />
+            <attribute name="3 - Neutral" id="0e04d790426e94d1" />
+            <attribute name="4 - Leaning Positive"
+            id="62008a716f04daf4" />
+            <attribute name="5 - Happy/Positive"
+            id="aed5418c1ca410fc" />
+          </attributes>
+        </attribute>
+        <attribute name="Tempo" id="65ea5898a4549788">
+          <attributes>
+            <attribute name="1 - Very Slow"
+            id="12686fbe3e027d52" />
+            <attribute name="2 - Slower" id="b2927d5885423cd5" />
+            <attribute name="3 - Medium" id="b7f9cd0ca260b61a" />
+            <attribute name="4 - Faster" id="ce5ca8c9d3221d28" />
+            <attribute name="5 - Very Fast"
+            id="fc4e0bec7ad28319" />
+          </attributes>
+        </attribute>
+        <attribute name="Tone" id="22aadd9f2935aabe">
+          <attributes>
+            <attribute name="1 - Dark" id="b403776ec4239f98" />
+            <attribute name="2 - Leaning Dark"
+            id="aa9c33fef3c5756f" />
+            <attribute name="3 - Balanced" id="99cf91a48d60a45c" />
+            <attribute name="4 - Leaning Bright"
+            id="0b71a8e28e9cdcda" />
+            <attribute name="5 - Bright" id="d26011882954cb23" />
+          </attributes>
+        </attribute>
+        <attribute name="Vocals" id="ea584a3d9b4fb116">
+          <attributes>
+            <attribute name="0" id="da2362b0e30b131f" />
+            <attribute name="1" id="6185334915adc56b" />
+          </attributes>
+        </attribute>
+      </attributes>
+    </category>
+    <category name="Instrumentation" id="7907138b683424f4">
+      <attributes>
+        <attribute name="A Capella" id="d69ca22efb7ac248" />
+        <attribute name="Accordion" id="7a95697f9d590778" />
+        <attribute name="Acoustic" id="34ba238b25cf4e84" />
+        <attribute name="Acoustic" id="a35d92ce17194d0e" />
+        <attribute name="Acoustic" id="9801fbc2d575b92d" />
+        <attribute name="Acoustic 12-string"
+        id="4f24b8670aa7fe15" />
+        <attribute name="Acoustic 6-string"
+        id="645732ba70dae88e" />
+        <attribute name="Acoustic Banjo" id="3c10d638ed09a44d" />
+        <attribute name="Acoustic Celeste" id="e0600ea5d0844989" />
+        <attribute name="Acoustic Glockenspiel"
+        id="e06bbd26717fc396" />
+        <attribute name="Acoustic Harpsichord"
+        id="45979045a2be09eb" />
+        <attribute name="Acoustic Honkey Tonk"
+        id="75e6995a44c6155b" />
+        <attribute name="Acoustic Honkey Tonk"
+        id="82e1eeca21e06e61" />
+        <attribute name="Acoustic Mandolin"
+        id="76afaecb09e15a44" />
+        <attribute name="Acoustic Piano" id="eab21b6b20c6a0c7" />
+        <attribute name="Acoustic Toy Piano"
+        id="44dd558437de9cb9" />
+        <attribute name="Acoustic Ukulele" id="f66869095b54a359" />
+        <attribute name="Acoustic Upright" id="e832de2f36882d48" />
+        <attribute name="Acoustic Upright" id="4e8c2d38edf532fc" />
+        <attribute name="Arab" id="0a320a9ea013a675" />
+        <attribute name="Asian" id="22efb8700ab5b349" />
+        <attribute name="Balaban" id="a7cd15d2c165dc7a" />
+        <attribute name="Bass" id="080a1841ed350bbb">
+          <attributes>
+            <attribute name="Acoustic" id="a35d92ce17194d0e" />
+            <attribute name="Acoustic Upright"
+            id="4e8c2d38edf532fc" />
+            <attribute name="Electric" id="a4fc0c1d3ad2cd64" />
+            <attribute name="Synth" id="8a4f93782c60d5b2" />
+          </attributes>
+        </attribute>
+        <attribute name="Bass" id="24900efb2fe2f786" />
+        <attribute name="Brass" id="b427df8f9e658c72" />
+        <attribute name="Brass Section" id="3e249a070f08081e" />
+        <attribute name="Brass Trumpet" id="6d295458d751b4fe" />
+        <attribute name="Brass Trumpet Muted"
+        id="54bfe112f83f8e98" />
+        <attribute name="Brass Tuba" id="d8a3116eb2f4eb18" />
+        <attribute name="Brass War Horns" id="035ad3c78301c7ac" />
+        <attribute name="Cello" id="b90948683057b538" />
+        <attribute name="Conga" id="e15832fb25b582e9" />
+        <attribute name="Crowd Noise" id="0457d1ce7158c4b9" />
+        <attribute name="DJ/Turntable" id="a5cba4e9dc2ae510" />
+        <attribute name="Drums" id="16fd25d513dce9dd">
+          <attributes>
+            <attribute name="Live" id="35babb65b41e2028" />
+            <attribute name="Live Brushes" id="079ef6c198b622c5" />
+            <attribute name="Programmed" id="92e679274cccd373" />
+            <attribute name="Programmed 808"
+            id="60daf5ae76eaf32a" />
+            <attribute name="Programmed Drum Machine"
+            id="c61c40ba51a88d39" />
+            <attribute name="Programmed Glitch"
+            id="d2cccfecae6032b7" />
+            <attribute name="Programmed Loops"
+            id="ee5a2b12321f215e" />
+          </attributes>
+        </attribute>
+        <attribute name="Effects" id="628308584b41b777">
+          <attributes>
+            <attribute name="Crowd Noise" id="0457d1ce7158c4b9" />
+            <attribute name="DJ/Turntable" id="a5cba4e9dc2ae510" />
+            <attribute name="Samples" id="ae733704ed1f5543" />
+            <attribute name="Sound Design" id="246218dd9f49a962" />
+            <attribute name="Vinyl" id="249afffa12bc144e" />
+          </attributes>
+        </attribute>
+        <attribute name="Electric" id="ad2af9ee090d1bde" />
+        <attribute name="Electric" id="a4fc0c1d3ad2cd64" />
+        <attribute name="Electric" id="ac75060028c5b7d0" />
+        <attribute name="Electric Clean" id="f423d0a45762362b" />
+        <attribute name="Electric Distorted"
+        id="96d809f485c198d4" />
+        <attribute name="Electric Ebow" id="d928a9afc8ab6150" />
+        <attribute name="Electric Mellotron"
+        id="42f74553eeb8e080" />
+        <attribute name="Electric Piano" id="fbdae3d61dde7f5e" />
+        <attribute name="Electronic" id="29aefdd818757ea3" />
+        <attribute name="Group" id="9a2f997a5a92d87b" />
+        <attribute name="Group Boys Choir" id="29f980d185a35e85" />
+        <attribute name="Group Choral" id="e537f41498ff25e5" />
+        <attribute name="Guitars" id="abf2d935cb4182b7">
+          <attributes>
+            <attribute name="Acoustic" id="9801fbc2d575b92d" />
+            <attribute name="Acoustic 12-string"
+            id="4f24b8670aa7fe15" />
+            <attribute name="Acoustic 6-string"
+            id="645732ba70dae88e" />
+            <attribute name="Acoustic Banjo"
+            id="3c10d638ed09a44d" />
+            <attribute name="Acoustic Mandolin"
+            id="76afaecb09e15a44" />
+            <attribute name="Acoustic Ukulele"
+            id="f66869095b54a359" />
+            <attribute name="Electric" id="ad2af9ee090d1bde" />
+            <attribute name="Electric Clean"
+            id="f423d0a45762362b" />
+            <attribute name="Electric Distorted"
+            id="96d809f485c198d4" />
+            <attribute name="Electric Ebow"
+            id="d928a9afc8ab6150" />
+          </attributes>
+        </attribute>
+        <attribute name="Harp" id="fd3688a162793a08" />
+        <attribute name="Keyboards" id="660d379e9f7a6faf">
+          <attributes>
+            <attribute name="Accordion" id="7a95697f9d590778" />
+            <attribute name="Acoustic" id="34ba238b25cf4e84" />
+            <attribute name="Acoustic Celeste"
+            id="e0600ea5d0844989" />
+            <attribute name="Acoustic Glockenspiel"
+            id="e06bbd26717fc396" />
+            <attribute name="Acoustic Harpsichord"
+            id="45979045a2be09eb" />
+            <attribute name="Acoustic Honkey Tonk"
+            id="75e6995a44c6155b" />
+            <attribute name="Acoustic Honkey Tonk"
+            id="82e1eeca21e06e61" />
+            <attribute name="Acoustic Piano"
+            id="eab21b6b20c6a0c7" />
+            <attribute name="Acoustic Toy Piano"
+            id="44dd558437de9cb9" />
+            <attribute name="Acoustic Upright"
+            id="e832de2f36882d48" />
+            <attribute name="Electric" id="ac75060028c5b7d0" />
+            <attribute name="Electric Mellotron"
+            id="42f74553eeb8e080" />
+            <attribute name="Electric Piano"
+            id="fbdae3d61dde7f5e" />
+            <attribute name="Melodica" id="3c04f616a4a55a23" />
+            <attribute name="Organ" id="c11aef51737ea17c" />
+            <attribute name="Organ Church/Pipe"
+            id="aaecd881a05b51a5" />
+            <attribute name="Organ Rock/Hammond"
+            id="b51e565cfd909a94" />
+            <attribute name="Synth" id="61454b4396a1f362" />
+            <attribute name="Synth Drone" id="0bcc5e929896df4f" />
+            <attribute name="Synth Pad" id="75e67905f7431070" />
+            <attribute name="Synth Theremin"
+            id="91119c2b555aaf96" />
+            <attribute name="Synth Vocoder"
+            id="47be24bc8ebfd5fa" />
+          </attributes>
+        </attribute>
+        <attribute name="Koto" id="56023e48eb8400dd" />
+        <attribute name="Live" id="35babb65b41e2028" />
+        <attribute name="Live Brushes" id="079ef6c198b622c5" />
+        <attribute name="Mallets" id="86c394603ad0c4ec">
+          <attributes>
+            <attribute name="Marimba" id="a4087def56046c06" />
+            <attribute name="Xylophone" id="bb3ace29a1b1641a" />
+          </attributes>
+        </attribute>
+        <attribute name="Marimba" id="a4087def56046c06" />
+        <attribute name="Melodica" id="3c04f616a4a55a23" />
+        <attribute name="Orchestral" id="0fd10ee2293ac94e" />
+        <attribute name="Orchestral" id="f5537d597960af22" />
+        <attribute name="Orchestral Bells" id="63b49b52222416c3" />
+        <attribute name="Orchestral Chime" id="64b20ac874ba3370" />
+        <attribute name="Orchestral Church Bell"
+        id="5cf1f11eb4cab67a" />
+        <attribute name="Orchestral Timpani"
+        id="63c4f4f2bb5fa639" />
+        <attribute name="Orchestral Triangle"
+        id="60621c09ad5556ad" />
+        <attribute name="Organ" id="c11aef51737ea17c" />
+        <attribute name="Organ Church/Pipe"
+        id="aaecd881a05b51a5" />
+        <attribute name="Organ Rock/Hammond"
+        id="b51e565cfd909a94" />
+        <attribute name="Other" id="7baeb3dc7f0d44c9" />
+        <attribute name="Other Claps" id="2cd7fbb97db48a71" />
+        <attribute name="Other Snaps" id="6673c67078a6c7cf" />
+        <attribute name="Other Stomps" id="b3af73dda2e0fb9c" />
+        <attribute name="Oud" id="1c2b808a017ef986" />
+        <attribute name="Percussion" id="aa2850c4d1579d12">
+          <attributes>
+            <attribute name="Conga" id="e15832fb25b582e9" />
+            <attribute name="Electronic" id="29aefdd818757ea3" />
+            <attribute name="Orchestral" id="f5537d597960af22" />
+            <attribute name="Orchestral Bells"
+            id="63b49b52222416c3" />
+            <attribute name="Orchestral Chime"
+            id="64b20ac874ba3370" />
+            <attribute name="Orchestral Church Bell"
+            id="5cf1f11eb4cab67a" />
+            <attribute name="Orchestral Timpani"
+            id="63c4f4f2bb5fa639" />
+            <attribute name="Orchestral Triangle"
+            id="60621c09ad5556ad" />
+            <attribute name="Other" id="7baeb3dc7f0d44c9" />
+            <attribute name="Other Claps" id="2cd7fbb97db48a71" />
+            <attribute name="Other Snaps" id="6673c67078a6c7cf" />
+            <attribute name="Other Stomps" id="b3af73dda2e0fb9c" />
+            <attribute name="Tambourine" id="047f60ef4d0b737a" />
+            <attribute name="World" id="034ed28abb30357a" />
+          </attributes>
+        </attribute>
+        <attribute name="Programmed" id="92e679274cccd373" />
+        <attribute name="Programmed 808" id="60daf5ae76eaf32a" />
+        <attribute name="Programmed Drum Machine"
+        id="c61c40ba51a88d39" />
+        <attribute name="Programmed Glitch"
+        id="d2cccfecae6032b7" />
+        <attribute name="Programmed Loops" id="ee5a2b12321f215e" />
+        <attribute name="Samples" id="ae733704ed1f5543" />
+        <attribute name="Sitar" id="389985da6b86deea" />
+        <attribute name="Solo" id="b8ba6bd739c9aebc" />
+        <attribute name="Solo Child" id="571d2fc23640e5aa" />
+        <attribute name="Solo Female" id="f85281cf6c7febe4" />
+        <attribute name="Solo Male" id="8c610b465004e909" />
+        <attribute name="Solo Synthesized" id="3342703265b91add" />
+        <attribute name="Sound Design" id="246218dd9f49a962" />
+        <attribute name="Strings" id="56be9af5959c094a">
+          <attributes>
+            <attribute name="Bass" id="24900efb2fe2f786" />
+            <attribute name="Cello" id="b90948683057b538" />
+            <attribute name="Harp" id="fd3688a162793a08" />
+            <attribute name="Orchestral" id="0fd10ee2293ac94e" />
+            <attribute name="Viola" id="ce3473265a1f51fd" />
+            <attribute name="Violin" id="30f47c7e501612f1" />
+          </attributes>
+        </attribute>
+        <attribute name="Synth" id="8a4f93782c60d5b2" />
+        <attribute name="Synth" id="61454b4396a1f362" />
+        <attribute name="Synth Drone" id="0bcc5e929896df4f" />
+        <attribute name="Synth Pad" id="75e67905f7431070" />
+        <attribute name="Synth Theremin" id="91119c2b555aaf96" />
+        <attribute name="Synth Vocoder" id="47be24bc8ebfd5fa" />
+        <attribute name="Tambourine" id="047f60ef4d0b737a" />
+        <attribute name="Vinyl" id="249afffa12bc144e" />
+        <attribute name="Viola" id="ce3473265a1f51fd" />
+        <attribute name="Violin" id="30f47c7e501612f1" />
+        <attribute name="Voices" id="04cbe187635f3370">
+          <attributes>
+            <attribute name="A Capella" id="d69ca22efb7ac248" />
+            <attribute name="Group" id="9a2f997a5a92d87b" />
+            <attribute name="Group Boys Choir"
+            id="29f980d185a35e85" />
+            <attribute name="Group Choral" id="e537f41498ff25e5" />
+            <attribute name="Solo" id="b8ba6bd739c9aebc" />
+            <attribute name="Solo Child" id="571d2fc23640e5aa" />
+            <attribute name="Solo Female" id="f85281cf6c7febe4" />
+            <attribute name="Solo Male" id="8c610b465004e909" />
+            <attribute name="Solo Synthesized"
+            id="3342703265b91add" />
+          </attributes>
+        </attribute>
+        <attribute name="Whistle" id="79bad595e679514e" />
+        <attribute name="Whistle Human" id="0f1ce56e6de02764" />
+        <attribute name="Whistle Penny" id="fc601a4ffc4bfea6" />
+        <attribute name="Whistle Slide" id="1f5b8866a9a454f8" />
+        <attribute name="Winds" id="4427aac92b9c0621">
+          <attributes>
+            <attribute name="Brass" id="b427df8f9e658c72" />
+            <attribute name="Brass Section"
+            id="3e249a070f08081e" />
+            <attribute name="Brass Trumpet"
+            id="6d295458d751b4fe" />
+            <attribute name="Brass Trumpet Muted"
+            id="54bfe112f83f8e98" />
+            <attribute name="Brass Tuba" id="d8a3116eb2f4eb18" />
+            <attribute name="Brass War Horns"
+            id="035ad3c78301c7ac" />
+            <attribute name="Whistle" id="79bad595e679514e" />
+            <attribute name="Whistle Human"
+            id="0f1ce56e6de02764" />
+            <attribute name="Whistle Penny"
+            id="fc601a4ffc4bfea6" />
+            <attribute name="Whistle Slide"
+            id="1f5b8866a9a454f8" />
+            <attribute name="Woodwinds" id="9f400967f16d0df7" />
+            <attribute name="Woodwinds Bassoon"
+            id="05692b9496a16f6f" />
+            <attribute name="Woodwinds Clarinet"
+            id="88fc0a5c81501440" />
+            <attribute name="Woodwinds Oboe"
+            id="13a8e5e06a1f05fa" />
+            <attribute name="Woodwinds Saxophone"
+            id="2ed8e501a797dff3" />
+          </attributes>
+        </attribute>
+        <attribute name="Woodwinds" id="9f400967f16d0df7" />
+        <attribute name="Woodwinds Bassoon"
+        id="05692b9496a16f6f" />
+        <attribute name="Woodwinds Clarinet"
+        id="88fc0a5c81501440" />
+        <attribute name="Woodwinds Oboe" id="13a8e5e06a1f05fa" />
+        <attribute name="Woodwinds Saxophone"
+        id="2ed8e501a797dff3" />
+        <attribute name="World" id="c12458f48d45a92b">
+          <attributes>
+            <attribute name="Arab" id="0a320a9ea013a675" />
+            <attribute name="Asian" id="22efb8700ab5b349" />
+            <attribute name="Balaban" id="a7cd15d2c165dc7a" />
+            <attribute name="Koto" id="56023e48eb8400dd" />
+            <attribute name="Oud" id="1c2b808a017ef986" />
+            <attribute name="Sitar" id="389985da6b86deea" />
+          </attributes>
+        </attribute>
+        <attribute name="World" id="034ed28abb30357a" />
+        <attribute name="Xylophone" id="bb3ace29a1b1641a" />
+      </attributes>
+    </category>
+  </categories>
+</responsecategories>
