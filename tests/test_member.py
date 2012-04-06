@@ -37,7 +37,7 @@ def test_create_member(HttpMock):
             <last_name>%(last_name)s</last_name>
             <email>%(email)s</email>
         </memberaccount>
-    </ResponseMember>""" % {'test_member_id': test_member_id, 
+    </ResponseMember>""" % {'test_member_id': test_member_id,
                             'username': username,
                             'first_name': first_name,
                             'last_name': last_name,
@@ -73,13 +73,13 @@ def test_from_xml():
                     <lastname>%(lastname)s</lastname>
                     <email>%(email)s</email>
                 </memberaccount>""" % \
-                    {'test_member_id': test_member_id, 
+                    {'test_member_id': test_member_id,
                      'username': username,
                      'firstname': firstname,
                      'lastname': lastname,
                      'email': email}
 
-    member_xml = ET.fromstring(xml_str)                     
+    member_xml = ET.fromstring(xml_str)
     member = Member.from_xml(member_xml, client)
 
     assert member.id == test_member_id
@@ -114,7 +114,7 @@ def test_member_update(HttpMock):
                         <lastname>%(test_lastname)s</lastname>
                         <email>%(test_email)s</email>
                     </memberaccount>
-                </ResponseMember>""" % locals()), 
+                </ResponseMember>""" % locals()),
     ]
 
     http = build_http_mock(HttpMock, responses=return_values)
@@ -166,7 +166,7 @@ def test_member_authenticate_fail(HttpMock):
                     </error>
                  </responsemember>"""
 
-    http = build_http_mock(HttpMock, content=content)                 
+    http = build_http_mock(HttpMock, content=content)
     member = Member.authenticate(test_username, test_password, client)
 
 
@@ -184,7 +184,7 @@ def test_member_invalid(HttpMock):
                     </error>
                  </responsemember>"""
 
-    http = build_http_mock(HttpMock, content=content)                    
+    http = build_http_mock(HttpMock, content=content)
     member = Member.query.get_by_id(test_member_id, client)
 
 
@@ -198,7 +198,7 @@ def test_send_password(HttpMock):
             <code>OK</code>
         </responsecode>"""
 
-    http = build_http_mock(HttpMock, content=content)                    
+    http = build_http_mock(HttpMock, content=content)
     Member.send_password(test_username, client)
 
 
@@ -222,7 +222,7 @@ def test_get_member_favourites(HttpMock):
                                      'firstname': firstname,
                                      'lastname': lastname,
                                      'email': email})
- 
+
     member = Member.from_xml(member_xml, client)
 
     test_track_id = get_random_md5()
@@ -236,8 +236,7 @@ def test_get_member_favourites(HttpMock):
                                 </tracks>
                             </favourites>
                         </ResponseFavourites>""" % {'id': test_track_id,
-                                                'name': test_track_name,}
-
+                                                   'name': test_track_name}
 
     http = build_http_mock(HttpMock, content=xml_response)
     favourites = member.get_favourites()
@@ -265,13 +264,13 @@ def test_add_track(HttpMock):
                     <lastname>%(lastname)s</lastname>
                     <email>%(email)s</email>
                 </memberaccount>""" % \
-                    {'test_member_id': test_member_id, 
+                    {'test_member_id': test_member_id,
                      'username': username,
                      'firstname': firstname,
                      'lastname': lastname,
                      'email': email}
 
-    member_xml = ET.fromstring(xml_str)                     
+    member_xml = ET.fromstring(xml_str)
     member = Member.from_xml(member_xml, client)
 
     xml_response = """<?xml version="1.0" encoding="utf-8"?>
@@ -299,13 +298,13 @@ def test_remove_track(HttpMock):
                     <lastname>%(lastname)s</lastname>
                     <email>%(email)s</email>
                 </memberaccount>""" % \
-                    {'test_member_id': test_member_id, 
+                    {'test_member_id': test_member_id,
                      'username': username,
                      'firstname': firstname,
                      'lastname': lastname,
                      'email': email}
 
-    member_xml = ET.fromstring(xml_str)                     
+    member_xml = ET.fromstring(xml_str)
     member = Member.from_xml(member_xml, client)
 
     xml_response = """<?xml version="1.0" encoding="utf-8"?>

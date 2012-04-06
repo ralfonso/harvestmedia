@@ -28,6 +28,28 @@ class MemberQuery(object):
                          'track_id': track_id}
         _client.get_xml(method_uri)
 
+    def update_member(self, member_id, _client, **kwargs):
+        root = ET.Element('requestmember')
+        member = ET.Element('memberaccount')
+
+        member.set('id', str(member_id))
+
+        for prop, value in kwargs.items():
+            if not prop.startswith('_'):
+                el = ET.Element(prop)
+                el.text = value
+                member.append(el)
+
+        root.append(member)
+
+        method_uri = '/updatemember/{{service_token}}'
+        xml_post_body = ET.tostring(root)
+
+        # if this is successful, we can just use the current object
+        xml_data = _client.post_xml(method_uri, xml_post_body)
+        xml_member = xml_data.find('memberaccount')
+        return Member.from_xml(xml_member, _client)
+
 
 class Member(DictObj):
 
@@ -76,24 +98,11 @@ class Member(DictObj):
         return cls.from_xml(xml_member, _client)
 
     def update(self):
-        root = ET.Element('requestmember')
-        member = ET.Element('memberaccount')
-
-        member.set('id', str(self.id))
-
-        for prop, value in vars(self).items():
-            if not prop.startswith('_'):
-                el = ET.Element(prop)
-                el.text = value
-                member.append(el)
-
-        root.append(member)
-
-        method_uri = '/updatemember/{{service_token}}'
-        xml_post_body = ET.tostring(root)
-
-        # if this is successful, we can just use the current object
-        xml_data = self._client.post_xml(method_uri, xml_post_body)
+        update_vars = vars(self).copy()
+        for k, v in update_vars.items():
+            if k.startswith('_'):
+                del update_vars[k]
+        return self.query.update_member(self.id, self._client, **update_vars)
 
     @classmethod
     def authenticate(cls, username, password, _client):

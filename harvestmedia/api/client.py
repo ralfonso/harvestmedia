@@ -84,7 +84,10 @@ class Client(object):
                     raise exceptions.CorruptInputData()
                 elif code.text == '2':
                     description = error.find('description')
-                    reason = description.text if description is not None else 'Incorrect Input Data'
+                    if description is not None:
+                        reason = description.text
+                    else:
+                        reason = 'Incorrect Input Data'
                     raise exceptions.IncorrectInputData(reason)
                 elif code.text == '5':
                     raise exceptions.InvalidToken()
@@ -123,7 +126,8 @@ class Client(object):
             logger.debug('post_xml url: %s' % method_url)
             logger.debug("posting XML: " + xml_post_body)
 
-        response, content = http.request(method_url, 'POST', xml_post_body, {'Content-Type': 'application/xml'})
+        headers = {'Content-Type': 'application/xml'}
+        response, content = http.request(method_url, 'POST', xml_post_body, headers)
         return self._handle_response(response, content)
 
     def request_service_token(self):

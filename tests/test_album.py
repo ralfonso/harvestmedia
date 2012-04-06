@@ -76,7 +76,7 @@ def test_album_notracks(HttpMock):
         (200, """<responsetracks>
                     <tracks>
                     </tracks>
-                </responsetracks>""" % locals(),), 
+                </responsetracks>""" % locals(),),
     ]
 
     http = build_http_mock(HttpMock, responses=return_values)
@@ -108,7 +108,7 @@ def test_album_tracks_fulldetail(HttpMock):
                         genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411"
                         dateingested="2008-05-15 06:08:18"/>
                     </tracks>
-                </responsetracks>""" % locals(),), 
+                </responsetracks>""" % locals(),),
         (200, """<responsetracks>
                     <tracks>
                         <track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down the front for
@@ -191,7 +191,7 @@ def test_album_tracks_fulldetail(HttpMock):
                         genre="Pop / Rock" tempo="" instrumentation="" bpm="" mixout="" frequency="44100" bitrate="1411"
                         dateingested="2008-05-15 06:08:18"/>
                     </tracks>
-                </responsetracks>""" % locals(),), 
+                </responsetracks>""" % locals(),),
     ]
 
     http = build_http_mock(HttpMock, responses=return_values)

@@ -27,8 +27,8 @@ def test_create_playlist(HttpMock):
                         <playlist id="%(id)s" name="%(name)s" />
                     </playlists>
                 </ResponsePlaylists>""" % \
-                    {'id': test_playlist_id, 
-                     'name': test_playlist_name,}
+                    {'id': test_playlist_id,
+                     'name': test_playlist_name}
 
     http = build_http_mock(HttpMock, content=content)
     playlist = Playlist.create(_client=client, member_id=test_member_id, playlist_name=test_playlist_name)
@@ -36,7 +36,7 @@ def test_create_playlist(HttpMock):
     assert playlist.id == test_playlist_id
     assert playlist.name == test_playlist_name
 
- 
+
 @mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_get_member_playlists(HttpMock):
     client = init_client()
@@ -51,7 +51,7 @@ def test_get_member_playlists(HttpMock):
                                     <firstname>%(firstname)s</firstname>
                                     <lastname>%(lastname)s</lastname>
                                     <email>%(email)s</email>
-                                </memberaccount>""" % {'test_member_id': test_member_id, 
+                                </memberaccount>""" % {'test_member_id': test_member_id,
                                                        'username': username,
                                                        'firstname': firstname,
                                                        'lastname': lastname,
@@ -67,17 +67,17 @@ def test_get_member_playlists(HttpMock):
                         <playlists>
                             <playlist id="%(id)s" name="%(name)s">
                                 <tracks>
-                                    <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure 
-                                        you’re down the front for this fiery Post Punk workout." 
-                                        composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM" 
-                                        name="Guerilla Pop" id="17376d36f309f18d" keywords="" lyrics="" 
+                                    <track tracknumber="001" time="02:50" lengthseconds="170" comment="Make sure
+                                        you’re down the front for this fiery Post Punk workout."
+                                        composer="&quot;S. Milton, J. Wygens&quot;" publisher="HM"
+                                        name="Guerilla Pop" id="17376d36f309f18d" keywords="" lyrics=""
                                         displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
                                         bpm="" mixout="" frequency="44100" bitrate="1411" />
                                 </tracks>
                             </playlist>
                         </playlists>
                     </ResponsePlaylists>""" % {'id': test_playlist_id,
-                                            'name': test_playlist_name,}
+                                            'name': test_playlist_name}
 
     http = build_http_mock(HttpMock, content=content)
     playlists = member.get_playlists()
@@ -169,9 +169,9 @@ def test_remove_track(HttpMock):
     album_id = '1c5f47572d9152f3'
 
     now = datetime.datetime.today().isoformat()
-    test_member_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_member_id = get_random_md5()
     now = datetime.datetime.today().isoformat()
-    test_playlist_id = hashlib.md5(now).hexdigest() # generate an md5 from the date for testing
+    test_playlist_id = get_random_md5()
     test_playlist_name = 'test playlist'
     track_id = '17376d36f309f18d'
 
@@ -190,7 +190,7 @@ def test_remove_track(HttpMock):
                                 </tracks>
                             </playlist>
                         </playlists>
-                    </ResponsePlaylists>""" % locals(),), 
+                    </ResponsePlaylists>""" % locals(),),
         (200, """<?xml version="1.0" encoding="utf-8"?>
                 <responsecode xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
                     <code>OK</code>
@@ -247,11 +247,13 @@ def test_playlist_update(HttpMock):
     playlist.update()
     assert playlist.name == test_playlist_update_name
 
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_playlist_update_missing_member_id():
     client = init_client()
     test_playlist_name = 'test playlist'
     playlist = Playlist.create(playlist_name=test_playlist_name, _client=client)
+
 
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_playlist_update_missing_playlist_name():

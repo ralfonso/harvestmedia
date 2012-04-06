@@ -19,7 +19,7 @@ def test_get_libraries(HttpMock):
 
     return_values = [
          (200, """<ResponseLibraries>
-                    <libraries> 
+                    <libraries>
                         <library id="abc123" name="VIDEOHELPER" detail="Library description" />
                         <library id="abc125" name="MODULES" detail="Library description" />
                     </libraries>
@@ -43,7 +43,7 @@ def test_get_library_albums(HttpMock):
 
     return_values = [
          (200, """<ResponseLibraries>
-                    <libraries> 
+                    <libraries>
                         <library id="abc123" name="VIDEOHELPER" detail="Library description" />
                         <library id="abc125" name="MODULES" detail="Library description" />
                     </libraries>
@@ -60,7 +60,7 @@ def test_get_library_albums(HttpMock):
                         </albums>
                     </responsealbums>""" % {'test_album_id': test_album_id}),
     ]
-    
+
     http = build_http_mock(HttpMock, responses=return_values)
 
     libraries = Library.query.get_libraries(client)

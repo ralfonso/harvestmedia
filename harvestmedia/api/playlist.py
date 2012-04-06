@@ -39,7 +39,7 @@ class PlaylistQuery(object):
     def remove(self, member_id, playlist_id, _client):
         method_uri = '/removeplaylist/{{service_token}}/%(member_id)s/%(id)s' % \
                         {'member_id': member_id,
-                         'id': id}
+                         'id': playlist_id}
         _client.get_xml(method_uri)
 
 

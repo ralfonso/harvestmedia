@@ -38,8 +38,8 @@ def test_non_200(HttpMock):
 def test_get_service_token(HttpMock):
     api_key = get_random_md5()
     expiry = datetime.datetime.now()
-    expiry += datetime.timedelta(hours=22) # offset for HM timezone
-    test_token = hashlib.md5(str(expiry)).hexdigest() # generate an md5 from the date for testing
+    expiry += datetime.timedelta(hours=22)  # offset for HM timezone
+    test_token = get_random_md5()
 
     return_values = [
          (200, """<?xml version="1.0" encoding="utf-8"?>
@@ -52,23 +52,23 @@ def test_get_service_token(HttpMock):
                     <responseserviceinfo>
                         <asseturl
                             albumart="http://asset.harvestmedia.net/albumart/8185d768cd8fcaa7/{id}/{width}/{height}"
-                            waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}" 
-                            trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}" 
-                            trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}" /> 
+                            waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}"
+                            trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}"
+                            trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}" />
                         <trackformats>
-                          <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" /> 
-                          <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" /> 
-                          <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" /> 
+                          <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" />
+                          <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" />
+                          <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" />
                         </trackformats>
                     </responseserviceinfo>"""),
     ]
-                        
-    http = build_http_mock(HttpMock, responses=return_values)                        
+
+    http = build_http_mock(HttpMock, responses=return_values)
     client = harvestmedia.api.client.Client(api_key=api_key, debug_level='DEBUG')
 
     # get the debug level to cover the getter
-    print client.debug_level
-    
+    client.debug_level
+
     assert client.config.service_token.token == test_token
     assert client.config.service_token.expiry == expiry.strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -108,13 +108,28 @@ def test_corrupt_input_data(HttpMock):
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
 @raises(harvestmedia.api.exceptions.IncorrectInputData)
-def test_invalid_input_data(HttpMock):
+def test_incorrect_input_data(HttpMock):
     api_key = get_random_md5()
     content = """<?xml version="1.0" encoding="utf-8"?>
                     <memberaccount>
                         <error>
                             <code>2</code>
                             <description>Incorrect Input Data</description>
+                        </error>
+                    </memberaccount>"""
+    http = build_http_mock(HttpMock, content=content)
+    client = harvestmedia.api.client.Client(api_key=api_key)
+    libraries = Library.get_libraries(client)
+
+
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+@raises(harvestmedia.api.exceptions.IncorrectInputData)
+def test_incorrect_input_data_missing_description(HttpMock):
+    api_key = get_random_md5()
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                    <memberaccount>
+                        <error>
+                            <code>2</code>
                         </error>
                     </memberaccount>"""
     http = build_http_mock(HttpMock, content=content)
@@ -139,17 +154,17 @@ def test_expired_token_refetch(HttpMock):
                                 <responseserviceinfo>
                                     <asseturl
                                         albumart="http://asset.harvestmedia.net/albumart/8185d768cd8fcaa7/{id}/{width}/{height}"
-                                        waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}" 
-                                        trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}" 
-                                        trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}" /> 
+                                        waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}"
+                                        trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}"
+                                        trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}" />
                                     <trackformats>
-                                      <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" /> 
-                                      <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" /> 
-                                      <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" /> 
+                                      <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" />
+                                      <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" />
+                                      <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" />
                                     </trackformats>
                                 </responseserviceinfo>"""),
                     ]
-                        
+
     client = init_client()
 
     # force-expire the token
