@@ -138,7 +138,7 @@ class Track(DictObj):
         categories = xml_data.find('categories')
         if categories is not None:
             for category in categories.getchildren():
-                instance.categories.append(Category(category))
+                instance.categories.append(Category._from_xml(category, _client=_client))
 
         return instance
 
