@@ -8,6 +8,6 @@ setup(
       author='Ryan Roemmich',
       author_email='ryan@roemmich.org',
       description='Wrapper for the Harvest Media XML API',
-      install_requires=['httplib2', 'cElementTree', 'pytz', 'iso8601', 'blinker'],
+      install_requires=['httplib2', 'cElementTree', 'pytz', 'iso8601', ],
       keywords='Harvest HarvestMedia API Media Music',
 )
