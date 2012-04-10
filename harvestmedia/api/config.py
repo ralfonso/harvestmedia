@@ -62,6 +62,7 @@ class Config(object):
         self._set('webservice_url', **kwargs)
         self._set('debug_level', **kwargs)
         self._set('timezone', 'Australia/Sydney', **kwargs)
+        self.service_token = None
 
     @property
     def webservice_url(self):

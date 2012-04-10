@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import logging
 import httplib2
 import xml.etree.cElementTree as ET
@@ -91,7 +92,14 @@ class Client(object):
                         reason = 'Incorrect Input Data'
                     raise exceptions.IncorrectInputData(reason)
                 elif code.text == '5':
-                    raise exceptions.InvalidToken()
+                    now = datetime.datetime.utcnow()
+                    if self.config.service_token:
+                        token_expiration = self.config.service_token.expiry
+                        message = "invalid token received.  now: %s our expiration: %s" % \
+                                        (now.isoformat(), token_expiration)
+                    else:
+                        message = "no token set"
+                    raise exceptions.InvalidToken(message)
                 elif code.text == '6':
                     raise exceptions.InvalidLoginDetails()
                 elif code.text == '7':

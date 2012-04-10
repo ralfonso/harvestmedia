@@ -32,25 +32,25 @@ class IncorrectInputData(HarvestMediaError):
 
 class InvalidToken(HarvestMediaError):
 
-    def __init__(self):
-        super(HarvestMediaError, self).__init__('Invalid Token')
+    def __init__(self, reason='Invalid Token'):
+        super(HarvestMediaError, self).__init__(reason)
 
 
 class InvalidLoginDetails(HarvestMediaError):
 
-    def __init__(self):
-        super(HarvestMediaError, self).__init__('Invalid Login')
+    def __init__(self, reason="Invalid Login"):
+        super(HarvestMediaError, self).__init__(reason)
 
 
 class MemberDoesNotExist(HarvestMediaError):
 
-    def __init__(self):
-        super(HarvestMediaError, self).__init__('Member Does Not Exist')
+    def __init__(self, reason="Member Does Not Exist"):
+        super(HarvestMediaError, self).__init__(reason)
 
 
 class CorruptInputData(HarvestMediaError):
-    def __init__(self):
-        super(HarvestMediaError, self).__init__('Corrupt Input Data')
+    def __init__(self, reason="Corrupt Input Data"):
+        super(HarvestMediaError, self).__init__(reason)
 
 
 class TokenExpired(Exception):

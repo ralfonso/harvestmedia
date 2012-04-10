@@ -91,6 +91,33 @@ def test_invalid_token(HttpMock):
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
+@raises(harvestmedia.api.exceptions.InvalidToken)
+def test_invalid_remote_token(HttpMock):
+    api_key = get_random_md5()
+    expiry = datetime.datetime.now()
+    expiry += datetime.timedelta(hours=22)  # offset for HM timezone
+    test_token = get_random_md5()
+
+    return_values = [
+         (200, """<?xml version="1.0" encoding="utf-8"?>
+                    <responseservicetoken>
+                        <token value="%s" expiry="%s"/>
+                    </responseservicetoken>""" % \
+                    (test_token, expiry.strftime("%Y-%m-%dT%H:%M:%S"))),
+         (200, """<memberaccount>
+                    <error>
+                        <code>5</code>
+                        <description>Invalid Token</description>
+                    </error>
+                </memberaccount>"""),
+    ]
+
+    http = build_http_mock(HttpMock, responses=return_values)
+    client = harvestmedia.api.client.Client(api_key=api_key)
+    libraries = Library.get_libraries(client)
+
+
+@mock.patch('harvestmedia.api.client.httplib2.Http')
 @raises(harvestmedia.api.exceptions.CorruptInputData)
 def test_corrupt_input_data(HttpMock):
     api_key = get_random_md5()
