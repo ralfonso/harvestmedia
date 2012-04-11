@@ -33,7 +33,7 @@ class ServiceToken(object):
         service_token_expires_date = service_token_expires_date.replace(tzinfo=hm_tz)
         utc_tz = pytz.timezone('UTC')
         self._expiry_dt = service_token_expires_date.astimezone(utc_tz)
-        self._expiry = value
+        self._expiry = self._expiry_dt.isoformat()
 
     @property
     def token(self):

@@ -4,6 +4,7 @@ import hashlib
 import logging
 import mock
 from nose.tools import raises
+import pytz
 import StringIO
 import textwrap
 import xml.etree.cElementTree as ET
@@ -37,8 +38,8 @@ def test_non_200(HttpMock):
 @mock.patch('harvestmedia.api.client.httplib2.Http')
 def test_get_service_token(HttpMock):
     api_key = get_random_md5()
-    expiry = datetime.datetime.now()
-    expiry += datetime.timedelta(hours=22)  # offset for HM timezone
+    now = datetime.datetime.utcnow()
+    expiry = now + datetime.timedelta(hours=16)  # offset for HM timezone and lifetime (10 + 6)
     test_token = get_random_md5()
 
     return_values = [
@@ -70,7 +71,13 @@ def test_get_service_token(HttpMock):
     client.debug_level
 
     assert client.config.service_token.token == test_token
-    assert client.config.service_token.expiry == expiry.strftime("%Y-%m-%dT%H:%M:%S")
+
+    utc_expiration = now + datetime.timedelta(hours=6)
+
+    # make TZ aware and remove ms
+    utc_expiration = utc_expiration.replace(tzinfo=pytz.UTC, microsecond=0)
+    assert client.config.service_token._expiry_dt.isoformat() == utc_expiration.isoformat(), 'token expiration %s != utc expiration %s' % \
+                    (client.config.service_token._expiry_dt.isoformat(), utc_expiration.isoformat())
 
 
 @mock.patch('harvestmedia.api.client.httplib2.Http')
