@@ -132,6 +132,19 @@ class PlaylistQuery(object):
 
         _client.get_xml(method_uri)
 
+    def get_playlist_download_url(self, playlist_id, track_format, _client, member_id=None):
+        format_identifier = _client.config.get_format_identifier(track_format)
+        if format_identifier is None:
+            raise MissingParameter('Invalid track format')
+
+        download_url = _client.config.playlistdownload_url
+        download_url = download_url.replace('{id}', playlist_id)
+        download_url = download_url.replace('{trackformat}', format_identifier)
+        if member_id is not None:
+            download_url = download_url.replace('{memberaccountid}', member_id)
+
+        return download_url
+
 
 class Playlist(DictObj):
     """ Represents a Harvest Media member playlist asset
@@ -227,3 +240,6 @@ class Playlist(DictObj):
         """
 
         self.query.update_playlist(self.member_id, self.id, self.name, self._client)
+
+    def get_download_url(self, track_format, member_id=None):
+        return self.query.get_playlist_download_url(self.id, track_format, self._client, member_id)

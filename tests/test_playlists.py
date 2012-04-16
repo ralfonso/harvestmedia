@@ -246,3 +246,56 @@ def test_playlist_update(HttpMock):
     playlist.name = test_playlist_update_name
     playlist.update()
     assert playlist.name == test_playlist_update_name
+
+
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_get_download_url(HttpMock):
+    client = init_client()
+    member_id = 'bacba2b288328238bcbac'
+    track_format = 'mp3'
+    playlist_id = "908098a8a0ba8b065"
+    playlist_xml = ET.fromstring("""
+                <playlist id="%(playlist_id)s" name="sample playlist">
+                    <tracks>
+                        <track tracknumber="1" time="02:50" lengthseconds="170"
+                            comment="Track Comment" composer="JJ Jayjay"
+                            publisher="PP Peepee" name="Epic Track" albumid="1abcbacbac33" id="11bacbcbabcb3b2823"
+                            displaytitle="Epic Track" genre="Pop / Rock"
+                            bpm="100" mixout="FULL" frequency="44100" bitrate="1411"
+                            dateingested="2008-05-15 06:08:18"/>
+                    </tracks>
+                </playlist>""" % locals())
+
+    playlist = Playlist._from_xml(playlist_xml, client)
+
+    download_url = playlist.get_download_url(track_format, member_id)
+    download_url_template = client.config.playlistdownload_url
+
+    format_identifier = client.config.get_format_identifier(track_format)
+    expected_url = download_url_template.replace('{memberaccountid}', member_id).\
+                                         replace('{id}', playlist_id).\
+                                         replace('{trackformat}', format_identifier)
+    assert download_url == expected_url, 'url: %s != expected: %s' % (download_url, expected_url)
+
+
+@raises(harvestmedia.api.exceptions.MissingParameter)
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_get_download_url_missing_format(HttpMock):
+    client = init_client()
+    member_id = 'bacba2b288328238bcbac'
+    track_format = 'BAD-FORMAT'
+    playlist_id = "908098a8a0ba8b065"
+    playlist_xml = ET.fromstring("""
+                <playlist id="%(playlist_id)s" name="sample playlist">
+                    <tracks>
+                        <track tracknumber="1" time="02:50" lengthseconds="170"
+                            comment="Track Comment" composer="JJ Jayjay"
+                            publisher="PP Peepee" name="Epic Track" albumid="1abcbacbac33" id="11bacbcbabcb3b2823"
+                            displaytitle="Epic Track" genre="Pop / Rock"
+                            bpm="100" mixout="FULL" frequency="44100" bitrate="1411"
+                            dateingested="2008-05-15 06:08:18"/>
+                    </tracks>
+                </playlist>""" % locals())
+
+    playlist = Playlist._from_xml(playlist_xml, client)
+    download_url = playlist.get_download_url(track_format, member_id)

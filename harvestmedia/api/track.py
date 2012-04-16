@@ -2,6 +2,7 @@
 import xml.etree.cElementTree as ET
 
 from .category import Category
+from .exceptions import MissingParameter
 from .util import DictObj
 
 import exceptions
@@ -101,7 +102,7 @@ class TrackQuery(object):
     def get_track_download_url(self, track_id, track_format, _client, member_id=None):
         format_identifier = _client.config.get_format_identifier(track_format)
         if format_identifier is None:
-            raise exceptions.MissingParameter('Invalid track format')
+            raise MissingParameter('Invalid track format')
 
         download_url = _client.config.download_url
         download_url = download_url.replace('{id}', track_id)
