@@ -64,6 +64,14 @@ class Config(object):
         self._set('timezone', 'Australia/Sydney', **kwargs)
         self.service_token = None
 
+        self.album_art_url = None
+        self.waveform_url = None
+        self.download_url = None
+        self.playlistdownload_url = None
+        self.stream_url = None
+
+        self.trackformats = []
+
     @property
     def webservice_url(self):
         return self._webservice_url
@@ -77,3 +85,7 @@ class Config(object):
             self._webservice_url = value
             self.webservice_prefix = self.webservice_url_parsed.path
             self.webservice_host = self.webservice_url_parsed.netloc
+
+    def get_format_identifier(self, track_format):
+        format_identifier = next((tf['identifier'] for tf in self.trackformats if tf['extension'] == track_format.lower()), None)
+        return format_identifier

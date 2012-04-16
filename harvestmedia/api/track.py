@@ -4,6 +4,8 @@ import xml.etree.cElementTree as ET
 from .category import Category
 from .util import DictObj
 
+import exceptions
+
 
 class TrackQuery(object):
     """Performs calls for the :class:`Track` model, also useful in a static
@@ -96,6 +98,19 @@ class TrackQuery(object):
             if xml_track is not None:
                 return Track._from_xml(xml_track, _client)
 
+    def get_track_download_url(self, track_id, track_format, _client, member_id=None):
+        format_identifier = _client.config.get_format_identifier(track_format)
+        if format_identifier is None:
+            raise exceptions.MissingParameter('Invalid track format')
+
+        download_url = _client.config.download_url
+        download_url = download_url.replace('{id}', track_id)
+        download_url = download_url.replace('{trackformat}', format_identifier)
+        if member_id is not None:
+            download_url = download_url.replace('{memberaccountid}', member_id)
+
+        return download_url
+
 
 class Track(DictObj):
     """ Represents a Harvest Media track asset
@@ -165,3 +180,6 @@ class Track(DictObj):
         if height:
             asset_url = asset_url.replace('{height}', str(height))
         return asset_url
+
+    def get_download_url(self, track_format, member_id=None):
+        return self.query.get_track_download_url(self.id, track_format, self._client, member_id)

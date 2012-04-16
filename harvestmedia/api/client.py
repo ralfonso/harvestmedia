@@ -187,8 +187,6 @@ class Client(object):
         self.config.playlistdownload_url = asset_url.get('playlistdownload')
         self.config.stream_url = asset_url.get('trackstream')
 
-        self.config.trackformats = []
-
         trackformats_xml = root.find('trackformats')
 
         if trackformats_xml:
