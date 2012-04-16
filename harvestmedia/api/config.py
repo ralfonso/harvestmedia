@@ -86,6 +86,10 @@ class Config(object):
             self.webservice_prefix = self.webservice_url_parsed.path
             self.webservice_host = self.webservice_url_parsed.netloc
 
-    def get_format_identifier(self, track_format):
-        format_identifier = next((tf['identifier'] for tf in self.trackformats if tf['extension'] == track_format.lower()), None)
+    def get_format_identifier(self, requested_format, bitrate=None):
+        format_identifier = None
+        for track_format in self.trackformats:
+            if track_format['extension'].lower() == str(requested_format).lower() and \
+                (bitrate is None or track_format['bitrate'] == bitrate):
+                format_identifier = track_format['identifier']
         return format_identifier
