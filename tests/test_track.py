@@ -140,40 +140,54 @@ def test_get_waveform_url(HttpMock):
 
     track = Track._from_xml(track_xml, client)
 
-    expiry = datetime.datetime.now()
-    expiry += datetime.timedelta(hours=22)  # offset for HM timezone
-    test_token = get_random_md5()
-    waveform_url = "http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}"
-
-    return_values = [
-         (200, """<?xml version="1.0" encoding="utf-8"?>
-                    <responseservicetoken>
-                        <token value="%s" expiry="%s"/>
-                    </responseservicetoken>""" % \
-                    (test_token, expiry.strftime("%Y-%m-%dT%H:%M:%S"))),
-
-         (200, """<?xml version="1.0" encoding="utf-8"?>
-                    <responseserviceinfo>
-                        <asseturl
-                            albumart="http://asset.harvestmedia.net/albumart/8185d768cd8fcaa7/{id}/{width}/{height}"
-                            waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}"
-                            trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}"
-                            trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}" />
-                        <trackformats>
-                          <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" />
-                          <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" />
-                          <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" />
-                        </trackformats>
-                    </responseserviceinfo>"""),
-    ]
-
-    api_key = get_random_md5()
-    http = build_http_mock(HttpMock, responses=return_values)
-    client = harvestmedia.api.client.Client(api_key=api_key, debug_level='DEBUG')
-
     width = 200
     height = 300
     waveform_url = track.get_waveform_url(width, height)
 
-    expected_url = waveform_url.replace('{id}', track_id).replace('{width}', str(width)).replace('{height}', str(height))
+    waveform_url_template = client.config.waveform_url
+    expected_url = waveform_url_template.replace('{id}', track_id).replace('{width}', str(width)).replace('{height}', str(height))
     assert waveform_url == expected_url
+
+
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_get_download_url(HttpMock):
+    client = init_client()
+    member_id = 'bacba2b288328238bcbac'
+    track_format = 'mp3'
+    track_id = '17376d36f309f18d'
+    track_name = 'Guerilla Pop'
+    track_xml = ET.fromstring(textwrap.dedent("""<track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down
+                                                  the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;"
+                                                  publisher="" name="%(track_name)s" albumid="1c5f47572d9152f3" id="%(track_id)s"
+                                                  keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
+                                                  bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""") % locals())
+
+    track = Track._from_xml(track_xml, client)
+
+    download_url = track.get_download_url(track_format, member_id)
+    download_url_template = client.config.download_url
+
+    format_identifier = client.config.get_format_identifier(track_format)
+    expected_url = download_url_template.replace('{memberaccountid}', member_id).\
+                                         replace('{id}', track_id).\
+                                         replace('{trackformat}', format_identifier)
+    assert download_url == expected_url, 'url: %s != expected: %s' % (download_url, expected_url)
+
+
+@raises(harvestmedia.api.exceptions.MissingParameter)
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_get_download_url_missing_format(HttpMock):
+    client = init_client()
+    member_id = 'bacba2b288328238bcbac'
+    track_format = 'BAD-FORMAT'
+    track_id = '17376d36f309f18d'
+    track_name = 'Guerilla Pop'
+    track_xml = ET.fromstring(textwrap.dedent("""<track tracknumber="1" time="02:50" lengthseconds="170" comment="Make sure you’re down
+                                                  the front for this fiery Post Punk workout." composer="&quot;S. Milton, J. Wygens&quot;"
+                                                  publisher="" name="%(track_name)s" albumid="1c5f47572d9152f3" id="%(track_id)s"
+                                                  keywords="" displaytitle="Guerilla Pop" genre="Pop / Rock" tempo="" instrumentation=""
+                                                  bpm="" mixout="" frequency="44100" bitrate="1411" dateingested="2008-05-15 06:08:18"/>""") % locals())
+
+    track = Track._from_xml(track_xml, client)
+
+    download_url = track.get_download_url(track_format, member_id)

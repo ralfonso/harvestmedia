@@ -66,8 +66,8 @@ def init_client(HttpMock):
                 <asseturl
                     albumart="http://asset.harvestmedia.net/albumart/8185d768cd8fcaa7/{id}/{width}/{height}"
                     waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}"
-                    trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}"
-                    trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}" />
+                    trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{memberaccountid}/{id}"
+                    trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{memberaccountid}/{id}/{trackformat}" />
                 <trackformats>
                   <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" />
                   <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" />
