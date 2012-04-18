@@ -44,8 +44,8 @@ def test_register_member(HttpMock):
     fileformat = 'MP3'
 
     http = build_http_mock(HttpMock, content=xml_response)
-    member = Member.register(_client=client, username=username, first_name=first_name,
-                             last_name=last_name, email=email, termsaccept=termsaccept,
+    member = Member.register(_client=client, username=username, firstname=first_name,
+                             lastname=last_name, email=email, termsaccept=termsaccept,
                              fileformat=fileformat)
 
     assert member.id == test_member_id
