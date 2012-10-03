@@ -90,6 +90,45 @@ def test_get_member_playlists(HttpMock):
     assert playlist.name == test_playlist_name
 
 
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_get_featured_playlists(HttpMock):
+    client = init_client()
+    test_playlist_id = get_random_md5()
+    test_playlist_name = 'test playlist'
+
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                     <responsefeaturedplaylists>
+                        <playlists>
+                            <playlist id="%(id)s" name="%(name)s">
+                                 <tracks>
+                                    <track tracknumber="001" time="01:07" lengthseconds="67" comment="If a certain
+                                    animated film studio were to remake The Andy Griffith Show as a digital short, we'd
+                                    nominate this for the theme. Warm, chunky, a little slow on the uptake... a.k.a. the
+                                    anti-lemonade song. Ending starts @ 1:08. Lite Mix, without main rhythm acoustic
+                                    guitars." composer="D. Holter/K. White" publisher="TLL UNDERscore Nashcap (ASCAP)"
+                                    name="Pencilneck Strut" id="902dea1d377473df" keywords="Cute, Goofy, Lighthearted,
+                                    Happy, Comical, Twang, Rural, Fun, Mischievous, Celebration, Campy, Childlike,
+                                    Cheerful, Simple, Quirky, Swampy, Playful" lyrics="" displaytitle="Pencilneck Strut"
+                                    genre="Country" tempo="Medium" instrumentation="Acoustic Guitar, Banjo, Percussion"
+                                    bpm="130" mixout="Alt2" frequency="2650" bitrate="24" />
+                                </tracks>
+                            </playlist>
+                        </playlists>
+                    </responsefeaturedplaylists>
+              """ % {'id': test_playlist_id,
+                     'name': test_playlist_name}
+
+    http = build_http_mock(HttpMock, content=content)
+    playlists = Playlist.query.get_featured_playlists(client)
+
+    assert isinstance(playlists, list)
+
+    playlist = playlists[0]
+
+    assert playlist.id == test_playlist_id
+    assert playlist.name == test_playlist_name
+
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_add_playlist_client_missing():
     playlist = Playlist.add()
