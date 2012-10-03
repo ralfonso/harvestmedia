@@ -163,6 +163,27 @@ class PlaylistQuery(object):
 
         return download_url
 
+    def get_playlist_cover_url(self, playlist_id, _client, width=None, height=None):
+        """Generates a URL that can be used to fetch the
+        cover image for a playlist on Harvest Media
+
+        :param playlist_id: The Harvest Media playlist identifer
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+        :param width: optional integer specifiying the width of \
+        the image to fetch
+        :param height: optional integer specifiying the height of \
+        the image to fetch
+
+        """
+
+        asset_url = _client.config.playlist_art_url
+        asset_url = asset_url.replace('{id}', playlist_id)
+        if width:
+            asset_url = asset_url.replace('{width}', str(width))
+        if height:
+            asset_url = asset_url.replace('{height}', str(height))
+        return asset_url
+
 
 class Playlist(DictObj):
     """ Represents a Harvest Media member playlist asset
@@ -261,3 +282,6 @@ class Playlist(DictObj):
 
     def get_download_url(self, track_format, member_id=None, bitrate=None):
         return self.query.get_playlist_download_url(self.id, track_format, self._client, member_id, bitrate)
+
+    def get_cover_url(self, width, height):
+        return self.query.get_playlist_cover_url(self.id, self._client, width, height)
