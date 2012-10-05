@@ -90,6 +90,45 @@ def test_get_member_playlists(HttpMock):
     assert playlist.name == test_playlist_name
 
 
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_get_featured_playlists(HttpMock):
+    client = init_client()
+    test_playlist_id = get_random_md5()
+    test_playlist_name = 'test playlist'
+
+    content = """<?xml version="1.0" encoding="utf-8"?>
+                     <responsefeaturedplaylists>
+                        <playlists>
+                            <playlist id="%(id)s" name="%(name)s">
+                                 <tracks>
+                                    <track tracknumber="001" time="01:07" lengthseconds="67" comment="If a certain
+                                    animated film studio were to remake The Andy Griffith Show as a digital short, we'd
+                                    nominate this for the theme. Warm, chunky, a little slow on the uptake... a.k.a. the
+                                    anti-lemonade song. Ending starts @ 1:08. Lite Mix, without main rhythm acoustic
+                                    guitars." composer="D. Holter/K. White" publisher="TLL UNDERscore Nashcap (ASCAP)"
+                                    name="Pencilneck Strut" id="902dea1d377473df" keywords="Cute, Goofy, Lighthearted,
+                                    Happy, Comical, Twang, Rural, Fun, Mischievous, Celebration, Campy, Childlike,
+                                    Cheerful, Simple, Quirky, Swampy, Playful" lyrics="" displaytitle="Pencilneck Strut"
+                                    genre="Country" tempo="Medium" instrumentation="Acoustic Guitar, Banjo, Percussion"
+                                    bpm="130" mixout="Alt2" frequency="2650" bitrate="24" />
+                                </tracks>
+                            </playlist>
+                        </playlists>
+                    </responsefeaturedplaylists>
+              """ % {'id': test_playlist_id,
+                     'name': test_playlist_name}
+
+    http = build_http_mock(HttpMock, content=content)
+    playlists = Playlist.query.get_featured_playlists(client)
+
+    assert isinstance(playlists, list)
+
+    playlist = playlists[0]
+
+    assert playlist.id == test_playlist_id
+    assert playlist.name == test_playlist_name
+
+
 @raises(harvestmedia.api.exceptions.MissingParameter)
 def test_add_playlist_client_missing():
     playlist = Playlist.add()
@@ -299,3 +338,48 @@ def test_get_download_url_missing_format(HttpMock):
 
     playlist = Playlist._from_xml(playlist_xml, client)
     download_url = playlist.get_download_url(track_format, member_id)
+
+
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_get_playlist_art_url(HttpMock):
+    client = init_client()
+
+    playlist_id = '112358'
+    playlist_xml = ET.fromstring(textwrap.dedent("""<playlist name="EFF!" id="%s" 
+                                                    createddate="2012-04-17 06:24:45"
+                                                    trackcount="0" />""" % (playlist_id)))
+    playlist_art_url = 'http://download.harvestmedia.net/wsplaylistart/8185d768cd8fcaa7/{id}/{width}/{height}'
+
+    expiry = datetime.datetime.now()
+    test_token = get_random_md5()
+
+    return_values = [
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                    <responseservicetoken>
+                        <token value="%s" expiry="%s"/>
+                    </responseservicetoken>""" % \
+                    (test_token, expiry.strftime("%Y-%m-%dT%H:%M:%S"))),
+        (200, """<?xml version="1.0" encoding="utf-8"?>
+                <responseserviceinfo>
+                    <asseturl
+                        waveform="http://asset.harvestmedia.net/waveform/8185d768cd8fcaa7/{id}/{width}/{height}"
+                        trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{id}"
+                        trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{id}/{trackformat}"
+                        playlistart="%(playlist_art_url)s" />
+                    <trackformats>
+                      <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" />
+                      <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" />
+                      <trackformat identifier="7jsi8fcaa818df57" extension="aif" bitrate="1536" samplerate="48" samplesize="16" />
+                    </trackformats>
+                </responseserviceinfo>""" % locals()),
+    ]
+    http = build_http_mock(HttpMock, responses=return_values)
+
+    width = 200
+    height = 300
+
+    playlist = Playlist._from_xml(playlist_xml, client)
+    cover_art_url = playlist.get_cover_url(width, height)
+
+    expected_url = playlist_art_url.replace('{id}', playlist_id).replace('{width}', str(width)).replace('{height}', str(height))
+    assert cover_art_url == expected_url

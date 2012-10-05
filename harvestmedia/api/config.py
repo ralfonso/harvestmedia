@@ -68,6 +68,7 @@ class Config(object):
         self.waveform_url = None
         self.download_url = None
         self.playlistdownload_url = None
+        self.playlist_art_url = None
         self.stream_url = None
 
         self.trackformats = []
