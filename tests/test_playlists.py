@@ -382,6 +382,4 @@ def test_get_playlist_art_url(HttpMock):
     cover_art_url = playlist.get_cover_url(width, height)
 
     expected_url = playlist_art_url.replace('{id}', playlist_id).replace('{width}', str(width)).replace('{height}', str(height))
-    print expected_url
-    print cover_art_url
     assert cover_art_url == expected_url
