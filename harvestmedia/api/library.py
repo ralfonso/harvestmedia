@@ -28,6 +28,28 @@ class LibraryQuery(object):
         return libraries
 
 
+    def get_logo_url_for_library(self, library_id, _client, width=None, height=None):
+        """Generates a URL that can be used to fetch the
+        logo image for a Harvest Media library
+
+        :param library_id: The Harvest Media library identifer
+        :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
+        :param width: optional integer specifiying the width of \
+        the image to fetch
+        :param height: optional integer specifiying the height of \
+        the image to fetch
+
+        """
+
+        asset_url = _client.config.library_logo_url
+        asset_url = asset_url.replace('{id}', library_id)
+        if width:
+            asset_url = asset_url.replace('{width}', str(width))
+        if height:
+            asset_url = asset_url.replace('{height}', str(height))
+        return asset_url
+
+
 class Library(DictObj):
 
     query = LibraryQuery()
@@ -59,3 +81,6 @@ class Library(DictObj):
         """Gets all of the albums for this library"""
 
         return Album.query.get_albums_for_library(self.id, self._client)
+
+    def get_logo_url(self, width, height):
+        return self.query.get_logo_url_for_library(self.id, self._client, width, height)

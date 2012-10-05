@@ -69,7 +69,8 @@ def init_client(HttpMock):
                     trackstream="http://asset.harvestmedia.net/trackstream/8185d768cd8fcaa7/{memberaccountid}/{id}"
                     trackdownload=" http://asset.harvestmedia.net/trackdownload/8185d768cd8fcaa7/{memberaccountid}/{id}/{trackformat}"
                     playlistdownload="http://download.harvestmedia.net/wsplaylistdownload/8185d768cd8fcaa7/{memberaccountid}/{id}/{trackformat}" 
-                    playlistart="http://download.harvestmedia.net/wsplaylistart/8185d768cd8fcaa7/{id}/{width}/{height}" />
+                    playlistart="http://download.harvestmedia.net/wsplaylistart/8185d768cd8fcaa7/{id}/{width}/{height}" 
+                    librarylogo="http://download.harvestmedia.net/wslibrarylogo/8185d768cd8fcaa7/{id}/{width}/{height}" />
                 <trackformats>
                   <trackformat identifier="8185d768cd8fcaa7" extension="mp3" bitrate="320" samplerate="48" samplesize="16" />
                   <trackformat identifier="768cd8fcaa8185d7" extension="wav" bitrate="1536" samplerate="48" samplesize="16" />

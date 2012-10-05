@@ -186,6 +186,7 @@ class Client(object):
         self.config.download_url = asset_url.get('trackdownload')
         self.config.playlistdownload_url = asset_url.get('playlistdownload')
         self.config.playlist_art_url = asset_url.get('playlistart')
+        self.config.library_logo_url = asset_url.get('librarylogo')
         self.config.stream_url = asset_url.get('trackstream')
 
         trackformats_xml = root.find('trackformats')
