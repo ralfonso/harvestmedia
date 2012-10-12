@@ -70,3 +70,22 @@ def test_get_library_albums(HttpMock):
     albums = library.get_albums()
     assert isinstance(albums, list)
     assert albums[0].id == test_album_id
+
+@mock.patch('harvestmedia.api.client.httplib2.Http')
+def test_get_library_logo_url(HttpMock):
+    client = init_client()
+
+    width = 200
+    height = 400
+
+    library_id = '11235813'
+    library_logo_url = "http://download.harvestmedia.net/wslibrarylogo/8185d768cd8fcaa7/{id}/{width}/{height}"
+
+    library_xml = ET.fromstring(textwrap.dedent("""<library detail="" name="" id="%(library_id)s" location="Talent, Oregon"
+                      website="http://risefromyourgrave.com" librarylogourl="%(library_logo_url)s" />""" % locals()))
+
+    library = Library._from_xml(library_xml, client)
+    library_logo_url = library.get_logo_url(width, height)
+
+    expected_url = library_logo_url.replace('{id}', library_id).replace('{width}', str(width)).replace('{height}]', str(height))
+    assert library_logo_url == expected_url

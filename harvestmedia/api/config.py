@@ -69,6 +69,7 @@ class Config(object):
         self.download_url = None
         self.playlistdownload_url = None
         self.playlist_art_url = None
+        self.library_logo_url = None
         self.stream_url = None
 
         self.trackformats = []
