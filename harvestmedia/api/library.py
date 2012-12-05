@@ -9,7 +9,7 @@ class LibraryQuery(object):
 
     """
 
-    def get_libraries(self, _client):
+    def get_libraries(self, _client, include_inactive=False):
         """Returns all of the libraries on the configured Harvest Media account
 
         :param _client: An initialized instance of :class:`harvestmedia.api.client.Client`
@@ -19,6 +19,8 @@ class LibraryQuery(object):
         libraries = []
 
         method_uri = '/getlibraries/{{service_token}}'
+        if include_inactive:
+            method_uri += '/IncludeInactive'
         xml_root = _client.get_xml(method_uri)
         xml_libraries = xml_root.find('libraries').getchildren()
         for library_element in xml_libraries:
@@ -77,10 +79,10 @@ class Library(DictObj):
 
         return instance
 
-    def get_albums(self):
+    def get_albums(self, include_inactive=False):
         """Gets all of the albums for this library"""
 
-        return Album.query.get_albums_for_library(self.id, self._client)
+        return Album.query.get_albums_for_library(self.id, self._client, include_inactive)
 
     def get_logo_url(self, width, height):
         return self.query.get_logo_url_for_library(self.id, self._client, width, height)

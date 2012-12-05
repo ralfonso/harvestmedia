@@ -10,7 +10,7 @@ class AlbumQuery(object):
     """
 
 
-    def get_albums_for_library(self, library_id, _client):
+    def get_albums_for_library(self, library_id, _client, include_inactive=False):
         """Gets all of the albums for a particular library.
 
         :param library_id: The Harvest Media library identifer
@@ -20,6 +20,8 @@ class AlbumQuery(object):
 
         album_list = []
         method_uri = '/getalbums/{{service_token}}/' + library_id
+        if include_inactive:
+            method_uri += '/IncludeInactive'
         xml_root = _client.get_xml(method_uri)
         albums = xml_root.find('albums').getchildren()
 
@@ -64,7 +66,7 @@ class Album(DictObj):
     def __init__(self, _client):
         self._client = _client
 
-    def get_tracks(self, get_full_detail=True):
+    def get_tracks(self, get_full_detail=True, include_inactive=False):
         """Gets all of the tracks for a this album.
 
         :param get_full_detail: if True, sends a second request to get all of \
@@ -72,7 +74,7 @@ class Album(DictObj):
 
         """
 
-        return Track.query.get_tracks_for_album(self.id, self._client, get_full_detail)
+        return Track.query.get_tracks_for_album(self.id, self._client, get_full_detail, include_inactive)
 
     @classmethod
     def _from_xml(cls, xml_data, _client):

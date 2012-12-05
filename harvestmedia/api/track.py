@@ -14,7 +14,7 @@ class TrackQuery(object):
 
     """
 
-    def get_tracks_for_album(self, album_id, _client, get_full_detail=True):
+    def get_tracks_for_album(self, album_id, _client, get_full_detail=True, include_inactive=False):
         """Gets all of the tracks for a particular album.
 
         :param album_id: The Harvest Media album identifer
@@ -26,6 +26,8 @@ class TrackQuery(object):
 
         track_list = []
         method_uri = '/getalbumtracks/{{service_token}}/' + album_id
+        if include_inactive:
+            method_uri += '/IncludeInactive'
 
         xml_root = _client.get_xml(method_uri)
         tracks = xml_root.find('tracks').getchildren()
