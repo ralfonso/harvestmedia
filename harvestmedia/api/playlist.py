@@ -150,8 +150,8 @@ class PlaylistQuery(object):
 
         _client.get_xml(method_uri)
 
-    def get_playlist_download_url(self, playlist_id, track_format, _client, member_id=None, bitrate=None):
-        format_identifier = _client.config.get_format_identifier(track_format, bitrate)
+    def get_playlist_download_url(self, playlist_id, track_format, _client, member_id=None, bitrate=None, is_master=False):
+        format_identifier = _client.config.get_format_identifier(track_format, bitrate, is_master)
         if format_identifier is None:
             raise MissingParameter('Invalid track format')
 
@@ -280,8 +280,8 @@ class Playlist(DictObj):
 
         self.query.update_playlist(self.member_id, self.id, self.name, self._client)
 
-    def get_download_url(self, track_format, member_id=None, bitrate=None):
-        return self.query.get_playlist_download_url(self.id, track_format, self._client, member_id, bitrate)
+    def get_download_url(self, track_format, member_id=None, bitrate=None, is_master=False):
+        return self.query.get_playlist_download_url(self.id, track_format, self._client, member_id, bitrate, is_master)
 
     def get_cover_url(self, width, height):
         return self.query.get_playlist_cover_url(self.id, self._client, width, height)
