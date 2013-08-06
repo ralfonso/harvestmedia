@@ -88,10 +88,12 @@ class Config(object):
             self.webservice_prefix = self.webservice_url_parsed.path
             self.webservice_host = self.webservice_url_parsed.netloc
 
-    def get_format_identifier(self, requested_format, bitrate=None):
+    def get_format_identifier(self, requested_format, bitrate=None, is_master=False):
         format_identifier = None
         for track_format in self.trackformats:
             if track_format['extension'].lower() == str(requested_format).lower() and \
-                (bitrate is None or track_format['bitrate'] == bitrate):
+                (bitrate is None or track_format['bitrate'] == bitrate) and \
+                ((is_master is True and track_format['ismaster'] == 'true') or \
+                 (is_master is False and track_format['ismaster'] == 'false')):
                 format_identifier = track_format['identifier']
         return format_identifier

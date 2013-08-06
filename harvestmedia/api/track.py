@@ -101,8 +101,8 @@ class TrackQuery(object):
             if xml_track is not None:
                 return Track._from_xml(xml_track, _client)
 
-    def get_track_download_url(self, track_id, track_format, _client, member_id=None):
-        format_identifier = _client.config.get_format_identifier(track_format)
+    def get_track_download_url(self, track_id, track_format, _client, member_id=None, is_master=False):
+        format_identifier = _client.config.get_format_identifier(track_format, is_master=is_master)
         if format_identifier is None:
             raise MissingParameter('Invalid track format')
 
@@ -184,5 +184,5 @@ class Track(DictObj):
             asset_url = asset_url.replace('{height}', str(height))
         return asset_url
 
-    def get_download_url(self, track_format, member_id=None):
-        return self.query.get_track_download_url(self.id, track_format, self._client, member_id)
+    def get_download_url(self, track_format, member_id=None, is_master=False):
+        return self.query.get_track_download_url(self.id, track_format, self._client, member_id, is_master)
