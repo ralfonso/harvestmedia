@@ -118,7 +118,7 @@ class PlaylistQuery(object):
         if not playlist_name:
             raise MissingParameter('You must pass playlist_name to Playlist.add')
 
-        method_uri = '/addplaylist/{{service_token}}/%(member_id)s/%(playlist_name)s/' % \
+        method_uri = '/addplaylist/{{service_token}}/%(member_id)s/%(playlist_name)s' % \
                         {'member_id': member_id,
                          'playlist_name': url_quote(playlist_name.encode('utf-8'))}
         xml_root = _client.get_xml(method_uri)
